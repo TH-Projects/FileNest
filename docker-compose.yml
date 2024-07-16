@@ -1,12 +1,16 @@
 version: '3'
 services:
   createuser:
-    build: .
+    build: FileStorage
     depends_on:
-      - minio1
-      - minio2
-      - minio3
-      - minio4
+      minio1:
+        condition: service_started
+      minio2:
+        condition: service_started
+      minio3:
+        condition: service_started
+      minio4:
+        condition: service_started
     command: ["./createuser.sh", "http://minio1:9000"]
     volumes:
       - .env:/usr/local/bin/.env
@@ -14,7 +18,7 @@ services:
       - .env
     networks:
       - minio_network
-    restart: "no" 
+
   minio1:
     image: minio/minio
     volumes:
@@ -86,12 +90,52 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+  
+  fastify:
+    build: ServerFastify
+    container_name: server
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    networks:
+      - minio_network
+
+  metadb1:
+    image: mariadb
+    env_file:
+      - .env
+    volumes:
+      - metadb1-data:/var/lib/mysql
+    ports:
+      - "8001:3306"
+
+  metadb2:
+    image: mariadb
+    env_file:
+      - .env
+    volumes:
+      - metadb2-data:/var/lib/mysql
+    ports:
+      - "8002:3306"
+
+  metadb3:
+    image: mariadb
+    env_file:
+      - .env
+    volumes:
+      - metadb3-data:/var/lib/mysql
+    ports:
+      - "8003:3306"
 
 volumes:
   minio1-data:
   minio2-data:
   minio3-data:
   minio4-data:
+  metadb1-data:
+  metadb2-data:
+  metadb3-data:
 
 networks:
   minio_network:
