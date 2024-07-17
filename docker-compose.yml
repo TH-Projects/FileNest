@@ -1,7 +1,10 @@
 version: '3'
 services:
   createuser:
-    build: FileStorage
+    image: createuser
+    build: 
+      context: FileStorage
+      dockerfile: Dockerfile
     depends_on:
       minio1:
         condition: service_started
@@ -103,30 +106,42 @@ services:
 
   metadb1:
     image: mariadb
+    build: MetaDB
     env_file:
       - .env
     volumes:
       - metadb1-data:/var/lib/mysql
+      - .env:/usr/local/bin/.env
     ports:
       - "8001:3306"
+    networks:
+      - metanet
 
   metadb2:
     image: mariadb
+    build: MetaDB
     env_file:
       - .env
     volumes:
       - metadb2-data:/var/lib/mysql
+      - .env:/usr/local/bin/.env
     ports:
       - "8002:3306"
+    networks:
+      - metanet
 
   metadb3:
     image: mariadb
+    build: MetaDB
     env_file:
       - .env
     volumes:
       - metadb3-data:/var/lib/mysql
+      - .env:/usr/local/bin/.env
     ports:
       - "8003:3306"
+    networks:
+      - metanet
 
 volumes:
   minio1-data:
@@ -134,10 +149,16 @@ volumes:
   minio3-data:
   minio4-data:
   metadb1-data:
+    driver: local
   metadb2-data:
+    driver: local
   metadb3-data:
+    driver: local
 
 networks:
   minio_network:
     name: minio_network
+    driver: bridge
+  metanet:
+    name: metanet
     driver: bridge

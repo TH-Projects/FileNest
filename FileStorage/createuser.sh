@@ -30,8 +30,10 @@ if [ -z "$MINIO_ALIAS" ] || [ -z "$MINIO_ROOT_USER" ] || [ -z "$MINIO_ROOT_PASSW
     exit 1
 fi
 
+echo "Sleeping for 10 seconds..."
+sleep 10
+
 # MinIO Alias setzen
-echo alias set $MINIO_ALIAS $MINIO_URL $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
 mc alias set $MINIO_ALIAS $MINIO_URL $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
 
 # Benutzer erstellen
