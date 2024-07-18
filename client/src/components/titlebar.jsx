@@ -6,7 +6,7 @@ import Button from "react-bootstrap/Button";
 const Titlebar = () => {
   return (
     <Navbar className="bg-dark navbar-dark">
-      <Container fluid style={{ marginLeft: "30px", marginRight: "30px" }}>
+      <Container fluid style={{ marginLeft: "50px", marginRight: "50px" }}>
         <Navbar.Brand>
           <Image src="logo.png" rounded style={{ maxHeight: "90px" }} />
         </Navbar.Brand>

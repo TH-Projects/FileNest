@@ -1,0 +1,13 @@
+.vertical-line {
+  border-left: 1px solid #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.first-column {
+  border-left: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
