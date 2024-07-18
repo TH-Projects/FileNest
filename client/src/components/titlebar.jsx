@@ -8,7 +8,7 @@ const Titlebar = () => {
         <Navbar className="bg-dark navbar-dark">
           <Container className="justify-content-between">
             <Navbar.Brand>
-                <Image src='logo.png' fluid rounded style={{ maxHeight: '80px' }} />
+                <Image src='logo.png' fluid rounded style={{ maxHeight: '90px'}} />
             </Navbar.Brand>
             <Navbar.Text className="text-center">
                 <h5 className='display-6 text-white'>FileNest - Dashboard</h5>
