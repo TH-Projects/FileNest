@@ -1,26 +1,26 @@
-# Verwende das offizielle Node.js-Image als Basisimage
+# Use the official Node.js base image
 FROM node:16-alpine
 
-# Setze das Arbeitsverzeichnis im Container
+# Set the working dir
 WORKDIR /app
 
-# Kopiere die package.json und package-lock.json ins Arbeitsverzeichnis
+# Copy package files
 COPY package*.json ./
 
-# Installiere die Abhängigkeiten
+# Install dependencies
 RUN npm install
 
-# Kopiere den Rest der Anwendung ins Arbeitsverzeichnis
+# Copy rest of the app
 COPY . .
 
-# Baue die Anwendung für die Produktion
+# Build app
 RUN npm run build
 
-# Installiere ein einfaches HTTP-Server-Tool, um die statischen Dateien zu bedienen
+# Install HTTP server
 RUN npm install -g serve
 
-# Exponiere den Port, auf dem die Anwendung laufen wird
+# Expose the port
 EXPOSE 3000
 
-# Starte die Anwendung
+# Start the server
 CMD ["serve", "-s", "dist", "-l", "3000"]
