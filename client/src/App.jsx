@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
 
 import Titlebar from './components/titlebar'
+import FileTable from './container/filetable';
 
 function App() {
 
@@ -12,7 +13,7 @@ function App() {
       <Titlebar/>
       <div>
         <Routes>
-          <Route path='/' element = {<h2></h2>} />
+          <Route path='/' element = {<FileTable/>} />
         </Routes>
       </div>
     </> 
