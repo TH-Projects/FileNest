@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
 
 import Titlebar from './components/titlebar'
-import FileTable from './container/filetable';
+import FileTable from './pages/filetable';
 
 function App() {
 
