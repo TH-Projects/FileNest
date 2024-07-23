@@ -33,5 +33,19 @@
         "size": "5 MB",
         "owner": "polar_bear123",
         "modified": "2024-07-19T10:35:00.000Z"
+    },
+    {
+        "name": "some name5",
+        "extension": ".jpg",
+        "size": "5 MB",
+        "owner": "grizzly_bear123",
+        "modified": "2024-07-19T10:35:00.000Z"
+    },
+    {
+        "name": "apfelkuchenrezept",
+        "extension": ".pdf",
+        "size": "5 MB",
+        "owner": "grizzly_bear123",
+        "modified": "2024-07-19T10:35:00.000Z"
     }
 ]

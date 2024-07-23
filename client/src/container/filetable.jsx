@@ -5,6 +5,7 @@ import MultiSelect from "../components/multiselect";
 import FileView from "../components/fileview";
 
 import testData from "./testdata.json"; 
+import "../style/cards.css"
 
 const FileTable = () => {
   const [queryData, setQueryData] = useState([]);
@@ -56,19 +57,19 @@ const FileTable = () => {
   };
 
   const handleNameSelect = (vData) => {
-    setSelectedFilenameOptions(vData);
+    setSelectedFilenameOptions(vData || []);
     setSelectedFileExtensionOptions([]);
     setSelectedFileOwnerOptions([]);
   };
 
   const handleExtensionSelect = (vData) => {
-    setSelectedFileExtensionOptions(vData);
+    setSelectedFileExtensionOptions(vData || []);
     setSelectedFilenameOptions([]);
     setSelectedFileOwnerOptions([]);
   };
 
   const handleOwnerSelect = (vData) => {
-    setSelectedFileOwnerOptions(vData);
+    setSelectedFileOwnerOptions(vData || []);
     setSelectedFilenameOptions([]);
     setSelectedFileExtensionOptions([]);
   };
@@ -104,8 +105,8 @@ const FileTable = () => {
           />
         </Col>
         <Col md={3}></Col>
-        <Col md={1} className="d-flex justify-content-end">
-          <Button variant="success" className="btn-md">
+        <Col md={1} className="d-flex justify-content-end align-items-top">
+          <Button variant="success" className="btn-md square-button">
             +
           </Button>
         </Col>

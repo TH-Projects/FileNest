@@ -13,3 +13,21 @@
   box-shadow: 0 0 4px rgb(157, 157, 157); 
   border-radius: 5px;
 }
+
+.square-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 5vh;
+  width: 5vh;
+  max-height: 40px; /* Maximale Höhe, um sicherzustellen, dass der Button nicht zu groß wird */
+  max-width: 40px; /* Maximale Breite, um sicherzustellen, dass der Button quadratisch bleibt */
+}
+
+@media (min-width: 768px) {
+  .square-button {
+    height: 40px;
+    width: 40px;
+  }
+}
+
