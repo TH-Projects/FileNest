@@ -3,122 +3,92 @@ import { useState, useEffect, useCallback } from "react";
 
 import MultiSelect from "../components/multiselect";
 import FileView from "../components/fileview";
-import FileUpload from './fileupload';
+import FileUpload from '../components/fileupload';
 
+import useFileUpload from '../hooks/usefileupload';
 import testData from "../testdata.json"; 
-import "../style/cards.css"
+import "../style/cards.css";
 
 const FileTable = () => {
+  // State Initialization
   const [queryData, setQueryData] = useState([]);
   const [fileMetaData, setFileMetaData] = useState([]); 
   const [filenameOptions, setFilenameOptions] = useState([]); 
   const [fileExtensionOptions, setFileExtensionOptions] = useState([]); 
   const [fileOwnerOptions, setFileOwnerOptions] = useState([]); 
-
   const [selectedFilenameOptions, setSelectedFilenameOptions] = useState([]);
   const [selectedFileExtensionOptions, setSelectedFileExtensionOptions] = useState([]);
   const [selectedFileOwnerOptions, setSelectedFileOwnerOptions] = useState([]);
-
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
 
-  const getSelectOptionsFromBaseData = useCallback((data) => {
-    let uniqueFilenames;
-    //when the filter for filenames is used the select shows all available files to allow multi select
-    //when the filter is not used the select shows only the files that are in the prefiltred data
-    if(selectedFilenameOptions.length >0){
-      uniqueFilenames = [...new Set(queryData.map(file => file.name))].map(name => ({ label: name, value: name }));
-    }else{
-      uniqueFilenames = [...new Set(data.map(file => file.name))].map(name => ({ label: name, value: name }));
-    }
-    const uniqueFileExtensions = [...new Set(data.map(file => file.extension))].map(extension => ({ label: extension, value: extension }));
-    const uniqueFileOwners = [...new Set(data.map(file => file.owner))].map(owner => ({ label: owner, value: owner }));
+  // Custom Hook for File Upload
+  const uploadUrl = 'http://localhost:3000/upload';
+  // eslint-disable-next-line no-unused-vars
+  const {selectedFile, handleFileChange, handleUpload } = useFileUpload(uploadUrl, handleCloseModal);
 
-    return { uniqueFilenames, uniqueFileExtensions, uniqueFileOwners };
-  },[queryData, selectedFilenameOptions]);
 
-  const setStatesForSelectedOptions = useCallback((data) => {
-    const { uniqueFilenames, uniqueFileExtensions, uniqueFileOwners } = getSelectOptionsFromBaseData(data);
+  // Callback to generate select options based on key
+  const generateSelectOptions = useCallback((data, key) => {
+    return [...new Set(data.map(item => item[key]))].map(value => ({ label: value, value }));
+  }, []);
+
+  // Helper function to set state for select options
+  const setStatesForSelectOptionsFromBaseData = useCallback((data) => {
+    const uniqueFilenames = selectedFilenameOptions.length > 0 ? 
+      generateSelectOptions(queryData, 'name') : generateSelectOptions(data, 'name');
+    const uniqueFileExtensions = generateSelectOptions(data, 'extension');
+    const uniqueFileOwners = generateSelectOptions(data, 'owner');
+
     setFilenameOptions(uniqueFilenames);
     setFileExtensionOptions(uniqueFileExtensions);
     setFileOwnerOptions(uniqueFileOwners);
-  },[getSelectOptionsFromBaseData]);
+  }, [queryData, selectedFilenameOptions, generateSelectOptions]);
 
-  //get data from initially
+  // Data fetching and setting initial state
   useEffect(() => {
     setQueryData(testData);
   }, []);
 
-  //get options for filters from data
+  // Update options for filters based on data
   useEffect(() => {
     setFileMetaData(queryData);
+    setStatesForSelectOptionsFromBaseData(queryData);
+  }, [queryData, setStatesForSelectOptionsFromBaseData]);
 
-   setStatesForSelectedOptions(queryData);
-  }, [queryData, setStatesForSelectedOptions]);
-
-  //filter data based on selected options
+  // Filtering data based on selected options
   useEffect(() => {
     let filteredData = queryData;
-    if(selectedFilenameOptions.length > 0){
+    if (selectedFilenameOptions.length > 0) {
       filteredData = filteredData.filter(file => selectedFilenameOptions.map(option => option.value).includes(file.name));
     }
-    if(selectedFileExtensionOptions.length > 0){
+    if (selectedFileExtensionOptions.length > 0) {
       filteredData = filteredData.filter(file => selectedFileExtensionOptions.map(option => option.value).includes(file.extension));
     }
-    if(selectedFileOwnerOptions.length > 0){
+    if (selectedFileOwnerOptions.length > 0) {
       filteredData = filteredData.filter(file => selectedFileOwnerOptions.map(option => option.value).includes(file.owner));
     }
-    setStatesForSelectedOptions(filteredData);
+    setStatesForSelectOptionsFromBaseData(filteredData);
     setFileMetaData(filteredData);
-  },[selectedFilenameOptions, selectedFileExtensionOptions, selectedFileOwnerOptions, queryData, setStatesForSelectedOptions]);
+  }, [
+    selectedFilenameOptions, 
+    selectedFileExtensionOptions, 
+    selectedFileOwnerOptions, 
+    queryData, 
+    setStatesForSelectOptionsFromBaseData
+  ]);
 
-  //render file views based on data
-  const renderFileViews = (data) => {
-    return data.map((file, index) => (
-      <FileView key={index} file_meta_data={file} />
-    ));
-  };
-
-  //set values of selects to states
+  // Handlers for UI interactions
+  const handleCloseModal = () => setShowUploadModal(false);
+  const handleShowModal = () => setShowUploadModal(true);
   const handleNameSelect = (vData) => setSelectedFilenameOptions(vData || []);
   const handleExtensionSelect = (vData) => setSelectedFileExtensionOptions(vData || []);
   const handleOwnerSelect = (vData) => setSelectedFileOwnerOptions(vData || []);
 
-  //handle modal
-  const handleCloseModal = () => setShowUploadModal(false);
-  const handleShowModal = () => setShowUploadModal(true);
-
-  //handle file upload of component
-  const handleFileChange = (event) => setSelectedFile(event.target.files[0]);
-
-  //upload file to minIO-microservice-server
-  const handleUpload = async () => {
-    if (!selectedFile) return;
-
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-
-    try {
-      const response = await fetch('http://localhost:3000/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      console.log(response);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('File uploaded successfully:', data);
-        alert('Datei erfolgreich hochgeladen');
-      } else {
-        console.error('File upload failed:', response.statusText);
-        alert('Fehler beim Hochladen der Datei');
-      }
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      alert('Ein Fehler ist beim Hochladen aufgetreten');
-    } finally {
-      handleCloseModal();
-    }
+  // Rendering file views
+  const renderFileViews = (data) => {
+    return data.map((file, index) => (
+      <FileView key={index} file_meta_data={file} />
+    ));
   };
 
   return (
@@ -154,7 +124,7 @@ const FileTable = () => {
         <Col md={3}></Col>
         <Col md={1} className="d-flex justify-content-end align-items-top">
           <Button variant="success" className="btn-md square-button" onClick={handleShowModal}>
-          +
+            +
           </Button>
           <FileUpload 
             show={showUploadModal} 
