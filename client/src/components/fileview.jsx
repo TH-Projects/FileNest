@@ -24,7 +24,7 @@ const FileView = ({ file_meta_data }) => {
         <Col md={1}>{file_meta_data.extension}</Col>
         <Col md={1}>{file_meta_data.size}</Col>
         <Col md={2}>{file_meta_data.owner}</Col>
-        <Col md={2}>{formatTimestamp(file_meta_data.modified)}</Col>
+        <Col md={2}>{formatTimestamp(file_meta_data.lastModified)}</Col>
         <Col md={2} className="d-flex justify-content-end">
           <Button variant="success" className="w-40 me-2">
             Download

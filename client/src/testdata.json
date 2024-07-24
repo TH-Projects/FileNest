@@ -1,51 +1,42 @@
 [
     {
-        "name": "some name",
-        "extension": ".txt",
-        "size": "5 MB",
-        "owner": "polar_bear123",
-        "modified": "2024-07-19T10:35:00.000Z"
+        "name": "FileNest-Architecture",
+        "extension": ".drawio",
+        "lastModified": "2024-07-24T18:03:28.975Z",
+        "size": 1337,
+        "owner": "test_user1",
+        "etag": "0725a3477d1aa56fb3edeed57f506d47"
     },
     {
-        "name": "some name2",
-        "extension": ".txt",
-        "size": "5 MB",
-        "owner": "polar_bear123",
-        "modified": "2024-07-19T10:35:00.000Z"
+        "name": "FileNest-MetaDB-ERM",
+        "extension": ".svg",
+        "lastModified": "2024-07-24T18:03:28.952Z",
+        "size": 42591,
+        "owner": "test_user1",
+        "etag": "7b3962fdbf1cfeb8eb31cf3f508dfa4b"
     },
     {
-        "name": "some name3",
-        "extension": ".txt",
-        "size": "5 MB",
-        "owner": "brown_bear123",
-        "modified": "2024-07-19T10:35:00.000Z"
-    },
-    {
-        "name": "some name4",
-        "extension": ".pdf",
-        "size": "5 MB",
-        "owner": "grizzly_bear123",
-        "modified": "2024-07-19T10:35:00.000Z"
-    },
-    {
-        "name": "some name5",
+        "name": "IMG_0385",
         "extension": ".jpg",
-        "size": "5 MB",
-        "owner": "polar_bear123",
-        "modified": "2024-07-19T10:35:00.000Z"
+        "lastModified": "2024-07-24T18:03:28.926Z",
+        "size": 161479,
+        "owner": "test_user1",
+        "etag": "8e5f5a5a1d198c51a1889dce29d56a53"
     },
     {
-        "name": "some name5",
-        "extension": ".jpg",
-        "size": "5 MB",
-        "owner": "grizzly_bear123",
-        "modified": "2024-07-19T10:35:00.000Z"
+        "name": "logo",
+        "extension": ".ico",
+        "lastModified": "2024-07-24T18:03:28.872Z",
+        "size": 86564,
+        "owner": "test_user2",
+        "etag": "520f0b18129aa1a9afd0267d7a36d72e"
     },
     {
-        "name": "apfelkuchenrezept",
-        "extension": ".pdf",
-        "size": "5 MB",
-        "owner": "grizzly_bear123",
-        "modified": "2024-07-19T10:35:00.000Z"
+        "name": "text",
+        "extension": ".txt",
+        "lastModified": "2024-07-24T18:03:28.902Z",
+        "size": 7,
+        "owner": "test_user3",
+        "etag": "0d2de89d5504288960e9f416ef7e175f"
     }
 ]

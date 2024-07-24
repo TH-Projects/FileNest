@@ -21,10 +21,25 @@ const FileTable = () => {
   const [selectedFileOwnerOptions, setSelectedFileOwnerOptions] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
+   // Handlers for UI interactions
+   const handleCloseModal = () => setShowUploadModal(false);
+   const handleShowModal = () => setShowUploadModal(true);
+   const handleNameSelect = (vData) => setSelectedFilenameOptions(vData || []);
+   const handleExtensionSelect = (vData) => setSelectedFileExtensionOptions(vData || []);
+   const handleOwnerSelect = (vData) => setSelectedFileOwnerOptions(vData || []);
+ 
+   // Rendering file views
+   const renderFileViews = (data) => {
+     return data.map((file, index) => (
+       <FileView key={index} file_meta_data={file} />
+     ));
+   };
+
   // Custom Hook for File Upload
   const uploadUrl = 'http://localhost:3000/upload';
   // eslint-disable-next-line no-unused-vars
   const {selectedFile, handleFileChange, handleUpload } = useFileUpload(uploadUrl, handleCloseModal);
+  console.log(selectedFile);
 
 
   // Callback to generate select options based on key
@@ -46,6 +61,8 @@ const FileTable = () => {
 
   // Data fetching and setting initial state
   useEffect(() => {
+    // Currently hardcoded from file
+    // Needs to be replaced by db call later
     setQueryData(testData);
   }, []);
 
@@ -76,20 +93,6 @@ const FileTable = () => {
     queryData, 
     setStatesForSelectOptionsFromBaseData
   ]);
-
-  // Handlers for UI interactions
-  const handleCloseModal = () => setShowUploadModal(false);
-  const handleShowModal = () => setShowUploadModal(true);
-  const handleNameSelect = (vData) => setSelectedFilenameOptions(vData || []);
-  const handleExtensionSelect = (vData) => setSelectedFileExtensionOptions(vData || []);
-  const handleOwnerSelect = (vData) => setSelectedFileOwnerOptions(vData || []);
-
-  // Rendering file views
-  const renderFileViews = (data) => {
-    return data.map((file, index) => (
-      <FileView key={index} file_meta_data={file} />
-    ));
-  };
 
   return (
     <Container fluid style={{ marginTop: "30px", marginBottom: "30px" }}>
@@ -142,7 +145,7 @@ const FileTable = () => {
                 <Row className="table-header">
                   <Col md={4}>Filename</Col>
                   <Col md={1}>Extension</Col>
-                  <Col md={1}>Size</Col>
+                  <Col md={1}>Bytesize</Col>
                   <Col md={2}>Owner</Col>
                   <Col md={2}>Modified</Col>
                   <Col md={2}>Actions</Col>
