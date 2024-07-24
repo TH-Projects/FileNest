@@ -5,7 +5,7 @@ import MultiSelect from "../components/multiselect";
 import FileView from "../components/fileview";
 import FileUpload from './fileupload';
 
-import testData from "./testdata.json"; 
+import testData from "..testdata.json"; 
 import "../style/cards.css"
 
 const FileTable = () => {
@@ -22,11 +22,12 @@ const FileTable = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
 
-
+  //get data from initially
   useEffect(() => {
     setQueryData(testData);
   }, []);
 
+  //get options for filters from data
   useEffect(() => {
     setFileMetaData(queryData);
 
@@ -40,6 +41,7 @@ const FileTable = () => {
     setFileOwnerOptions(uniqueFileOwners);
   }, [queryData]);
 
+  //filter data based on selected options
   useEffect(() => {
     if (selectedFilenameOptions.length > 0) {
       const filteredData = queryData.filter(file => selectedFilenameOptions.map(option => option.value).includes(file.name));
@@ -55,6 +57,7 @@ const FileTable = () => {
     }
   },[selectedFilenameOptions, selectedFileExtensionOptions, selectedFileOwnerOptions, queryData]);
 
+  //render file views based on data
   const renderFileViews = (data) => {
     return data.map((file, index) => (
       <FileView key={index} file_meta_data={file} />
