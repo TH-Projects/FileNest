@@ -1,5 +1,5 @@
 import { Container, Row, Col, Button, Card } from 'react-bootstrap';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import MultiSelect from "../components/multiselect";
 import FileView from "../components/fileview";
@@ -22,6 +22,28 @@ const FileTable = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
 
+  const getSelectOptionsFromBaseData = useCallback((data) => {
+    let uniqueFilenames;
+    //when the filter for filenames is used the select shows all available files to allow multi select
+    //when the filter is not used the select shows only the files that are in the prefiltred data
+    if(selectedFilenameOptions.length >0){
+      uniqueFilenames = [...new Set(queryData.map(file => file.name))].map(name => ({ label: name, value: name }));
+    }else{
+      uniqueFilenames = [...new Set(data.map(file => file.name))].map(name => ({ label: name, value: name }));
+    }
+    const uniqueFileExtensions = [...new Set(data.map(file => file.extension))].map(extension => ({ label: extension, value: extension }));
+    const uniqueFileOwners = [...new Set(data.map(file => file.owner))].map(owner => ({ label: owner, value: owner }));
+
+    return { uniqueFilenames, uniqueFileExtensions, uniqueFileOwners };
+  },[queryData, selectedFilenameOptions]);
+
+  const setStatesForSelectedOptions = useCallback((data) => {
+    const { uniqueFilenames, uniqueFileExtensions, uniqueFileOwners } = getSelectOptionsFromBaseData(data);
+    setFilenameOptions(uniqueFilenames);
+    setFileExtensionOptions(uniqueFileExtensions);
+    setFileOwnerOptions(uniqueFileOwners);
+  },[getSelectOptionsFromBaseData]);
+
   //get data from initially
   useEffect(() => {
     setQueryData(testData);
@@ -31,31 +53,24 @@ const FileTable = () => {
   useEffect(() => {
     setFileMetaData(queryData);
 
-    const uniqueFilenames = [...new Set(queryData.map(file => file.name))].map(name => ({ label: name, value: name }));
-    setFilenameOptions(uniqueFilenames);
-    
-    const uniqueFileExtensions = [...new Set(queryData.map(file => file.extension))].map(extension => ({ label: extension, value: extension }));
-    setFileExtensionOptions(uniqueFileExtensions);
-    
-    const uniqueFileOwners = [...new Set(queryData.map(file => file.owner))].map(owner => ({ label: owner, value: owner }));
-    setFileOwnerOptions(uniqueFileOwners);
-  }, [queryData]);
+   setStatesForSelectedOptions(queryData);
+  }, [queryData, setStatesForSelectedOptions]);
 
   //filter data based on selected options
   useEffect(() => {
-    if (selectedFilenameOptions.length > 0) {
-      const filteredData = queryData.filter(file => selectedFilenameOptions.map(option => option.value).includes(file.name));
-      setFileMetaData(filteredData);
-    }else if (selectedFileExtensionOptions.length > 0) {
-      const filteredData = queryData.filter(file => selectedFileExtensionOptions.map(option => option.value).includes(file.extension));
-      setFileMetaData(filteredData);
-    }else if (selectedFileOwnerOptions.length > 0) {
-      const filteredData = queryData.filter(file => selectedFileOwnerOptions.map(option => option.value).includes(file.owner));
-      setFileMetaData(filteredData);
-    }else {
-      setFileMetaData(queryData);
+    let filteredData = queryData;
+    if(selectedFilenameOptions.length > 0){
+      filteredData = filteredData.filter(file => selectedFilenameOptions.map(option => option.value).includes(file.name));
     }
-  },[selectedFilenameOptions, selectedFileExtensionOptions, selectedFileOwnerOptions, queryData]);
+    if(selectedFileExtensionOptions.length > 0){
+      filteredData = filteredData.filter(file => selectedFileExtensionOptions.map(option => option.value).includes(file.extension));
+    }
+    if(selectedFileOwnerOptions.length > 0){
+      filteredData = filteredData.filter(file => selectedFileOwnerOptions.map(option => option.value).includes(file.owner));
+    }
+    setStatesForSelectedOptions(filteredData);
+    setFileMetaData(filteredData);
+  },[selectedFilenameOptions, selectedFileExtensionOptions, selectedFileOwnerOptions, queryData, setStatesForSelectedOptions]);
 
   //render file views based on data
   const renderFileViews = (data) => {
@@ -64,31 +79,19 @@ const FileTable = () => {
     ));
   };
 
-  const handleNameSelect = (vData) => {
-    setSelectedFilenameOptions(vData || []);
-    setSelectedFileExtensionOptions([]);
-    setSelectedFileOwnerOptions([]);
-  };
+  //set values of selects to states
+  const handleNameSelect = (vData) => setSelectedFilenameOptions(vData || []);
+  const handleExtensionSelect = (vData) => setSelectedFileExtensionOptions(vData || []);
+  const handleOwnerSelect = (vData) => setSelectedFileOwnerOptions(vData || []);
 
-  const handleExtensionSelect = (vData) => {
-    setSelectedFileExtensionOptions(vData || []);
-    setSelectedFilenameOptions([]);
-    setSelectedFileOwnerOptions([]);
-  };
-
-  const handleOwnerSelect = (vData) => {
-    setSelectedFileOwnerOptions(vData || []);
-    setSelectedFilenameOptions([]);
-    setSelectedFileExtensionOptions([]);
-  };
-
+  //handle modal
   const handleCloseModal = () => setShowUploadModal(false);
   const handleShowModal = () => setShowUploadModal(true);
 
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
-  };
+  //handle file upload of component
+  const handleFileChange = (event) => setSelectedFile(event.target.files[0]);
 
+  //upload file to minIO-microservice-server
   const handleUpload = async () => {
     if (!selectedFile) return;
 
