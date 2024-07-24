@@ -5,7 +5,7 @@ import MultiSelect from "../components/multiselect";
 import FileView from "../components/fileview";
 import FileUpload from './fileupload';
 
-import testData from "..testdata.json"; 
+import testData from "../testdata.json"; 
 import "../style/cards.css"
 
 const FileTable = () => {
