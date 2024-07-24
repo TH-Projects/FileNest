@@ -21,26 +21,25 @@ const FileTable = () => {
   const [selectedFileOwnerOptions, setSelectedFileOwnerOptions] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
-   // Handlers for UI interactions
-   const handleCloseModal = () => setShowUploadModal(false);
-   const handleShowModal = () => setShowUploadModal(true);
-   const handleNameSelect = (vData) => setSelectedFilenameOptions(vData || []);
-   const handleExtensionSelect = (vData) => setSelectedFileExtensionOptions(vData || []);
-   const handleOwnerSelect = (vData) => setSelectedFileOwnerOptions(vData || []);
- 
-   // Rendering file views
-   const renderFileViews = (data) => {
-     return data.map((file, index) => (
-       <FileView key={index} file_meta_data={file} />
-     ));
-   };
+  // Handlers for UI interactions
+  const handleCloseModal = () => setShowUploadModal(false);
+  const handleShowModal = () => setShowUploadModal(true);
+  const handleNameSelect = (vData) => setSelectedFilenameOptions(vData || []);
+  const handleExtensionSelect = (vData) => setSelectedFileExtensionOptions(vData || []);
+  const handleOwnerSelect = (vData) => setSelectedFileOwnerOptions(vData || []);
+
+  // Rendering file views
+  const renderFileViews = (data) => {
+    return data.map((file, index) => (
+      <FileView key={index} file_meta_data={file} />
+    ));
+  };
 
   // Custom Hook for File Upload
   const uploadUrl = 'http://localhost:3000/upload';
   // eslint-disable-next-line no-unused-vars
   const {selectedFile, handleFileChange, handleUpload } = useFileUpload(uploadUrl, handleCloseModal);
   console.log(selectedFile);
-
 
   // Callback to generate select options based on key
   const generateSelectOptions = useCallback((data, key) => {
@@ -51,13 +50,21 @@ const FileTable = () => {
   const setStatesForSelectOptionsFromBaseData = useCallback((data) => {
     const uniqueFilenames = selectedFilenameOptions.length > 0 ? 
       generateSelectOptions(queryData, 'name') : generateSelectOptions(data, 'name');
-    const uniqueFileExtensions = generateSelectOptions(data, 'extension');
-    const uniqueFileOwners = generateSelectOptions(data, 'owner');
+    const uniqueFileExtensions = selectedFileExtensionOptions.length > 0 ?
+      generateSelectOptions(queryData, 'extension') : generateSelectOptions(data, 'extension');
+    const uniqueFileOwners = selectedFileOwnerOptions.length > 0 ?
+      generateSelectOptions(queryData, 'owner') : generateSelectOptions(data, 'owner');
 
     setFilenameOptions(uniqueFilenames);
     setFileExtensionOptions(uniqueFileExtensions);
     setFileOwnerOptions(uniqueFileOwners);
-  }, [queryData, selectedFilenameOptions, generateSelectOptions]);
+  }, 
+  [queryData, 
+   generateSelectOptions, 
+   selectedFilenameOptions, 
+   selectedFileExtensionOptions, 
+   selectedFileOwnerOptions
+  ]);
 
   // Data fetching and setting initial state
   useEffect(() => {
