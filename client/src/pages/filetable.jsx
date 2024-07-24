@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 import MultiSelect from "../components/multiselect";
 import FileView from "../components/fileview";
+import FileUpload from './fileupload';
 
 import testData from "./testdata.json"; 
 import "../style/cards.css"
@@ -17,6 +18,10 @@ const FileTable = () => {
   const [selectedFilenameOptions, setSelectedFilenameOptions] = useState([]);
   const [selectedFileExtensionOptions, setSelectedFileExtensionOptions] = useState([]);
   const [selectedFileOwnerOptions, setSelectedFileOwnerOptions] = useState([]);
+
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+
 
   useEffect(() => {
     setQueryData(testData);
@@ -74,6 +79,42 @@ const FileTable = () => {
     setSelectedFileExtensionOptions([]);
   };
 
+  const handleCloseModal = () => setShowUploadModal(false);
+  const handleShowModal = () => setShowUploadModal(true);
+
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+      const response = await fetch('http://localhost:3000/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      console.log(response);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('File uploaded successfully:', data);
+        alert('Datei erfolgreich hochgeladen');
+      } else {
+        console.error('File upload failed:', response.statusText);
+        alert('Fehler beim Hochladen der Datei');
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Ein Fehler ist beim Hochladen aufgetreten');
+    } finally {
+      handleCloseModal();
+    }
+  };
+
   return (
     <Container fluid style={{ marginTop: "30px", marginBottom: "30px" }}>
       <Row className="justify-content-center mb-3">
@@ -106,9 +147,15 @@ const FileTable = () => {
         </Col>
         <Col md={3}></Col>
         <Col md={1} className="d-flex justify-content-end align-items-top">
-          <Button variant="success" className="btn-md square-button">
-            +
+          <Button variant="success" className="btn-md square-button" onClick={handleShowModal}>
+          +
           </Button>
+          <FileUpload 
+            show={showUploadModal} 
+            handleClose={handleCloseModal} 
+            handleFileChange={handleFileChange}
+            handleUpload={handleUpload}
+          />
         </Col>
       </Row>
       <Row className="justify-content-center">
