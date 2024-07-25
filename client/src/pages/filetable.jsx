@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Container, Row, Col, Button, Card } from 'react-bootstrap';
 import { useState, useEffect, useCallback } from "react";
 
@@ -37,9 +38,16 @@ const FileTable = () => {
 
   // Custom Hook for File Upload
   const uploadUrl = 'http://localhost:3000/upload';
-  // eslint-disable-next-line no-unused-vars
-  const {selectedFile, handleFileChange, handleUpload } = useFileUpload(uploadUrl, handleCloseModal);
-  console.log(selectedFile);
+  const { selectedFile, handleFileChange, handleUpload } = useFileUpload(uploadUrl, handleCloseModal);
+
+  // Handler for actual file upload to prevent multiple uploads or page reloads
+  const handleFileUpload = async () => {
+    const metadata = await handleUpload();
+    if (metadata) {
+      metadata.owner = 'test_user_123'; // Hardcoded for now
+      setQueryData(prevData => [...prevData, metadata]);
+    }
+  };
 
   // Callback to generate select options based on key
   const generateSelectOptions = useCallback((data, key) => {
@@ -140,7 +148,7 @@ const FileTable = () => {
             show={showUploadModal} 
             handleClose={handleCloseModal} 
             handleFileChange={handleFileChange}
-            handleUpload={handleUpload}
+            handleUpload={handleFileUpload} // Call the handler for actual upload
           />
         </Col>
       </Row>
@@ -152,7 +160,7 @@ const FileTable = () => {
                 <Row className="table-header">
                   <Col md={4}>Filename</Col>
                   <Col md={1}>Extension</Col>
-                  <Col md={1}>Bytesize</Col>
+                  <Col md={1}>Size</Col>
                   <Col md={2}>Owner</Col>
                   <Col md={2}>Modified</Col>
                   <Col md={2}>Actions</Col>
