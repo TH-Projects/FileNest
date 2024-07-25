@@ -1,17 +1,17 @@
 /* eslint-disable no-unused-vars */
 import { Container, Row, Col, Button, Card } from 'react-bootstrap';
 import { useState, useEffect, useCallback } from "react";
-
 import MultiSelect from "../components/multiselect";
 import FileView from "../components/fileview";
 import FileUpload from '../components/fileupload';
-
+import { useAuth } from '../contextes/AuthContext';
 import useFileUpload from '../hooks/usefileupload';
 import testData from "../testdata.json"; 
 import "../style/cards.css";
 
 const FileTable = () => {
   // State Initialization
+  const { user } = useAuth(); // Get the user from context
   const [queryData, setQueryData] = useState([]);
   const [fileMetaData, setFileMetaData] = useState([]); 
   const [filenameOptions, setFilenameOptions] = useState([]); 
@@ -42,10 +42,14 @@ const FileTable = () => {
 
   // Handler for actual file upload to prevent multiple uploads or page reloads
   const handleFileUpload = async () => {
-    const metadata = await handleUpload();
-    if (metadata) {
-      metadata.owner = 'test_user_123'; // Hardcoded for now
-      setQueryData(prevData => [...prevData, metadata]);
+    if (user) {
+      const metadata = await handleUpload();
+      if (metadata) {
+        metadata.owner = user.username; // Set the owner to the logged-in username
+        setQueryData(prevData => [...prevData, metadata]);
+      }
+    } else {
+      console.log("User not logged in");
     }
   };
 
@@ -68,10 +72,10 @@ const FileTable = () => {
     setFileOwnerOptions(uniqueFileOwners);
   }, 
   [queryData, 
-   generateSelectOptions, 
-   selectedFilenameOptions, 
-   selectedFileExtensionOptions, 
-   selectedFileOwnerOptions
+    generateSelectOptions, 
+    selectedFilenameOptions, 
+    selectedFileExtensionOptions, 
+    selectedFileOwnerOptions
   ]);
 
   // Data fetching and setting initial state
@@ -141,7 +145,12 @@ const FileTable = () => {
         </Col>
         <Col md={3}></Col>
         <Col md={1} className="d-flex justify-content-end align-items-top">
-          <Button variant="success" className="btn-md square-button" onClick={handleShowModal}>
+          <Button 
+            variant="success" 
+            className="btn-md square-button" 
+            onClick={handleShowModal}
+            disabled={!user} // Disable the button if the user is not logged in
+          >
             +
           </Button>
           <FileUpload 
