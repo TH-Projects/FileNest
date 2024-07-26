@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contextes/AuthContext';
+import { useAuth } from '../contextes/auth-context';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');

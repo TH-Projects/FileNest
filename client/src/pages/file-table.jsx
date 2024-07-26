@@ -1,11 +1,11 @@
 /* eslint-disable no-unused-vars */
 import { Container, Row, Col, Button, Card } from 'react-bootstrap';
 import { useState, useEffect, useCallback } from "react";
-import MultiSelect from "../components/multiselect";
-import FileView from "../components/fileview";
-import FileUpload from '../components/fileupload';
-import { useAuth } from '../contextes/AuthContext';
-import useFileUpload from '../hooks/usefileupload';
+import MultiSelect from "../components/multi-select";
+import FileView from "../components/view-file";
+import FileUpload from '../components/upload-file';
+import { useAuth } from '../contextes/auth-context';
+import useFileUpload from '../hooks/useFileUpload';
 import testData from "../testdata.json"; 
 import "../style/cards.css";
 

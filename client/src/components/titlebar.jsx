@@ -3,7 +3,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import Container from 'react-bootstrap/Container';
 import Image from 'react-bootstrap/Image';
 import Button from 'react-bootstrap/Button';
-import { useAuth } from '../contextes/AuthContext';
+import { useAuth } from '../contextes/auth-context';
 
 const Titlebar = () => {
   const navigate = useNavigate();

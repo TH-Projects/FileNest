@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Container, Row, Col, Button } from "react-bootstrap";
-import { useAuth } from "../contextes/AuthContext";
+import { useAuth } from "../contextes/auth-context";
 import "../style/cards.css";
 
 // Utility function to format a timestamp
@@ -13,8 +13,8 @@ const formatTimestamp = (timestamp) => {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    hour12: false, // 24-Stunden-Format
-  }).replace(',', ''); // Entfernen des Kommas zwischen Datum und Uhrzeit
+    hour12: false, // 24-hour format
+  }).replace(',', '');
 };
 
 const FileView = ({ file_meta_data }) => {

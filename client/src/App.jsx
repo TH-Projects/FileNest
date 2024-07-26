@@ -3,11 +3,11 @@ import { Routes, Route } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
-import { AuthProvider } from './contextes/AuthContext';
+import { AuthProvider } from './contextes/auth-context';
 import Titlebar from './components/titlebar';
-import FileTable from './pages/filetable';
-import LoginPage from './pages/loginPage';
-import RegisterPage from './pages/registerPage';
+import FileTable from './pages/file-table';
+import LoginPage from './pages/login-user';
+import RegisterPage from './pages/register-user';
 
 function App() {
   return (
