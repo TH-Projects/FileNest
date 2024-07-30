@@ -13,8 +13,5 @@ RUN npm install
 # Kopiere den Rest des Anwendungscodes
 COPY . .
 
-# Exponiere den Port, den Fastify verwendet
-EXPOSE 6001
-
 # Definiere den Startbefehl für die Anwendung
 CMD ["npm", "start"]

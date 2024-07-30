@@ -13,6 +13,12 @@ upstream reactapp{
     server ${URL_REACTAPP}:${PORT_REACTAPP};
 }
 
+upstream servermetadb{
+    server ${URL_SERVERMETADB1}:${PORT_SERVERMETADB};
+    server ${URL_SERVERMETADB2}:${PORT_SERVERMETADB};
+    server ${URL_SERVERMETADB3}:${PORT_SERVERMETADB};
+}
+
 server {
     listen 80;
     server_name ${NGINX_SERVER_NAME};

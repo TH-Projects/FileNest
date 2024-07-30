@@ -138,7 +138,8 @@ services:
     ports:
       - "6002:${PORT_BROKER}"
     depends_on:
-      - broker1
+      broker1:
+        condition: service_started
 
   broker3:
     image: broker
@@ -152,7 +153,8 @@ services:
     ports:
       - "6003:${PORT_BROKER}"
     depends_on:
-      - broker2
+      broker2:
+        condition: service_started
 
   broker4:
     image: broker
@@ -167,7 +169,8 @@ services:
     ports:
       - "6004:${PORT_BROKER}"
     depends_on:
-      - broker3
+      broker3:
+        condition: service_started
 
   nginx:
     image: nginx-server
@@ -177,8 +180,63 @@ services:
     container_name: nginx
     env_file:
       - .env
+    depends_on:
+      serverfastify1:
+        condition: service_started
+      reactapp:
+        condition: service_started
+      broker4:
+        condition: service_started
+      servermetadb1:
+        condition: service_started
+      servermetadb2:
+        condition: service_started
+      servermetadb3:
+        condition: service_started
     ports:
       - "${PORT_NGINX}:${PORT_NGINX}"
+
+  servermetadb1:
+    image: servermetadb
+    build: ./MetaDBServer
+    container_name: servermetadb1
+    depends_on:
+      metadb1:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      - metadb=${URL_METADB1}
+    ports:
+      - "7001:${PORT_SERVERMETADB}"
+
+  servermetadb2:
+    image: servermetadb
+    build: ./MetaDBServer
+    container_name: servermetadb2
+    depends_on:
+      metadb2:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      - metadb=${URL_METADB2}
+    ports:
+      - "7002:${PORT_SERVERMETADB}"
+
+  servermetadb3:
+    image: servermetadb
+    build: ./MetaDBServer
+    container_name: servermetadb3
+    depends_on:
+      metadb3:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      - metadb=${URL_METADB3}
+    ports:
+      - "7003:${PORT_SERVERMETADB}"
 
 volumes:
   minio1-data:
