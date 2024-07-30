@@ -1,24 +1,25 @@
 /* eslint-disable no-unused-vars */
-import { Container, Row, Col, Button, Card } from 'react-bootstrap';
+import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import { useState, useEffect, useCallback } from "react";
 import MultiSelect from "../components/multi-select";
 import FileView from "../components/view-file";
-import FileUpload from '../components/upload-file';
-import { useAuth } from '../contextes/auth-context';
-import useFileUpload from '../hooks/useFileUpload';
-import testData from "../testdata.json"; 
+import FileUpload from "../components/upload-file";
+import { useAuth } from "../contextes/auth-context";
+import useFileUpload from "../hooks/usefileupload";
+import testData from "../testdata.json";
 import "../style/cards.css";
 
 const FileTable = () => {
   // State Initialization
   const { user } = useAuth(); // Get the user from context
   const [queryData, setQueryData] = useState([]);
-  const [fileMetaData, setFileMetaData] = useState([]); 
-  const [filenameOptions, setFilenameOptions] = useState([]); 
-  const [fileExtensionOptions, setFileExtensionOptions] = useState([]); 
-  const [fileOwnerOptions, setFileOwnerOptions] = useState([]); 
+  const [fileMetaData, setFileMetaData] = useState([]);
+  const [filenameOptions, setFilenameOptions] = useState([]);
+  const [fileExtensionOptions, setFileExtensionOptions] = useState([]);
+  const [fileOwnerOptions, setFileOwnerOptions] = useState([]);
   const [selectedFilenameOptions, setSelectedFilenameOptions] = useState([]);
-  const [selectedFileExtensionOptions, setSelectedFileExtensionOptions] = useState([]);
+  const [selectedFileExtensionOptions, setSelectedFileExtensionOptions] =
+    useState([]);
   const [selectedFileOwnerOptions, setSelectedFileOwnerOptions] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
@@ -26,7 +27,8 @@ const FileTable = () => {
   const handleCloseModal = () => setShowUploadModal(false);
   const handleShowModal = () => setShowUploadModal(true);
   const handleNameSelect = (vData) => setSelectedFilenameOptions(vData || []);
-  const handleExtensionSelect = (vData) => setSelectedFileExtensionOptions(vData || []);
+  const handleExtensionSelect = (vData) =>
+    setSelectedFileExtensionOptions(vData || []);
   const handleOwnerSelect = (vData) => setSelectedFileOwnerOptions(vData || []);
 
   // Rendering file views
@@ -37,16 +39,18 @@ const FileTable = () => {
   };
 
   // Custom Hook for File Upload
-  const uploadUrl = 'http://localhost:3000/upload';
-  const { selectedFile, handleFileChange, handleUpload } = useFileUpload(uploadUrl, handleCloseModal);
+  const uploadUrl = "http://localhost:3000/upload";
+  const { selectedFile, handleFileChange, handleUpload } = useFileUpload(
+    uploadUrl,
+    handleCloseModal
+  );
 
   // Handler for actual file upload to prevent multiple uploads or page reloads
   const handleFileUpload = async () => {
     if (user) {
       const metadata = await handleUpload();
       if (metadata) {
-        metadata.owner = user.username; // Set the owner to the logged-in username
-        setQueryData(prevData => [...prevData, metadata]);
+        setQueryData((prevData) => [...prevData, metadata]);
       }
     } else {
       console.log("User not logged in");
@@ -55,28 +59,40 @@ const FileTable = () => {
 
   // Callback to generate select options based on key
   const generateSelectOptions = useCallback((data, key) => {
-    return [...new Set(data.map(item => item[key]))].map(value => ({ label: value, value }));
+    return [...new Set(data.map((item) => item[key]))].map((value) => ({
+      label: value,
+      value,
+    }));
   }, []);
 
   // Helper function to set state for select options
-  const setStatesForSelectOptionsFromBaseData = useCallback((data) => {
-    const uniqueFilenames = selectedFilenameOptions.length > 0 ? 
-      generateSelectOptions(queryData, 'name') : generateSelectOptions(data, 'name');
-    const uniqueFileExtensions = selectedFileExtensionOptions.length > 0 ?
-      generateSelectOptions(queryData, 'extension') : generateSelectOptions(data, 'extension');
-    const uniqueFileOwners = selectedFileOwnerOptions.length > 0 ?
-      generateSelectOptions(queryData, 'owner') : generateSelectOptions(data, 'owner');
+  const setStatesForSelectOptionsFromBaseData = useCallback(
+    (data) => {
+      const uniqueFilenames =
+        selectedFilenameOptions.length > 0
+          ? generateSelectOptions(queryData, "name")
+          : generateSelectOptions(data, "name");
+      const uniqueFileExtensions =
+        selectedFileExtensionOptions.length > 0
+          ? generateSelectOptions(queryData, "extension")
+          : generateSelectOptions(data, "extension");
+      const uniqueFileOwners =
+        selectedFileOwnerOptions.length > 0
+          ? generateSelectOptions(queryData, "owner")
+          : generateSelectOptions(data, "owner");
 
-    setFilenameOptions(uniqueFilenames);
-    setFileExtensionOptions(uniqueFileExtensions);
-    setFileOwnerOptions(uniqueFileOwners);
-  }, 
-  [queryData, 
-    generateSelectOptions, 
-    selectedFilenameOptions, 
-    selectedFileExtensionOptions, 
-    selectedFileOwnerOptions
-  ]);
+      setFilenameOptions(uniqueFilenames);
+      setFileExtensionOptions(uniqueFileExtensions);
+      setFileOwnerOptions(uniqueFileOwners);
+    },
+    [
+      queryData,
+      generateSelectOptions,
+      selectedFilenameOptions,
+      selectedFileExtensionOptions,
+      selectedFileOwnerOptions,
+    ]
+  );
 
   // Data fetching and setting initial state
   useEffect(() => {
@@ -95,30 +111,42 @@ const FileTable = () => {
   useEffect(() => {
     let filteredData = queryData;
     if (selectedFilenameOptions.length > 0) {
-      filteredData = filteredData.filter(file => selectedFilenameOptions.map(option => option.value).includes(file.name));
+      filteredData = filteredData.filter((file) =>
+        selectedFilenameOptions
+          .map((option) => option.value)
+          .includes(file.name)
+      );
     }
     if (selectedFileExtensionOptions.length > 0) {
-      filteredData = filteredData.filter(file => selectedFileExtensionOptions.map(option => option.value).includes(file.extension));
+      filteredData = filteredData.filter((file) =>
+        selectedFileExtensionOptions
+          .map((option) => option.value)
+          .includes(file.extension)
+      );
     }
     if (selectedFileOwnerOptions.length > 0) {
-      filteredData = filteredData.filter(file => selectedFileOwnerOptions.map(option => option.value).includes(file.owner));
+      filteredData = filteredData.filter((file) =>
+        selectedFileOwnerOptions
+          .map((option) => option.value)
+          .includes(file.owner)
+      );
     }
     setStatesForSelectOptionsFromBaseData(filteredData);
     setFileMetaData(filteredData);
   }, [
-    selectedFilenameOptions, 
-    selectedFileExtensionOptions, 
-    selectedFileOwnerOptions, 
-    queryData, 
-    setStatesForSelectOptionsFromBaseData
+    selectedFilenameOptions,
+    selectedFileExtensionOptions,
+    selectedFileOwnerOptions,
+    queryData,
+    setStatesForSelectOptionsFromBaseData,
   ]);
 
   return (
     <Container fluid style={{ marginTop: "30px", marginBottom: "30px" }}>
       <Row className="justify-content-center mb-3">
         <Col md={2}>
-          <MultiSelect 
-            placeholder="Select filename" 
+          <MultiSelect
+            placeholder="Select filename"
             onChange={handleNameSelect}
             options={filenameOptions}
             value={selectedFilenameOptions}
@@ -126,8 +154,8 @@ const FileTable = () => {
           />
         </Col>
         <Col md={2}>
-          <MultiSelect 
-            placeholder="Select file extension" 
+          <MultiSelect
+            placeholder="Select file extension"
             onChange={handleExtensionSelect}
             options={fileExtensionOptions}
             value={selectedFileExtensionOptions}
@@ -135,8 +163,8 @@ const FileTable = () => {
           />
         </Col>
         <Col md={2}>
-          <MultiSelect 
-            placeholder="Select owner" 
+          <MultiSelect
+            placeholder="Select owner"
             onChange={handleOwnerSelect}
             options={fileOwnerOptions}
             value={selectedFileOwnerOptions}
@@ -145,17 +173,17 @@ const FileTable = () => {
         </Col>
         <Col md={3}></Col>
         <Col md={1} className="d-flex justify-content-end align-items-top">
-          <Button 
-            variant="success" 
-            className="btn-md square-button" 
+          <Button
+            variant="success"
+            className="btn-md square-button"
             onClick={handleShowModal}
             disabled={!user} // Disable the button if the user is not logged in
           >
             +
           </Button>
-          <FileUpload 
-            show={showUploadModal} 
-            handleClose={handleCloseModal} 
+          <FileUpload
+            show={showUploadModal}
+            handleClose={handleCloseModal}
             handleFileChange={handleFileChange}
             handleUpload={handleFileUpload} // Call the handler for actual upload
           />
