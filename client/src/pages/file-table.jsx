@@ -50,6 +50,7 @@ const FileTable = () => {
     if (user) {
       const metadata = await handleUpload();
       if (metadata) {
+        console.log(metadata);
         setQueryData((prevData) => [...prevData, metadata]);
       }
     } else {

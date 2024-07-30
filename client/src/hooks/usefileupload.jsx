@@ -5,12 +5,12 @@ import { useAuth } from "../contextes/auth-context";
 const formatBytes = (bytes) => {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  // Application allows sizes until 5MB
-  const availSizes = ["Bytes", "KB", "MB"];
-  const unitID = Math.floor(Math.log(bytes) / Math.log(k));
-  const size = Math.ceil(bytes / Math.pow(k, unitID));
-  return size + " " + availSizes[unitID];
+  const sizes = ["Bytes", "KB", "MB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const size = Math.ceil(bytes / Math.pow(k, i));
+  return size + " " + sizes[i];
 };
+
 
 const useFileUpload = (uploadUrl, handleCloseModal) => {
   const { user } = useAuth();
@@ -45,23 +45,21 @@ const useFileUpload = (uploadUrl, handleCloseModal) => {
         alert("Datei erfolgreich hochgeladen");
 
         // Set file metadata only after successful upload
+        const fileName = selectedFile.name;
+        const lastDotIndex = fileName.lastIndexOf(".");
+
+        console.log(selectedFile);
         const metadata = {
-          name: selectedFile.name.substring(
-            0,
-            selectedFile.name.lastIndexOf(".")
-          ), // Name without extension
-          extension: selectedFile.name.substring(
-            selectedFile.name.lastIndexOf(".") + 1
-          ), // extension
+          name: lastDotIndex !== -1 ? fileName.substring(0, lastDotIndex) : fileName, // Name without extension
+          extension: lastDotIndex !== -1 ? fileName.substring(lastDotIndex + 1) : "", // Extension or empty if none
           size: formatBytes(selectedFile.size),
-          lastModified: new Date().toISOString(), // ISO-8601 Format
-          owner: user.username,
+          lastModified: new Date(selectedFile.lastModified).toISOString(), // ISO-8601 Format
+          owner: user.username || null,
         };
 
         setUploadError(null);
         return metadata; // Return metadata to be handled in the component
       } else {
-        console.error(response);
         console.error("File upload failed:", response.statusText);
         setUploadError("Fehler beim Hochladen der Datei");
         return null;
