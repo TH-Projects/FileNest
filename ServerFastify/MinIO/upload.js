@@ -1,5 +1,5 @@
 const minioClient = require('./MinIOClient');
-const { pipeline } = require('stream');/ Import the stream module
+const { pipeline } = require('stream'); // Import the stream module
 
 const CHUNK_SIZE = 1024 * 1024;
 
