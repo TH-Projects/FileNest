@@ -21,8 +21,9 @@ const LoginPage = () => {
   };
 
   return (
-    <Container className="auth-container">
-      <Row className="justify-content-md-center">
+    <Container fluid className="auth-container">
+      <Row style={{minHeight:'20vh'}} ></Row>
+      <Row md={6} className="justify-content-md-center">
         <Col md={6} lg={4}>
           <h2 className="text-center">Login</h2>
           <Form onSubmit={handleSubmit}>
@@ -57,6 +58,7 @@ const LoginPage = () => {
           </p>
         </Col>
       </Row>
+      <Row style={{minHeight:'20vh'}}></Row>
     </Container>
   );
 };

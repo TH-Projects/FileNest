@@ -54,6 +54,7 @@ const RegisterPage = () => {
 
   return (
     <Container className="auth-container">
+      <Row style={{ minHeight: '10vh' }}></Row>
       <Row className="justify-content-md-center">
         <Col md={6} lg={4}>
           <h2 className="text-center">Register</h2>
@@ -112,6 +113,7 @@ const RegisterPage = () => {
           </p>
         </Col>
       </Row>
+      <Row style={{ minHeight: '10vh' }}></Row>
     </Container>
   );
 };
