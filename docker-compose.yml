@@ -19,129 +19,95 @@ services:
       - .env:/usr/local/bin/.env
     env_file:
       - .env
-    networks:
-      - minio_network
 
   minio1:
     image: minio/minio
     volumes:
       - minio1-data:/data
     ports:
-      - "9001:9000"
+      - "9001:${PORT_MINIO}"
       - "9091:9091"
     env_file:
       - .env
     command: server --console-address ":9091" http://minio{1...4}/data
-    networks:
-      - minio_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
 
   minio2:
     image: minio/minio
     volumes:
       - minio2-data:/data
     ports:
-      - "9002:9000"
+      - "9002:${PORT_MINIO}"
       - "9092:9092"
     env_file:
       - .env
     command: server --console-address ":9092" http://minio{1...4}/data
-    networks:
-      - minio_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
 
   minio3:
     image: minio/minio
     volumes:
       - minio3-data:/data
     ports:
-      - "9003:9000"
+      - "9003:${PORT_MINIO}"
       - "9093:9093"
     env_file:
       - .env
     command: server --console-address ":9093" http://minio{1...4}/data
-    networks:
-      - minio_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
   
   minio4:
     image: minio/minio
     volumes:
       - minio4-data:/data
     ports:
-      - "9004:9000"
+      - "9004:${PORT_MINIO}"
       - "9094:9094"
     env_file:
       - .env
     command: server --console-address ":9094" http://minio{1...4}/data
-    networks:
-      - minio_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
   
-  fastify:
+  serverfastify1:
+    image: serverfastify
     build: ServerFastify
-    container_name: server
+    container_name: serverfastify1
     env_file:
       - .env
     ports:
-      - "3000:3000"
-    networks:
-      - minio_network
+      - "3000:${PORT_SERVERFASTIFY}"
 
   metadb1:
-    image: mariadb
+    image: metadb
     build: MetaDB
+    container_name: metadb1
     env_file:
       - .env
     volumes:
       - metadb1-data:/var/lib/mysql
       - .env:/usr/local/bin/.env
     ports:
-      - "8001:3306"
-    networks:
-      - metanet
+      - "8001:${PORT_METADB}"
 
   metadb2:
-    image: mariadb
+    image: metadb
     build: MetaDB
+    container_name: metadb2
     env_file:
       - .env
     volumes:
       - metadb2-data:/var/lib/mysql
       - .env:/usr/local/bin/.env
     ports:
-      - "8002:3306"
-    networks:
-      - metanet
+      - "8002:${PORT_METADB}"
 
   metadb3:
-    image: mariadb
+    image: metadb
     build: MetaDB
+    container_name: metadb3
     env_file:
       - .env
     volumes:
       - metadb3-data:/var/lib/mysql
       - .env:/usr/local/bin/.env
     ports:
-      - "8003:3306"
-    networks:
-      - metanet
+      - "8003:${PORT_METADB}"
 
   reactapp:
     build:
@@ -150,9 +116,127 @@ services:
     image: reactapp
     container_name: filenest-client
     ports:
-      - "3001:3000" # runs on port 3001
-    networks:
-      - minio_network
+      - "3001:${PORT_REACTAPP}" # runs on port 3001
+
+  broker1:
+    image: broker
+    build: 
+      context: ./Broker
+      dockerfile: Dockerfile
+    container_name: broker1
+    ports:
+      - "6001:${PORT_BROKER}"
+
+  broker2:
+    image: broker
+    build: 
+      context: ./Broker
+      dockerfile: Dockerfile
+    container_name: broker2
+    environment:
+      - url1=ws://broker1:6001
+    ports:
+      - "6002:${PORT_BROKER}"
+    depends_on:
+      broker1:
+        condition: service_started
+
+  broker3:
+    image: broker
+    build: 
+      context: ./Broker
+      dockerfile: Dockerfile
+    container_name: broker3
+    environment:
+      - url1=ws://broker1:6001
+      - url2=ws://broker2:6001
+    ports:
+      - "6003:${PORT_BROKER}"
+    depends_on:
+      broker2:
+        condition: service_started
+
+  broker4:
+    image: broker
+    build: 
+      context: ./Broker
+      dockerfile: Dockerfile
+    container_name: broker4
+    environment:
+      - url1=ws://broker1:6001
+      - url2=ws://broker2:6001
+      - url3=ws://broker3:6001
+    ports:
+      - "6004:${PORT_BROKER}"
+    depends_on:
+      broker3:
+        condition: service_started
+
+  nginx:
+    image: nginx-server
+    build: 
+      context: ./Nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    env_file:
+      - .env
+    depends_on:
+      serverfastify1:
+        condition: service_started
+      reactapp:
+        condition: service_started
+      broker4:
+        condition: service_started
+      servermetadb1:
+        condition: service_started
+      servermetadb2:
+        condition: service_started
+      servermetadb3:
+        condition: service_started
+    ports:
+      - "${PORT_NGINX}:${PORT_NGINX}"
+
+  servermetadb1:
+    image: servermetadb
+    build: ./MetaDBServer
+    container_name: servermetadb1
+    depends_on:
+      metadb1:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      - metadb=${URL_METADB1}
+    ports:
+      - "7001:${PORT_SERVERMETADB}"
+
+  servermetadb2:
+    image: servermetadb
+    build: ./MetaDBServer
+    container_name: servermetadb2
+    depends_on:
+      metadb2:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      - metadb=${URL_METADB2}
+    ports:
+      - "7002:${PORT_SERVERMETADB}"
+
+  servermetadb3:
+    image: servermetadb
+    build: ./MetaDBServer
+    container_name: servermetadb3
+    depends_on:
+      metadb3:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      - metadb=${URL_METADB3}
+    ports:
+      - "7003:${PORT_SERVERMETADB}"
 
 volumes:
   minio1-data:
@@ -165,11 +249,3 @@ volumes:
     driver: local
   metadb3-data:
     driver: local
-
-networks:
-  minio_network:
-    name: minio_network
-    driver: bridge
-  metanet:
-    name: metanet
-    driver: bridge
