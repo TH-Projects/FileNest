@@ -5,25 +5,26 @@ const CHUNK_SIZE = 1024 * 1024;
 
 async function upload(fastify, options) {
     const { fs, stream } = options;
-    fastify.get('/upload', async (request, reply) => {
+    fastify.post('/upload', async (request, reply) => {
         try {
             const exists = await minioClient.bucketExists('test');
             if (!exists) {
                 await minioClient.makeBucket('test');
             }
             const bucketName = 'test';
-            const objectName = 'data';
-            const filepath = 'main.pdf';
 
-            const stats = await fs.promises.stat(filepath);
-            const fileSize = stats.size;
+            const data = await request.file();
+
+            //const stats = await fs.promises.stat(filepath);
+            const fileSize = data.file.bytesRead;
+            const fileName = data.filename;
 
             const uploadStream = new stream.PassThrough();
-            const fileStream = fs.createReadStream(filepath, { highWaterMark: CHUNK_SIZE });
+            const fileStream = data.file;
 
             // MinIO upload promise
             const uploadPromise = new Promise((resolve, reject) => {
-                minioClient.putObject(bucketName, objectName, uploadStream, fileSize, (err, etag) => {
+                minioClient.putObject(bucketName, fileName, uploadStream, fileSize, (err, etag) => {
                     if (err) {
                         reject(err);
                     } else {

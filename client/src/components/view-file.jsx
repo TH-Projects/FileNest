@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Container, Row, Col, Button } from "react-bootstrap";
+import { useAuth } from "../contextes/auth-context";
 import "../style/cards.css";
 
 // Utility function to format a timestamp
@@ -12,11 +13,12 @@ const formatTimestamp = (timestamp) => {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    hour12: false, // 24-Stunden-Format
-  }).replace(',', ''); // Entfernen des Kommas zwischen Datum und Uhrzeit
+    hour12: false, // 24-hour format
+  }).replace(',', '');
 };
 
 const FileView = ({ file_meta_data }) => {
+  const {user} = useAuth();
   return (
     <Container fluid>
       <Row className="table-row align-items-center r-h-3">
@@ -24,12 +26,12 @@ const FileView = ({ file_meta_data }) => {
         <Col md={1}>{file_meta_data.extension}</Col>
         <Col md={1}>{file_meta_data.size}</Col>
         <Col md={2}>{file_meta_data.owner}</Col>
-        <Col md={2}>{formatTimestamp(file_meta_data.modified)}</Col>
+        <Col md={2}>{formatTimestamp(file_meta_data.lastModified)}</Col>
         <Col md={2} className="d-flex justify-content-end">
-          <Button variant="success" className="w-40 me-2">
+          <Button variant="success" className="w-40 me-2" disabled={!user}>
             Download
           </Button>
-          <Button variant="danger" className="w-40">
+          <Button variant="danger" className="w-40" disabled={!user}>
             Delete
           </Button>
         </Col>
