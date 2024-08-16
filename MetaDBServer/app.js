@@ -11,6 +11,7 @@ fastify.register(cors, {
 });*/
 
 fastify.register(require('./REST/getFiles'));
+fastify.register(require('./REST/getBucket'));
 
 // Server starten
 const start = async () => {

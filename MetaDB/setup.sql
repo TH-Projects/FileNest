@@ -29,7 +29,8 @@ CREATE TABLE `ServerCluster` (
   `cluster_id` INT,
   `minIOServer_id` INT,
   PRIMARY KEY (`server_cluster_id`),
-  FOREIGN KEY (`cluster_id`) REFERENCES `Cluster`(`cluster_id`)
+  FOREIGN KEY (`cluster_id`) REFERENCES `Cluster`(`cluster_id`),
+  FOREIGN KEY ('minIOServer_id') REFERENCES 'MinIOServer'('minIOServer_id')
 );
 
 CREATE TABLE `File` (
