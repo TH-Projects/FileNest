@@ -1,8 +1,12 @@
 const files = require('../DB/files');
 
-async function getFiles(fastify) {
+async function getClusterForFile(fastify) {
     fastify.get('/getFiles', async (request, reply) => {
-        const result = await files.getFiles();
+        const file_id = request.query?.file_id;
+        if(!file_id) {
+            return reply.code(400).send('file_id not provided');
+        }
+        const result = await files.getClusterForFile(file_id);
         if(!result.success){
             return reply.code(500).send({success:"false", error:result.message});
         }
@@ -10,4 +14,4 @@ async function getFiles(fastify) {
     });
 }
 
-module.exports = getFiles;
+module.exports = getClusterForFile;

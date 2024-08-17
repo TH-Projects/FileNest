@@ -20,17 +20,9 @@ CREATE TABLE `Account` (
 
 CREATE TABLE `Cluster` (
   `cluster_id` INT AUTO_INCREMENT,
-  `name` VARCHAR(256),
+  `start_node_id` INT,
+  `end_node_id` INT,
   PRIMARY KEY (`cluster_id`)
-);
-
-CREATE TABLE `ServerCluster` (
-  `server_cluster_id` INT AUTO_INCREMENT,
-  `cluster_id` INT,
-  `minIOServer_id` INT,
-  PRIMARY KEY (`server_cluster_id`),
-  FOREIGN KEY (`cluster_id`) REFERENCES `Cluster`(`cluster_id`),
-  FOREIGN KEY ('minIOServer_id') REFERENCES 'MinIOServer'('minIOServer_id')
 );
 
 CREATE TABLE `File` (
@@ -49,8 +41,10 @@ CREATE TABLE `File` (
 
 CREATE TABLE `MinIOServer` (
   `minIOServer_id` INT AUTO_INCREMENT,
-  `name` VARCHAR(256),
-  PRIMARY KEY (`minIOServer_id`)
+  `address` VARCHAR(256),
+  `cluster_id` INT,
+  PRIMARY KEY (`minIOServer_id`),
+  FOREIGN KEY (`cluster_id`) REFERENCES `Cluster`(`cluster_id`)
 );
 
 

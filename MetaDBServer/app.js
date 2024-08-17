@@ -11,9 +11,14 @@ fastify.register(cors, {
 });*/
 
 fastify.register(require('./REST/getFiles'));
-fastify.register(require('./REST/getBucket'));
 fastify.register(require('./REST/authUser'));
 fastify.register(require('./REST/createUser'));
+fastify.register(require('./REST/addCluster'));
+fastify.register(require('./REST/addMinIOServer'));
+fastify.register(require('./REST/getMinIOServer'));
+fastify.register(require('./REST/getClusterForFile'));
+fastify.register(require('./REST/deleteFile'));
+fastify.register(require('./REST/addFile'));
 
 // Server starten
 const start = async () => {

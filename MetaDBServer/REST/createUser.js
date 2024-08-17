@@ -17,9 +17,9 @@ async function createUser(fastify) {
         }
         const result = await user.createUser(username, password, email);
         if(!result.success){
-            return reply.code(400).send(JSON.stringify('{"success":"false","error":"' + result.message + '"}'));
+            return reply.code(500).send({success:"false", error:result.message});
         }
-        return reply.send(JSON.stringify('{"success":"true"}'));
+        return reply.send({success:"true"});
     });
 }
 
