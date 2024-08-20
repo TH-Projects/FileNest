@@ -1,4 +1,4 @@
-const minIOServer = require('../DB/minIOServer');
+const minIOServerDB = require('../DB/minIOServer');
 
 async function minIOServer(fastify) {
     fastify.get('/minIOServer', async (request, reply) => {
@@ -6,7 +6,7 @@ async function minIOServer(fastify) {
         if(!cluster_id) {
             return reply.code(400).send('cluster_id not provided');
         }
-        const result = await minIOServer.getMinIOServerByCluster(cluster_id);
+        const result = await minIOServerDB.getMinIOServerByCluster(cluster_id);
         if(!result.success){
             return reply.code(500).send({success:"false", error:result.message});
         }
