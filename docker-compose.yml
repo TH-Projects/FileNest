@@ -189,10 +189,6 @@ services:
         condition: service_started
       servermetadb1:
         condition: service_started
-      servermetadb2:
-        condition: service_started
-      servermetadb3:
-        condition: service_started
     ports:
       - "${PORT_NGINX}:${PORT_NGINX}"
 
@@ -206,37 +202,9 @@ services:
     env_file:
       - .env
     environment:
-      - metadb=${URL_METADB1}
+      - MYSQL_HOST=${URL_METADB1}
     ports:
       - "7001:${PORT_SERVERMETADB}"
-
-  servermetadb2:
-    image: servermetadb
-    build: ./MetaDBServer
-    container_name: servermetadb2
-    depends_on:
-      metadb2:
-        condition: service_started
-    env_file:
-      - .env
-    environment:
-      - metadb=${URL_METADB2}
-    ports:
-      - "7002:${PORT_SERVERMETADB}"
-
-  servermetadb3:
-    image: servermetadb
-    build: ./MetaDBServer
-    container_name: servermetadb3
-    depends_on:
-      metadb3:
-        condition: service_started
-    env_file:
-      - .env
-    environment:
-      - metadb=${URL_METADB3}
-    ports:
-      - "7003:${PORT_SERVERMETADB}"
 
 volumes:
   minio1-data:
