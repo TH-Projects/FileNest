@@ -1,6 +1,7 @@
 const fastify = require('fastify')({ logger: true });
 const buildUpConnection = require('./Socket/buildUpConnection');
 const dbConnection = require('./DB/connection');
+const connectionIn = require('./Socket/connectionIn');
 
 // Registriere CORS
 /*const cors = require('@fastify/cors');
@@ -32,4 +33,5 @@ const start = async () => {
 start();
 buildUpConnection();
 dbConnection.register();
+connectionIn(fastify);
 module.exports = fastify;
