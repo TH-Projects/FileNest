@@ -53,18 +53,37 @@ async function createUser(username, password, email) {
 }
 
 async function checkUsername(username){
-    const db = await connection.getConnection();
-    const userExists = await db.query(
-        'SELECT * ' +
-        'FROM Account ' +
-        'WHERE username = ?', [username]
-    );
-    db.release();
-    return userExists;
+    try {
+        const db = await connection.getConnection();
+        const userExists = await db.query(
+            'SELECT COUNT(*) as count FROM Account WHERE username = ?', [username]
+        );
+        db.release();
+        return userExists[0]; // Rückgabe des gesamten Ergebnisses, das Array ist
+    } catch(error) {
+        console.error(error);
+    }
+    return [];
+}
+
+async function checkEmail(email) {    
+    try {
+        const db = await connection.getConnection();
+        const emailExists = await db.query(
+            'SELECT COUNT(*) as count FROM Account WHERE email = ?', [email]
+        );
+        db.release();
+        return emailExists[0];
+    } catch(error) {
+        console.error(error);
+    }
+    return { count: 0 };
 }
 
 
 module.exports = {
     getUser,
-    createUser
+    createUser,
+    checkUsername,
+    checkEmail
 };
