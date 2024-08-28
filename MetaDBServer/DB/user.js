@@ -2,8 +2,16 @@ const connection = require('./connection');
 const defaultRole = 2;
 
 async function getUser(username, password) {
+    console.log(`getUser: ${username}, ${password}`);
+    
     try {
-        const result = await checkUsername(username);
+        const db = await connection.getConnection();
+        const result = await db.query(
+            'SELECT username,password FROM Account WHERE username = ?', [username]
+        );
+        db.release();
+        console.log(JSON.stringify(result));
+        
         if(result.length === 0 || result[0].password !== password) {
             return {
                 success: false,
