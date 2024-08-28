@@ -16,19 +16,24 @@ async function checkUserExistance(fastify) {
             const usernameExists = userByUsername.count > 0;
             const emailExists = userByEmail.count > 0;            
 
-            if (usernameExists || emailExists) {
+            if (usernameExists) {
                 return reply.code(409).send({
                     success: false,
-                    message: 'Username or Email already exists'
+                    message: `Username "${username}" is already taken`
                 });
-            } else {
+            }else if (emailExists) {  
+                return reply.code(409).send({
+                    success: false,
+                    message: `"${email}" was already used for an existing account`
+                });
+            }else {
                 return reply.code(200).send({
                     success: true,
                     message: 'Username and Email are available'
                 });
             }
         } catch (error) {
-            console.error("Error in checkUserExistance:", error);
+            fastify.log.error("Error in checkUserExistance:", error);
             return reply.code(500).send({
                 success: false,
                 error: error.message

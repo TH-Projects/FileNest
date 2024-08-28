@@ -12,7 +12,8 @@ async function createUserRoutes(fastify) {
             });
             
             if (checkResponse.status !== 200) {
-                throw new Error(`Failed to check user: ${checkResponse.statusText}`);
+                const checkData = await checkResponse.json();                
+                return reply.code(checkResponse.status).send(checkData.message);
             }
             
             // Create user when username or email not already existing

@@ -46,8 +46,9 @@ const RegisterPage = () => {
               body: JSON.stringify({ username, email, password: hashedPassword })
           });
           
-          if (response.ok !== true) {
-                setError("Username or Email already exists");
+          if (response.ok !== true) {            
+              const errorMessage = await response.text();
+              setError(errorMessage || 'Registration failed!');
           } else {
               //TODO: Log user instantly in after registration when login is implemented
               navigate('/login');
