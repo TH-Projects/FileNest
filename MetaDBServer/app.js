@@ -20,6 +20,7 @@ fastify.register(require('./REST/getMinIOServer'));
 fastify.register(require('./REST/getClusterForFile'));
 fastify.register(require('./REST/deleteFile'));
 fastify.register(require('./REST/addFile'));
+fastify.register(require('./REST/getFile'));
 
 // Server starten
 const start = async () => {

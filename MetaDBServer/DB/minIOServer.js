@@ -1,5 +1,27 @@
 const connection = require('./connection');
 
+async function getMinIOServerForUpload(){
+    try {
+        const db = await connection.getConnection();
+        const [result] = await db.query(
+            'SELECT * ' +
+            'FROM MinIOServer ' +
+            'WHERE upload = 1'
+        );
+        db.release();
+        return {
+            success: true,
+            message: result
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            message: error
+        };
+    }
+}
+
 async function addMinIOServer(address, cluster_id) {
     try {
         const db = await connection.getConnection();
@@ -67,5 +89,6 @@ async function getClusterForMinIOServer(minIOServer_id) {
 
 module.exports = {
     addMinIOServer,
-    getMinIOServerByCluster
+    getMinIOServerByCluster,
+    getClusterForMinIOServer
 }

@@ -13,9 +13,9 @@ async function addMinIOServer(fastify) {
         }
         const result = await cluster.addCluster(address, cluster_id);
         if(!result.success){
-            return reply.code(500).send({success:"false", error:result.message});
+            return reply.code(500).send(result);
         }
-        return reply.send({success:"true", minIOServer_id:result.message});
+        return reply.send(result);
     });
 }
 

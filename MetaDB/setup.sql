@@ -22,6 +22,7 @@ CREATE TABLE `Cluster` (
   `cluster_id` INT AUTO_INCREMENT,
   `start_node_id` INT,
   `end_node_id` INT,
+
   PRIMARY KEY (`cluster_id`)
 );
 
@@ -34,6 +35,7 @@ CREATE TABLE `File` (
   `last_modify` DATETIME,
   `owner_id` INT,
   `cluster_location_id` INT,
+  `content_type` VARCHAR(500),
   PRIMARY KEY (`file_id`),
   FOREIGN KEY (`owner_id`) REFERENCES `Account`(`account_id`),
   FOREIGN KEY (`cluster_location_id`) REFERENCES `Cluster`(`cluster_id`)

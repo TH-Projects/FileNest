@@ -17,7 +17,8 @@ function addConnection(ws, type) {
 }
 
 function addSharedConnection(clientAddress, type) {
-    if(!sharedConnections.find((entry) => entry.clientAddress === clientAddress)){
+    if(!sharedConnections.find((entry) => entry.clientAddress === clientAddress)
+        && !connectionStorage.find((entry) => entry.ws._url?.replace(/\//g, "") === clientAddress?.replace(/\//g, ""))){
         sharedConnections.push({type: type, clientAddress: clientAddress});
     }
 }
@@ -68,6 +69,7 @@ function getAllConnections(){
 
 module.exports = {
     connectionStorage,
+    sharedConnections,
     removeConnection,
     addConnection,
     getConnectionsByType,

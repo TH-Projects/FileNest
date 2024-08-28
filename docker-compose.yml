@@ -70,6 +70,8 @@ services:
     container_name: serverfastify1
     env_file:
       - .env
+    environment:
+      - address=serverfastify1
     ports:
       - "3000:${PORT_SERVERFASTIFY}"
 
@@ -203,6 +205,7 @@ services:
       - .env
     environment:
       - MYSQL_HOST=${URL_METADB1}
+      - address=servermetadb1
     ports:
       - "7001:${PORT_SERVERMETADB}"
 

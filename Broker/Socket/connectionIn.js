@@ -28,7 +28,7 @@ function connectionIn (fastify){
 }
 
 function shareConnections(fastify){
-    const connections = connectionStorage.getAllConnections();
+    const connections = connectionStorage.getAllConnections().filter((entry) => entry.type !== enums.connectionTypes.BROKER);
     syncConnectionsWithBrokers(fastify, connectionStorage, connections);
 }
 module.exports = connectionIn;

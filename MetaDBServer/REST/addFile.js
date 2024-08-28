@@ -10,9 +10,7 @@ async function addFile(fastify) {
         const last_modify = data?.last_modify
         const owner_id = data?.owner_id
         const minIOServer = data?.minIOServer;
-        if(!file_id) {
-            return reply.code(400).send('file_id not provided');
-        }
+        const content_type = data?.content_type;
         if(!etag) {
             return reply.code(400).send('etag not provided');
         }
@@ -34,11 +32,14 @@ async function addFile(fastify) {
         if(!minIOServer) {
             return reply.code(400).send('minIOServer not provided');
         }
-        const result = await file.addFile(etag, name, file_type, size, last_modify, owner_id, minIOServer);
-        if(!result.success){
-            return reply.code(500).send({success:"false", error:result.message});
+        if(!content_type) {
+            return reply.code(400).send('content_type not provided');
         }
-        return reply.send({success:"true", file_id:result.message});
+        const result = await file.addFile(etag, name, file_type, size, last_modify, owner_id, minIOServer, content_type);
+        if(!result.success){
+            return reply.code(500).send(result);
+        }
+        return reply.send(result);
     });
 }
 

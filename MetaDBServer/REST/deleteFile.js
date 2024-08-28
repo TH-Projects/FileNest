@@ -9,9 +9,9 @@ async function deleteFile(fastify) {
         }
         const result = await file.deleteFile(file_id);
         if(!result.success){
-            return reply.code(500).send({success:"false", error:result.message});
+            return reply.code(500).send(result);
         }
-        return reply.send({success:"true", affectedRows:result.message});
+        return reply.send(result);
     });
 }
 

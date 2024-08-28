@@ -15,9 +15,10 @@ async function buildUpConnection() {
 async function connectionCall() {
     const externalUrl = 'http://nginx:80/couple';
     dotenv.config();
+    console.log(`Connecting with: ws://${process.env.address}:${process.env.PORT_SERVERFASTIFY}`)
     const data = {
-        type: "METADBSERVER",
-        url: `ws://${process.env.address}:${process.env.PORT_SERVERMETADB}`
+        type: "SERVERFASTIFY",
+        url: `ws://${process.env.address}:${process.env.PORT_SERVERFASTIFY}`
     };
 
     try {

@@ -1,6 +1,8 @@
 const fastify = require('fastify')({ logger: true });
 const fs = require('fs');
 const stream = require('stream');
+const buildUpConnection = require("./Socket/buildUpConnection");
+const connectionIn = require('./Socket/connectionIn');
 
 // Registriere CORS
 const cors = require('@fastify/cors');
@@ -28,12 +30,12 @@ fastify.setNotFoundHandler((request, reply) => {
 const start = async () => {
     try {
         await fastify.listen({ port: 3000, host: '0.0.0.0' });
-        fastify.log.info('Server listening on http://localhost:3000');
     } catch (err) {
         fastify.log.error(err);
         process.exit(1);
     }
 };
 start();
-
+connectionIn(fastify);
+buildUpConnection();
 module.exports = fastify;

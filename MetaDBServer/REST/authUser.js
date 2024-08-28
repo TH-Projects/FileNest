@@ -13,9 +13,9 @@ async function authUser(fastify) {
         }
         const result = await user.getUser(username, password);
         if(!result.success){
-            return reply.code(500).send({success:"false", error:"Invalid username or password"});
+            return reply.code(500).send({success:false, error:"Invalid username or password"});
         }
-        return reply.send({success:"true"});
+        return reply.send({success:true});
     });
 }
 
