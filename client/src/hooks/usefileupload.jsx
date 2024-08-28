@@ -20,7 +20,21 @@ const useFileUpload = (uploadUrl, handleCloseModal) => {
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
+    const maxFileSize = 10 * 1024 * 1024; // 10 MB
+
     if (file) {
+      console.log("File size:", file.size);
+      console.log("Max file size:", maxFileSize);
+
+      // Check if the file size exceeds the limit
+      if (file.size > maxFileSize) {
+        setUploadError(`Die Datei ist zu groß. Maximale Größe: ${formatBytes(maxFileSize)}`);
+        setSelectedFile(null);
+        alert("Die Datei ist zu groß. Maximale Größe: 10 MB");
+        return;
+      }
+
+      // If all checks pass, set the file and clear previous errors
       setSelectedFile(file);
       setUploadError(null);
     }
