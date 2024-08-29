@@ -13,43 +13,50 @@ const RegisterPage = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+      event.preventDefault();
 
-    // Regex for email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError("Invalid email address!");
-      return;
-    }
+      // Regex for email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+          setError("Invalid email address!");
+          return;
+      }
 
-    // Regex for password validation (at least 8 characters, including at least one uppercase letter, one lowercase letter, one digit, and one special character)
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-])[A-Za-z\d@$!%*?&\-]{8,}$/;
+      // Regex for password validation
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-])[A-Za-z\d@$!%*?&\-]{8,}$/;
 
-    if (!passwordRegex.test(password)) {
-      setError("Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.");
-      return;
-    }
+      if (!passwordRegex.test(password)) {
+          setError("Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.");
+          return;
+      }
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match!");
-      return;
-    }
+      if (password !== confirmPassword) {
+          setError("Passwords do not match!");
+          return;
+      }
 
-    // Placeholder: Check if the username or email already exists in the database
-    const userExists = false; // Assume false for now, implement DB check later
-
-    if (userExists) {
-      setError("Username or email already exists!");
-    } else {
       // Hash the password
       const hashedPassword = CryptoJS.SHA256(password).toString();
 
-      // Placeholder: Save the user to the database
-      console.log("Registering user with:", { username, email, hashedPassword });
+      try {
+          // Request Nginx-Proxy, to forward the request to the Fastify-Server        
+          const response = await fetch('http://localhost/checkAndCreateUser', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username, email, password: hashedPassword })
+          });
+          
+          if (response.ok !== true) {            
+              const errorMessage = await response.text();
+              setError(errorMessage || 'Registration failed!');
+          } else {
+              //TODO: Log user instantly in after registration when login is implemented
+              navigate('/login');
+          }
 
-      // Navigate to login page after successful registration
-      navigate('/login');
-    }
+      } catch (error) {
+          setError('An error occurred while registering the user.');
+      }
   };
 
   return (

@@ -20,6 +20,8 @@ fastify.register(require('./MinIO/upload'),{
 });
 fastify.register(require('./MinIO/download'));
 fastify.register(require('./MinIO/listObjects'));
+fastify.register(require('./User/checkAndCreateUser'));
+fastify.register(require('./User/loginUser'));
 
 // 404-Route
 fastify.setNotFoundHandler((request, reply) => {

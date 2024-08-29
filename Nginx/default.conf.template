@@ -24,6 +24,7 @@ server {
     # Set the maximum allowed size of the client request body to 10 MB
     client_max_body_size 10M;
 
+    # Proxy for broker-service
     location ~* ^/(getQueue|couple|addQueue) {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -35,7 +36,8 @@ server {
         proxy_redirect off;
     }
 
-    location ~* ^/(download|upload|listObjects) {
+    # Proxy for fastify backend server
+    location ~* ^/(download|upload|listObjects|checkAndCreateUser|loginUser){
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -46,7 +48,8 @@ server {
         proxy_redirect off;
     }
 
-    location ~* ^/(getFiles|authUser|createUser|addCluster|addFile|addMinIOServer|deleteFile|getClusterForFile|MinIOServer|getFile) {
+    # Proxy for database server
+    location ~* ^/(getFiles|authUser|createUser|addCluster|addFile|addMinIOServer|deleteFile|getClusterForFile|MinIOServer|getFile|checkUserExistance) {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -56,4 +59,5 @@ server {
         proxy_connect_timeout 90;
         proxy_redirect off;
     }
+
 }

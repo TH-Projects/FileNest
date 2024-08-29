@@ -4,12 +4,12 @@ const dbConnection = require('./DB/connection');
 const connectionIn = require('./Socket/connectionIn');
 
 // Registriere CORS
-/*const cors = require('@fastify/cors');
+const cors = require('@fastify/cors');
 fastify.register(cors, {
     origin: '*', //for development
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-});*/
+});
 
 fastify.register(require('./REST/getFiles'));
 fastify.register(require('./REST/authUser'));
@@ -20,6 +20,7 @@ fastify.register(require('./REST/getMinIOServer'));
 fastify.register(require('./REST/getClusterForFile'));
 fastify.register(require('./REST/deleteFile'));
 fastify.register(require('./REST/addFile'));
+fastify.register(require('./REST/checkUserExistance'));
 fastify.register(require('./REST/getFile'));
 
 // Server starten

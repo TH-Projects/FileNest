@@ -2,30 +2,51 @@ import { useState } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contextes/auth-context';
+import CryptoJS from 'crypto-js';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Placeholder for database verification logic
-    console.log("Logged in with:", { username, password });
 
-    // Placeholder: Implement actual login logic with database
-    // If login is successful:
-    login({ username }); // Set the logged-in username
-    navigate('/'); // Navigate to the home page or dashboard
+    // Hash the password
+    const hashedPassword = CryptoJS.SHA256(password).toString();
+
+    try {
+      const response = await fetch('http://localhost/loginUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password: hashedPassword })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Login erfolgreich
+        login({ username, password }); // Set logged-in user in context
+        navigate('/'); // Navigate to Dashboard
+      } else {
+        // Fehlerbehandlung
+        setError(data.message || 'Login failed');
+      }
+    } catch (error) {
+      console.error('An error occurred:', error);
+      setError('An unexpected error occurred. Please try again later.');
+    }
   };
 
   return (
     <Container fluid className="auth-container">
-      <Row style={{minHeight:'20vh'}} ></Row>
+      <Row style={{ minHeight: '20vh' }}></Row>
       <Row md={6} className="justify-content-md-center">
         <Col md={6} lg={4}>
           <h2 className="text-center">Login</h2>
+          {error && <p className="text-danger">{error}</p>}
           <Form onSubmit={handleSubmit}>
             <Form.Group controlId="formBasicUsername" className="mb-3">
               <Form.Label>Username</Form.Label>
@@ -58,7 +79,7 @@ const LoginPage = () => {
           </p>
         </Col>
       </Row>
-      <Row style={{minHeight:'20vh'}}></Row>
+      <Row style={{ minHeight: '20vh' }}></Row>
     </Container>
   );
 };
