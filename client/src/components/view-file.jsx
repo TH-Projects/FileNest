@@ -49,7 +49,7 @@ const FileView = ({ file_meta_data }) => {
       <Row className="table-row align-items-center r-h-3">
         <Col md={4}>{file_meta_data.name}</Col>
         <Col md={1}>{file_meta_data.extension}</Col>
-        <Col md={1}>{file_meta_data.size}</Col>
+        <Col md={1}>{file_meta_data.formatedSize}</Col>
         <Col md={2}>{file_meta_data.owner}</Col>
         <Col md={2}>{formatTimestamp(file_meta_data.lastModified)}</Col>
         <Col md={2} className="d-flex justify-content-end">

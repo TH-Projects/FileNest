@@ -1,5 +1,8 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { useAuth } from "../contextes/auth-context";
+import axios from "axios";
+import { Spinner } from 'react-bootstrap';
 
 // Helper function to format file size
 const formatBytes = (bytes) => {
@@ -11,89 +14,98 @@ const formatBytes = (bytes) => {
   return size + " " + sizes[i];
 };
 
-
 const useFileUpload = (uploadUrl, handleCloseModal) => {
   const { user } = useAuth();
   const [selectedFile, setSelectedFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState(null);
+  const [resultMessage, setResultMessage] = useState(null);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     const maxFileSize = 10 * 1024 * 1024; // 10 MB
 
     if (file) {
-      console.log("File size:", file.size);
-      console.log("Max file size:", maxFileSize);
-
-      // Check if the file size exceeds the limit
-      if (file.size > maxFileSize) {
-        setUploadError(`Die Datei ist zu groß. Maximale Größe: ${formatBytes(maxFileSize)}`);
+      // Check if the file size exceeds the limit      
+      if (file.size >= maxFileSize) {
+        setResultMessage(
+          <h5 className="text-danger fs-6 mt-2 mb-2">
+            Filesize too big. Size:  {formatBytes(maxFileSize)}
+          </h5>
+        );
+        handleCloseModal();
         setSelectedFile(null);
-        alert("Die Datei ist zu groß. Maximale Größe: 10 MB");
-        return;
+        return resultMessage;
       }
 
       // If all checks pass, set the file and clear previous errors
       setSelectedFile(file);
-      setUploadError(null);
+      setResultMessage(null);
     }
   };
 
   const handleUpload = async () => {
     if (!selectedFile) return;
 
+    // FormData object to hold the file and user data
     const formData = new FormData();
     formData.append("file", selectedFile);
+    formData.append("user", JSON.stringify(user));
 
-    try {
-      setUploading(true);
-      const response = await fetch(uploadUrl, {
-        method: "POST",
-        body: formData,
+    try {      
+      // Show a spinner while uploading
+      // Gets replaced by the result message
+      setResultMessage(
+        <div className="d-flex justify-content-center align-items-center">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Uploading...</span>
+          </Spinner>
+          <h5 className="text-secondary fs-6 ms-2">Uploading...</h5>
+        </div>
+      );
+      
+      const response = await axios.post(uploadUrl, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log("File uploaded successfully:", data);
-        alert("Datei erfolgreich hochgeladen");
-
-        // Set file metadata only after successful upload
-        const fileName = selectedFile.name;
-        const lastDotIndex = fileName.lastIndexOf(".");
-
-        console.log(selectedFile);
-        const metadata = {
-          name: lastDotIndex !== -1 ? fileName.substring(0, lastDotIndex) : fileName, // Name without extension
-          extension: lastDotIndex !== -1 ? fileName.substring(lastDotIndex + 1) : "", // Extension or empty if none
-          size: formatBytes(selectedFile.size),
-          lastModified: new Date(selectedFile.lastModified).toISOString(), // ISO-8601 Format
-          owner: user.username || null,
-        };
-
-        setUploadError(null);
-        return metadata; // Return metadata to be handled in the component
+      const uploadStatus = response.status;
+      const uploadStatusText = response.statusText;
+      const metadata = response.data.metadata;
+      
+      if (uploadStatus === 200) {
+        await handleCloseModal();
+        setResultMessage(
+          <h5 className="text-success fs-6 mt-2 mb-2">
+            File uploaded successfully
+          </h5>
+        );
+        return {metadata: metadata};
       } else {
-        console.error("File upload failed:", response.statusText);
-        setUploadError("Fehler beim Hochladen der Datei");
-        return null;
+        await handleCloseModal();
+        setResultMessage(
+          <h5 className="text-danger fs-6 mt-2 mb-2">
+            File upload failed: {uploadStatusText}
+          </h5>
+        );
+        return {success: false, message: uploadStatusText};
       }
+
     } catch (error) {
-      console.error("Error uploading file:", error);
-      setUploadError("Ein Fehler ist beim Hochladen aufgetreten");
-      return null;
+      setResultMessage(
+        <h5 className="text-danger fs-6 mt-2 mb-2">
+          Error uploading file: {error.message}
+        </h5>
+      );
+      return {success: false, message: error.message};
     } finally {
-      setUploading(false);
       handleCloseModal();
     }
   };
 
   return {
-    selectedFile,
     handleFileChange,
     handleUpload,
-    uploading,
-    uploadError,
+    resultMessage,
   };
 };
 

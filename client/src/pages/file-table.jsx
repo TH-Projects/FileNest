@@ -39,8 +39,8 @@ const FileTable = () => {
   };
 
   // Custom Hook for File Upload
-  const uploadUrl = "http://localhost:3000/upload";
-  const { selectedFile, handleFileChange, handleUpload } = useFileUpload(
+  const uploadUrl = "http://localhost/upload";
+  const { handleFileChange, handleUpload, resultMessage } = useFileUpload(
     uploadUrl,
     handleCloseModal
   );
@@ -51,7 +51,7 @@ const FileTable = () => {
       const metadata = await handleUpload();
       if (metadata) {
         console.log(metadata);
-        setQueryData((prevData) => [...prevData, metadata]);
+        //setQueryData((prevData) => [...prevData, metadata.metadata]);
       }
     } else {
       console.log("User not logged in");
@@ -60,6 +60,7 @@ const FileTable = () => {
 
   // Callback to generate select options based on key
   const generateSelectOptions = useCallback((data, key) => {
+    if (!data || data.length === 0) return [];
     return [...new Set(data.map((item) => item[key]))].map((value) => ({
       label: value,
       value,
@@ -69,6 +70,13 @@ const FileTable = () => {
   // Helper function to set state for select options
   const setStatesForSelectOptionsFromBaseData = useCallback(
     (data) => {
+      if (!data || data.length === 0) {
+        setFilenameOptions([]);
+        setFileExtensionOptions([]);
+        setFileOwnerOptions([]);
+        return;
+      }
+
       const uniqueFilenames =
         selectedFilenameOptions.length > 0
           ? generateSelectOptions(queryData, "name")
@@ -104,12 +112,16 @@ const FileTable = () => {
 
   // Update options for filters based on data
   useEffect(() => {
+    if (!queryData || queryData.length === 0) return;
+
     setFileMetaData(queryData);
     setStatesForSelectOptionsFromBaseData(queryData);
   }, [queryData, setStatesForSelectOptionsFromBaseData]);
 
   // Filtering data based on selected options
   useEffect(() => {
+    if (!queryData || queryData.length === 0) return;
+
     let filteredData = queryData;
     if (selectedFilenameOptions.length > 0) {
       filteredData = filteredData.filter((file) =>
@@ -189,6 +201,13 @@ const FileTable = () => {
             handleUpload={handleFileUpload} // Call the handler for actual upload
           />
         </Col>
+      </Row>
+      <Row className="justify-content-center">
+        <Col md={4}></Col>
+        <Col md={4} className="d-flex justify-content-center align-items-center">
+          {resultMessage ? resultMessage : "No"}
+        </Col>
+        <Col md={4}></Col>
       </Row>
       <Row className="justify-content-center">
         <Col md={10}>

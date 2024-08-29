@@ -1,17 +1,23 @@
 const fastify = require('fastify')({ logger: true });
 const fs = require('fs');
 const stream = require('stream');
+const FastifyCors = require('@fastify/cors');
+const FastifyMultipart = require('@fastify/multipart');
 
 // Registriere CORS
-const cors = require('@fastify/cors');
-fastify.register(cors, {
+fastify.register(FastifyCors, {
     origin: '*', //for development
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 });
 
+fastify.register(FastifyMultipart, {
+    addToBody: true,
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10 MB (Erhöhe diesen Wert nach Bedarf)
+      },
+});
 
-fastify.register(require('@fastify/multipart'));
 fastify.register(require('./MinIO/upload'),{
     fs: fs,
     stream: stream

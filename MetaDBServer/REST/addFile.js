@@ -2,17 +2,17 @@ const file = require('../DB/files');
 
 async function addFile(fastify) {
     fastify.post('/addFile', async (request, reply) => {
-        const data = request.body;
-        const etag = data?.etag;
-        const name = data?.name
-        const file_type = data?.file_type
-        const size = data?.size
-        const last_modify = data?.last_modify
-        const owner_id = data?.owner_id
-        const minIOServer = data?.minIOServer;
-        if(!file_id) {
+        const data = request.body;        
+        const etag = data.etag;
+        const name = data.name
+        const file_type = data.file_type
+        const size = data.size
+        const last_modify = new Date(data.last_modify).toISOString().slice(0, 19).replace('T', ' ');
+        const owner_id = data.owner_id
+        const minIOServer = data.minIOServer; 
+        /*if(!file_id) { ???
             return reply.code(400).send('file_id not provided');
-        }
+        }*/
         if(!etag) {
             return reply.code(400).send('etag not provided');
         }

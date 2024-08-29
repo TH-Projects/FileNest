@@ -20,6 +20,7 @@ upstream servermetadb{
 server {
     listen 80;
     server_name ${NGINX_SERVER_NAME};
+    client_max_body_size 10M;
 
     # Proxy for broker-service
     location ~* ^/(getQueue|couple|addQueue) {
@@ -46,7 +47,7 @@ server {
     }
 
     # Proxy for database server
-    location ~* ^/(getFiles|authUser|createUser|checkUserExistance){
+    location ~* ^/(getFiles|authUser|createUser|checkUserExistance|addFile|getAccountIdByUsername){
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

@@ -64,19 +64,22 @@ async function deleteFile(file_id) {
     }
 }
 
-async function addFile(etag, name, file_type, size, last_modify, owner_id, minIOServer) {
+async function addFile(etag, name, file_type, size, last_modify, owner_id, minIOServer) {    
     try {
-        const minIOServer = minIOServer.getClusterForMinIOServer(minIOServer);
+        //Wirft fehler, dass getClusterForMinIOServer keine Funktion ist
+        /*
+        const minIOServerCluster = minIOServer.getClusterForMinIOServer(minIOServer);
         if (!minIOServer.success){
             return {
                 success: false,
                 message: minIOServer.message
             };
         }
+            */
         const db = await connection.getConnection();
-        const [result] = await db.query(
+        const result = await db.query(
             'INSERT INTO File (etag, name, file_type, size, last_modify, owner_id, cluster_location_id) ' +
-            'VALUES (?, ?, ?, ?, ?, ?)', [etag, name, file_type, size, last_modify, owner_id, minIOServer.message[0].cluster_id]);
+            'VALUES (?, ?, ?, ?, ?, ?, ?)', [etag, name, file_type, size, last_modify, owner_id, 1]);// Replacement needed for cluster_location_id
         db.release();
         return {
             success: true,
