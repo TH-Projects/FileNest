@@ -5,9 +5,9 @@ const addMessage = require('../Queue/addMessage');
 const removeMessages = require('../Queue/removeMessage');
 
 // This function is called up when a message is received.
-function receiveMessage (fastify, message, ws) {
+function receiveMessage (fastify, jsonMessage, ws) {
+    const message = JSON.stringify(jsonMessage);
     console.log('Nachricht: ' + message);
-    const jsonMessage = JSON.parse(message);
     switch (jsonMessage.syncOperation) {
         case enums.syncOperation.ADD:
             addMessage(jsonMessage.messages, jsonMessage.clients);
@@ -19,10 +19,12 @@ function receiveMessage (fastify, message, ws) {
             console.log('Adding connection to storage' + message);
             const connections = Array.isArray(jsonMessage.clients) ? jsonMessage.clients : [jsonMessage.clients]
             for (let connection of connections) {
-                connectionStorage.addSharedConnection(
-                    connection.client,
-                    connection.type
-                );
+                if(connection.type !== socketEnums.connectionTypes.BROKER){
+                    connectionStorage.addSharedConnection(
+                        connection.client,
+                        connection.type
+                    );
+                }
             }
             break;
         case socketEnums.operation.REMOVECONNECTION:
@@ -35,7 +37,8 @@ function receiveMessage (fastify, message, ws) {
             }
             break;
         default:
-            console.log('Unknown operation: ' + jsonMessage.syncOperation);
+            console.log('Unknown operation: ' + jsonMessage.syncOperation + ' ' + message + ' ' + ws.clientAddress);
+
             break;
     }
 }

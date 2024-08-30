@@ -9,7 +9,7 @@ function sendMessage (fastify, message, wsList, publish = false) {
         if (ws.readyState === WebSocket.OPEN) {
             try {
                 ws.send(JSON.stringify(message));
-                console.log('Message sent to ' + ws.clientAddress);
+                console.log('Message sent to ' + ws.clientAddress + ': ' + JSON.stringify(message));
                 if(publish){
                     remove(fastify, ws.clientAddress);
                 }

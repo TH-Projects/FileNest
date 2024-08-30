@@ -1,3 +1,5 @@
+const os = require('os');
+
 // Used to store all the connections to the clients
 let connectionStorage = [];
 let sharedConnections = [];
@@ -11,8 +13,18 @@ function removeConnection(ws) {
 
 // Add a connection to the storage
 function addConnection(ws, type) {
+    if(ws._isServer){
+        console.log('No client address found');
+        return;
+    }
     if(!connectionStorage.find((entry) => entry.ws.clientAddress === ws.clientAddress)){
         connectionStorage.push({type: type, ws: ws});
+    }
+    else{
+        console.log('Connection already exists: ' + ws.clientAddress + ' ' + ws._url);
+    }
+    for(const connection of connectionStorage){
+        console.log('ConnectionStorage: ' + connection.ws.clientAddress);
     }
 }
 

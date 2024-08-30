@@ -2,7 +2,7 @@ version: '3'
 services:
   createuser:
     image: createuser
-    build: 
+    build:
       context: FileStorage
       dockerfile: Dockerfile
     depends_on:
@@ -52,7 +52,7 @@ services:
     env_file:
       - .env
     command: server --console-address ":9093" http://minio{1...4}/data
-  
+
   minio4:
     image: minio/minio
     volumes:
@@ -63,7 +63,7 @@ services:
     env_file:
       - .env
     command: server --console-address ":9094" http://minio{1...4}/data
-  
+
   serverfastify1:
     image: serverfastify
     build: ServerFastify
@@ -120,59 +120,13 @@ services:
     ports:
       - "3001:${PORT_REACTAPP}" # runs on port 3001
 
-  broker1:
+  broker:
     image: broker
     build: 
       context: ./Broker
       dockerfile: Dockerfile
-    container_name: broker1
-    ports:
-      - "6001:${PORT_BROKER}"
-
-  broker2:
-    image: broker
-    build: 
-      context: ./Broker
-      dockerfile: Dockerfile
-    container_name: broker2
-    environment:
-      - url1=ws://broker1:6001
-    ports:
-      - "6002:${PORT_BROKER}"
-    depends_on:
-      broker1:
-        condition: service_started
-
-  broker3:
-    image: broker
-    build: 
-      context: ./Broker
-      dockerfile: Dockerfile
-    container_name: broker3
-    environment:
-      - url1=ws://broker1:6001
-      - url2=ws://broker2:6001
-    ports:
-      - "6003:${PORT_BROKER}"
-    depends_on:
-      broker2:
-        condition: service_started
-
-  broker4:
-    image: broker
-    build: 
-      context: ./Broker
-      dockerfile: Dockerfile
-    container_name: broker4
-    environment:
-      - url1=ws://broker1:6001
-      - url2=ws://broker2:6001
-      - url3=ws://broker3:6001
-    ports:
-      - "6004:${PORT_BROKER}"
-    depends_on:
-      broker3:
-        condition: service_started
+    env_file:
+      - .env
 
   nginx:
     image: nginx-server
@@ -187,7 +141,7 @@ services:
         condition: service_started
       reactapp:
         condition: service_started
-      broker4:
+      broker:
         condition: service_started
       servermetadb1:
         condition: service_started
