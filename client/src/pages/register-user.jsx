@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import CryptoJS from 'crypto-js';
 
 const RegisterPage = () => {
   const [username, setUsername] = useState('');
@@ -13,51 +12,34 @@ const RegisterPage = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
-      event.preventDefault();
+    event.preventDefault();
 
-      // Regex for email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-          setError("Invalid email address!");
-          return;
-      }
+    if (password !== confirmPassword) {
+        setError("Passwords do not match!");
+        return;
+    }
 
-      // Regex for password validation
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-])[A-Za-z\d@$!%*?&\-]{8,}$/;
+    try {
+        // Request Nginx-Proxy, to forward the request to the Fastify-Server        
+        const response = await fetch('http://localhost/checkAndCreateUser', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password })
+        });
 
-      if (!passwordRegex.test(password)) {
-          setError("Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.");
-          return;
-      }
+        if (response.ok !== true) {
+            const error = await response.text();
+            const errorObject = JSON.parse(error);            
+            setError(errorObject.message || 'Registration failed!');
+        } else {
+            //TODO: Log user instantly in after registration when login is implemented
+            navigate('/login');
+        }
 
-      if (password !== confirmPassword) {
-          setError("Passwords do not match!");
-          return;
-      }
-
-      // Hash the password
-      const hashedPassword = CryptoJS.SHA256(password).toString();
-
-      try {
-          // Request Nginx-Proxy, to forward the request to the Fastify-Server        
-          const response = await fetch('http://localhost/checkAndCreateUser', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ username, email, password: hashedPassword })
-          });
-          
-          if (response.ok !== true) {            
-              const errorMessage = await response.text();
-              setError(errorMessage || 'Registration failed!');
-          } else {
-              //TODO: Log user instantly in after registration when login is implemented
-              navigate('/login');
-          }
-
-      } catch (error) {
-          setError('An error occurred while registering the user.');
-      }
-  };
+    } catch (error) {
+        setError('An error occurred while registering the user.');
+    }
+};
 
   return (
     <Container className="auth-container">
