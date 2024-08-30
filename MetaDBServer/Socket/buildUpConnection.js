@@ -1,5 +1,6 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
+const os = require('os');
 
 async function buildUpConnection() {
     console.log('Trying to establish connection');
@@ -13,15 +14,14 @@ async function buildUpConnection() {
 }
 
 async function connectionCall() {
-    const externalUrl = 'http://nginx:80/couple';
     dotenv.config();
     const data = {
         type: "METADBSERVER",
-        url: `ws://${process.env.address}:${process.env.PORT_SERVERMETADB}`
+        url: `ws://${os.hostname()}:${process.env.PORT_SERVERMETADB}`
     };
 
     try {
-        const response = await axios.post(externalUrl, data);
+        const response = await axios.post(process.env.NGINX_API + "/couple", data);
         console.log('Response: ', response.data);
         if (response.data?.couple === 'success') {
             console.log('Connection established (Call)');

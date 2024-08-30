@@ -13,7 +13,11 @@ fastify.register(cors, {
 });
 
 
-fastify.register(require('@fastify/multipart'));
+fastify.register(require('@fastify/multipart'), {
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10 MB (Erhöhe diesen Wert nach Bedarf)
+    },
+});
 fastify.register(require('./MinIO/upload'),{
     fs: fs,
     stream: stream

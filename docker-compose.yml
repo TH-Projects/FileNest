@@ -197,7 +197,6 @@ services:
   servermetadb1:
     image: servermetadb
     build: ./MetaDBServer
-    container_name: servermetadb1
     depends_on:
       metadb1:
         condition: service_started
@@ -205,9 +204,21 @@ services:
       - .env
     environment:
       - MYSQL_HOST=${URL_METADB1}
-      - address=servermetadb1
     ports:
       - "7001:${PORT_SERVERMETADB}"
+
+  servermetadb2:
+    image: servermetadb
+    build: ./MetaDBServer
+    depends_on:
+      metadb1:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      - MYSQL_HOST=${URL_METADB2}
+    ports:
+      - "7002:${PORT_SERVERMETADB}"
 
 volumes:
   minio1-data:

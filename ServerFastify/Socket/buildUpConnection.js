@@ -1,5 +1,6 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
+const os = require('os');
 
 async function buildUpConnection() {
     console.log('Trying to establish connection');
@@ -13,16 +14,15 @@ async function buildUpConnection() {
 }
 
 async function connectionCall() {
-    const externalUrl = 'http://nginx:80/couple';
     dotenv.config();
-    console.log(`Connecting with: ws://${process.env.address}:${process.env.PORT_SERVERFASTIFY}`)
+    console.log(`Connecting with: ws://${os.hostname()}:${process.env.PORT_SERVERFASTIFY}`)
     const data = {
         type: "SERVERFASTIFY",
-        url: `ws://${process.env.address}:${process.env.PORT_SERVERFASTIFY}`
+        url: `ws://${os.hostname()}:${process.env.PORT_SERVERFASTIFY}`
     };
 
     try {
-        const response = await axios.post(externalUrl, data);
+        const response = await axios.post(process.env.NGINX_API + "/couple", data);
         console.log('Response: ', response.data);
         if (response.data?.couple === 'success') {
             console.log('Connection established (Call)');

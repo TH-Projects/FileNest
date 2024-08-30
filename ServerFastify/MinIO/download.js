@@ -1,6 +1,6 @@
 const minioClient = require('./MinIOClient');
 const axios = require("axios");
-const nginx = "http://nginx:80/"
+require('dotenv').config();
 
 async function download (fastify) {
     fastify.get('/download', async (request, reply) => {
@@ -50,7 +50,7 @@ async function readFile(minIOClient, bucket, filename, content_type, reply){
 
 async function getFile(file_id){
     try {
-        const fileResult = await axios.get(nginx + `getFile?file_id=${file_id}`);
+        const fileResult = await axios.get(process.env.NGINX_API + `/getFile?file_id=${file_id}`);
         if(!fileResult?.data?.success){
             return undefined;
         }
@@ -64,7 +64,7 @@ async function getFile(file_id){
 
 async function getMinIOServer(cluster_location_id){
     try {
-        const minIOServerResult = await axios.get(nginx + `minIOServer?cluster_id=${cluster_location_id}`)
+        const minIOServerResult = await axios.get(process.env.NGINX_API + `/minIOServer?cluster_id=${cluster_location_id}`)
         if(!minIOServerResult?.data?.success){
             return undefined;
         }
