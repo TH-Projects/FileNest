@@ -28,6 +28,9 @@ async function upload(fastify, options) {
                 throw new Error('File data is missing or malformed');
             }
 
+
+            fastify.log.info('#############AUTHENTICATE USER#############');
+            // Authenticate the user
             const authResponse = await axios.post('http://nginx/authUser', {
                 username: user.username,
                 password: user.password
@@ -44,6 +47,11 @@ async function upload(fastify, options) {
                 });
             }
 
+
+            //TODO: Check if filename has already been used by the user
+
+
+            fastify.log.info('#############UPLOAD FILE TO MINIO#############');
             // Check if the bucket exists, if not create it            
             const bucketName = user.username.toLowerCase();
             const exists = await minioClient.bucketExists(bucketName);
@@ -73,7 +81,11 @@ async function upload(fastify, options) {
 
             // Pipeline to pipe data from fileBuffer to uploadStream
             uploadStream.end(fileBuffer);
+            uploadSuccess = true;
+            fastify.log.info('File uploaded successfully.');
 
+
+            fastify.log.info('#############CREATE METADATA OBJECT#############');
             // Wait for the upload to complete
             const etag = await uploadPromise;
             const serverUrl = `${minioClient.protocol}//${minioClient.host}:${minioClient.port}/${bucketName}/${fileName}`;
@@ -90,10 +102,8 @@ async function upload(fastify, options) {
                 owner: user.username || null,
             };            
 
-            uploadSuccess = true;
-            fastify.log.info('File uploaded successfully.');
 
-
+            fastify.log.info('#############INSERT METADATA INTO DATABASE#############');
             // Get Account ID from the database
             const accountResponse = await axios.get('http://nginx/getAccountIdByUsername', {
                 params: {
@@ -129,6 +139,7 @@ async function upload(fastify, options) {
             databaseInsertSuccess = true;   
             
 
+            fastify.log.info('#############CHECK SUCCESSFUL EXECUTION#############');
             //when successful: databaseInsterSuccess = true;
             //else: databaseInsterSuccess = false;            
             if(databaseInsertSuccess && uploadSuccess) {

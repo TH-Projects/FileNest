@@ -48,13 +48,12 @@ const FileTable = () => {
   // Handler for actual file upload to prevent multiple uploads or page reloads
   const handleFileUpload = async () => {
     if (user) {
-      const metadata = await handleUpload();
+      const metadata = await handleUpload();      
       if (metadata) {
-        console.log(metadata);
-        //setQueryData((prevData) => [...prevData, metadata.metadata]);
+        setQueryData((prevData) => [...prevData, metadata.metadata]);
       }
     } else {
-      console.log("User not logged in");
+      console.error("User not logged in");
     }
   };
 
