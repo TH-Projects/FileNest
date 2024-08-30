@@ -11,6 +11,15 @@ async function addQueue (fastify){
         }
         const messages = Array.isArray(data.message) ? data.message : [data.message];
         const clients = connectionStorage.getAllConnectionAddressesByType(data.type);
+        const exceptClients = data.except ? data.except : [];
+        if(exceptClients.length > 0) {
+            exceptClients.forEach(client => {
+                const index = clients.indexOf(client);
+                if(index > -1){
+                    clients.splice(index, 1);
+                }
+            });
+        }
         console.log('clients: ' + JSON.stringify(clients));
         sync.add(clients, messages);
         reply.send({status: 'success'});

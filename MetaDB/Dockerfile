@@ -1,5 +1,4 @@
-FROM mariadb
+FROM mariadb:latest
 
+# Kopieren Sie das SQL-Script und das Initialisierungsscript
 COPY setup.sql /docker-entrypoint-initdb.d/
-COPY init.sh /docker-entrypoint-initdb.d/
-RUN chmod +x /docker-entrypoint-initdb.d/init.sh

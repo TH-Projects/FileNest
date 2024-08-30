@@ -3,6 +3,8 @@ const receive = require('./receiveMessage');
 const close = require('./closeConnection');
 const open = require('./openConnection');
 const enums = require('./enums');
+const connectionStorage = require('./connectionStorage');
+const syncConnectionsWithBrokers = require('./syncConnectionsWithBrokers');
 
 // Connections from other instances
 function connectionIn (fastify){
@@ -14,7 +16,7 @@ function connectionIn (fastify){
             writable: true
         });
         open(fastify, ws, enums.connectionTypes.BROKER);
-
+        shareConnections(fastify);
         ws.on('message', (message) => {
             receive(fastify, message, ws);
         });
@@ -23,5 +25,10 @@ function connectionIn (fastify){
             close(fastify, ws);
         });
     });
+}
+
+function shareConnections(fastify){
+    const connections = connectionStorage.getAllConnections().filter((entry) => entry.type !== enums.connectionTypes.BROKER);
+    syncConnectionsWithBrokers(fastify, connectionStorage, connections);
 }
 module.exports = connectionIn;

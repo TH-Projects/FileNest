@@ -1,11 +1,4 @@
-CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};
-USE ${MYSQL_DATABASE};
-
-CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-
-GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';
-
-FLUSH PRIVILEGES;
+USE filenest;
 
 # Creating DB Structure:
 
@@ -27,16 +20,10 @@ CREATE TABLE `Account` (
 
 CREATE TABLE `Cluster` (
   `cluster_id` INT AUTO_INCREMENT,
-  `name` VARCHAR(256),
-  PRIMARY KEY (`cluster_id`)
-);
+  `start_node_id` INT,
+  `end_node_id` INT,
 
-CREATE TABLE `ServerCluster` (
-  `server_cluster_id` INT AUTO_INCREMENT,
-  `cluster_id` INT,
-  `minIOServer_id` INT,
-  PRIMARY KEY (`server_cluster_id`),
-  FOREIGN KEY (`cluster_id`) REFERENCES `Cluster`(`cluster_id`)
+  PRIMARY KEY (`cluster_id`)
 );
 
 CREATE TABLE `File` (
@@ -48,6 +35,7 @@ CREATE TABLE `File` (
   `last_modify` DATETIME,
   `owner_id` INT,
   `cluster_location_id` INT,
+  `content_type` VARCHAR(500),
   PRIMARY KEY (`file_id`),
   FOREIGN KEY (`owner_id`) REFERENCES `Account`(`account_id`),
   FOREIGN KEY (`cluster_location_id`) REFERENCES `Cluster`(`cluster_id`)
@@ -55,8 +43,10 @@ CREATE TABLE `File` (
 
 CREATE TABLE `MinIOServer` (
   `minIOServer_id` INT AUTO_INCREMENT,
-  `name` VARCHAR(256),
-  PRIMARY KEY (`minIOServer_id`)
+  `address` VARCHAR(256),
+  `cluster_id` INT,
+  PRIMARY KEY (`minIOServer_id`),
+  FOREIGN KEY (`cluster_id`) REFERENCES `Cluster`(`cluster_id`)
 );
 
 
@@ -67,5 +57,7 @@ INSERT INTO Role (name) VALUE ('admin');
 INSERT INTO Role (name) VALUE ('member');
 
 # Initial Development Accounts
-INSERT INTO Account (username, password, email, role_id) VALUE ('root', 'secret', 'root@supersavesecurity.com',1);
-INSERT INTO Account (username, password, email, role_id) VALUE ('testmember', 'member', 'member@supersavesecurity.com',2);
+# "root" pwd: "secret"
+# "testmember" pwd: "member"
+INSERT INTO Account (username, password, email, role_id) VALUE ('root', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', 'root@supersavesecurity.com',1);
+INSERT INTO Account (username, password, email, role_id) VALUE ('testmember', 'e31ab643c44f7a0ec824b59d1194d60dac334200d845e61d2d289daa0f087ea4', 'member@supersavesecurity.com',2);
