@@ -30,7 +30,7 @@ async function connectionCall() {
         }
 
     } catch (error) {
-        console.error(error);
+        console.log('Error when connecting to the broker. Retry after delay');
     }
     return false;
 }
