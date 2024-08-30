@@ -17,8 +17,6 @@ function formatBytes(bytes) {
 async function upload(fastify, options) {
     const { fs, stream } = options;
     fastify.post('/upload', async (request, reply) => {
-        let databaseInsertSuccess = false;
-        let uploadSuccess = false;
         try {
             const data = request.body.file?.[0]; // Access the first item in the file array, if it exists
             const userString = request.body.user; // user object as string
@@ -81,15 +79,13 @@ async function upload(fastify, options) {
 
             // Pipeline to pipe data from fileBuffer to uploadStream
             uploadStream.end(fileBuffer);
-            uploadSuccess = true;
             fastify.log.info('File uploaded successfully.');
 
-
-            fastify.log.info('#############CREATE METADATA OBJECT#############');
             // Wait for the upload to complete
             const etag = await uploadPromise;
-            const serverUrl = `${minioClient.protocol}//${minioClient.host}:${minioClient.port}/${bucketName}/${fileName}`;
+
             
+            fastify.log.info('#############CREATE METADATA OBJECT#############');
             // Create metadata object
             const lastDotIndex = fileName.lastIndexOf('.');
             const metadata = {
@@ -123,7 +119,7 @@ async function upload(fastify, options) {
                 size: metadata.trueSize,
                 last_modify: metadata.lastModified,
                 owner_id: owner_id,
-                minIOServer: 2,
+                minIOServer: 2, // set to 2 because function for getting minio server is not implemented
                 content_type: metadata.type
             }, {
                 headers: {
@@ -137,26 +133,12 @@ async function upload(fastify, options) {
                     message: insertResponse.error || 'Error inserting metadata into the database'
                 });
             }
-            databaseInsertSuccess = true;   
-            
 
-            fastify.log.info('#############CHECK SUCCESSFUL EXECUTION#############');
-            //when successful: databaseInsterSuccess = true;
-            //else: databaseInsterSuccess = false;            
-            if(databaseInsertSuccess && uploadSuccess) {
-                return reply.send({
-                    success: true,
-                    etag,
-                    metadata
-                });
-            }else{
-                // TODO: rollback the uploaded file
-                // TODO: rollback the database insert
-                return reply.code(500).send({
-                    success: false,
-                    error: 'Error uploading the file and/or metadata'
-                });
-            }
+            return reply.status(200).send({
+                success: true,
+                etag,
+                metadata
+            });
 
         } catch (err) {
             fastify.log.error(err);
