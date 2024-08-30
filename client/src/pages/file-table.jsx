@@ -9,7 +9,6 @@ import useFileUpload from "../hooks/usefileupload";
 import "../style/cards.css";
 
 const FileTable = () => {
-  // State Initialization
   const { user } = useAuth();
   const [queryData, setQueryData] = useState([]);
   const [fileMetaData, setFileMetaData] = useState([]);
@@ -20,8 +19,8 @@ const FileTable = () => {
   const [selectedFileExtensionOptions, setSelectedFileExtensionOptions] = useState([]);
   const [selectedFileOwnerOptions, setSelectedFileOwnerOptions] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [resultMessage, setResultMessage] = useState(null);
 
-  // Handlers for UI interactions
   const handleCloseModal = () => setShowUploadModal(false);
   const handleShowModal = () => setShowUploadModal(true);
   const handleNameSelect = (vData) => setSelectedFilenameOptions(vData || []);
@@ -37,22 +36,29 @@ const FileTable = () => {
 
   // Custom Hook for File Upload
   const uploadUrl = "http://localhost/upload";
-  const { handleFileChange, handleUpload, resultMessage } = useFileUpload(uploadUrl, handleCloseModal);
+  const { handleFileChange, handleUpload, resultMsg } = useFileUpload(uploadUrl, handleCloseModal);
 
-  // Handler for actual file upload to prevent multiple uploads or page reloads
+  useEffect(() => {
+    if (resultMsg) {
+      setResultMessage(resultMsg);
+    }
+  }, [resultMsg]);
+
   const handleFileUpload = async () => {
     if (user) {
-      const metadata = await handleUpload();      
-      if (metadata.metadata) {
-        console.log(metadata.metadata);
-        setQueryData((prevData) => [...prevData, metadata.metadata]);
+      const { success, message, metadata } = await handleUpload();
+
+      if (success) {
+        console.log(metadata);
+        setQueryData((prevData) => [...prevData, metadata]);
+      } else {
+        setResultMessage(message);
       }
     } else {
       console.error("User not logged in");
     }
   };
 
-  // Callback to generate select options based on key
   const generateSelectOptions = useCallback((data, key) => {
     if (!data || data.length === 0) return [];
     return [...new Set(data.map((item) => item[key]))].map((value) => ({
@@ -61,7 +67,6 @@ const FileTable = () => {
     }));
   }, []);
 
-  // Helper function to set state for select options
   const setStatesForSelectOptionsFromBaseData = useCallback(
     (data) => {
       if (!data || data.length === 0) {
@@ -97,15 +102,14 @@ const FileTable = () => {
     ]
   );
 
-  // Data fetching and setting initial state
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await axios.get('http://localhost/getFiles');           
-        const files = response.data.message;             
-        
+        const response = await axios.get('http://localhost/getFiles');
+        const files = response.data.message;
+
         if (response.status === 200) {
-          setQueryData(files);  // Assuming the response contains a `files` array
+          setQueryData(files);
         } else {
           console.error('Failed to fetch files');
         }
@@ -123,7 +127,6 @@ const FileTable = () => {
     fetchFiles();
   }, []);
 
-  // Update options for filters based on data
   useEffect(() => {
     if (!queryData || queryData.length === 0) return;
 
@@ -131,7 +134,6 @@ const FileTable = () => {
     setStatesForSelectOptionsFromBaseData(queryData);
   }, [queryData, setStatesForSelectOptionsFromBaseData]);
 
-  // Filtering data based on selected options
   useEffect(() => {
     if (!queryData || queryData.length === 0) return;
 
@@ -162,7 +164,7 @@ const FileTable = () => {
   ]);
 
   return (
-    <Container fluid style={{ marginTop: "30px", marginBottom: "30px" }}>
+    <Container fluid style={{ marginTop: '30px', marginBottom: '30px' }}>
       <Row className="justify-content-center mb-3">
         <Col md={2}>
           <MultiSelect
@@ -238,5 +240,6 @@ const FileTable = () => {
     </Container>
   );
 };
+
 
 export default FileTable;

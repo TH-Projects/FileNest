@@ -1,59 +1,43 @@
-/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { useAuth } from "../contextes/auth-context";
 import axios from "axios";
 import { Spinner } from 'react-bootstrap';
 
-// Helper function to format file size
-const formatBytes = (bytes) => {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  const size = Math.ceil(bytes / Math.pow(k, i));
-  return size + " " + sizes[i];
-};
-
 const useFileUpload = (uploadUrl, handleCloseModal) => {
   const { user } = useAuth();
   const [selectedFile, setSelectedFile] = useState(null);
-  const [resultMessage, setResultMessage] = useState(null);
+  const [resultMsg, setResultMsg] = useState(null);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     const maxFileSize = 10 * 1024 * 1024; // 10 MB
 
     if (file) {
-      // Check if the file size exceeds the limit      
       if (file.size >= maxFileSize) {
-        setResultMessage(
+        setResultMsg(
           <h5 className="text-danger fs-6 mt-2 mb-2">
-            Filesize too big. Size has to be smaller than:  {formatBytes(maxFileSize)}
+            Filesize too big. Size has to be smaller than: 10MB
           </h5>
         );
         handleCloseModal();
         setSelectedFile(null);
-        return resultMessage;
+        return;
       }
 
-      // If all checks pass, set the file and clear previous errors
       setSelectedFile(file);
-      setResultMessage(null);
+      setResultMsg(null);
     }
   };
 
   const handleUpload = async () => {
     if (!selectedFile) return;
 
-    // FormData object to hold the file and user data
     const formData = new FormData();
     formData.append("file", selectedFile);
     formData.append("user", JSON.stringify(user));
 
-    try {      
-      // Show a spinner while uploading
-      // Gets replaced by the result message
-      setResultMessage(
+    try {
+      setResultMsg(
         <div className="d-flex justify-content-center align-items-center">
           <Spinner animation="border" role="status">
             <span className="visually-hidden">Uploading...</span>
@@ -61,42 +45,36 @@ const useFileUpload = (uploadUrl, handleCloseModal) => {
           <h5 className="text-secondary fs-6 ms-2">Uploading...</h5>
         </div>
       );
-      
+
       const response = await axios.post(uploadUrl, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
-      const uploadStatus = response.status;
-      const uploadStatusText = response.statusText;
-      const metadata = response.data.metadata;
-      
-      if (uploadStatus === 200) {
-        await handleCloseModal();
-        setResultMessage(
+      if (response.status === 200) {
+        setResultMsg(
           <h5 className="text-success fs-6 mt-2 mb-2">
             File uploaded successfully
           </h5>
         );
-        return {metadata: metadata};
+        return { success: true, message: 'File uploaded successfully', metadata: response.data.metadata };
       } else {
-        await handleCloseModal();
-        setResultMessage(
+        setResultMsg(
           <h5 className="text-danger fs-6 mt-2 mb-2">
-            File upload failed: {uploadStatusText}
+            File upload failed: {response.data.message || response.statusText}
           </h5>
         );
-        return {success: false, message: uploadStatusText};
+        return { success: false, message: response.data.message || response.statusText, metadata: null };
       }
 
     } catch (error) {
-      setResultMessage(
+      setResultMsg(
         <h5 className="text-danger fs-6 mt-2 mb-2">
-          Error uploading file: {error.message}
+          Error uploading file: {error.response?.data?.message || error.message}
         </h5>
       );
-      return {success: false, message: error.message};
+      return { success: false, message: error.response?.data?.message || error.message, metadata: null };
     } finally {
       handleCloseModal();
     }
@@ -105,7 +83,7 @@ const useFileUpload = (uploadUrl, handleCloseModal) => {
   return {
     handleFileChange,
     handleUpload,
-    resultMessage,
+    resultMsg,
   };
 };
 

@@ -16,8 +16,6 @@ async function upload(fastify, options) {
                 throw new Error('File data is missing or malformed');
             }
 
-
-            fastify.log.info('#############AUTHENTICATE USER#############');
             // Authenticate the user
             const authResponse = await axios.post('http://nginx/authUser', {
                 username: user.username,
@@ -35,11 +33,36 @@ async function upload(fastify, options) {
                 });
             }
 
+            // Check if filename has already been used by the user
+            const filenameResponse = await axios.get('http://nginx/getFilenamesForUsername', {
+                params: {
+                    username: user.username
+                },
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            let isDuplicate = false;
+            filenameResponse.data.message.forEach(file => {
+                const lastDotIndex = data.filename.lastIndexOf('.');
+                const dataFilename = lastDotIndex === -1 ? data.filename : data.filename.substring(0, lastDotIndex);
+                
+                if(file.name === dataFilename){
+                    isDuplicate = true;
+                }
+            });
 
-            //TODO: Check if filename has already been used by the user
-
-
-            fastify.log.info('#############UPLOAD FILE TO MINIO#############');
+            if(isDuplicate){
+                fastify.log.error('Filename already exists');
+                return reply.code(400).send({
+                    success: false,
+                    message: 'Filename already exists'
+                });
+            }else{
+                fastify.log.info('Filename is available');
+            }
+            
             // Check if the bucket exists, if not create it            
             const bucketName = user.username.toLowerCase();
             const exists = await minioClient.minioClient.bucketExists(bucketName);
@@ -73,9 +96,7 @@ async function upload(fastify, options) {
 
             // Wait for the upload to complete
             const etag = await uploadPromise;
-
-            
-            fastify.log.info('#############CREATE METADATA OBJECT#############');
+         
             // Create metadata object
             const lastDotIndex = fileName.lastIndexOf('.');
             const metadata = {
@@ -87,8 +108,6 @@ async function upload(fastify, options) {
                 username: user.username || null,
             };            
 
-
-            fastify.log.info('#############INSERT METADATA INTO DATABASE#############');
             // Get Account ID from the database
             const accountResponse = await axios.get('http://nginx/getAccountIdByUsername', {
                 params: {
