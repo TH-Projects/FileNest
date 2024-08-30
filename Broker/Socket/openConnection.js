@@ -7,7 +7,7 @@ function open (fastify, ws, type) {
     connectionStorage.addConnection(ws, type);
     if(type !== enums.connectionTypes.BROKER) {
         console.log('Sharing: ' + ws.clientAddress)
-        syncConnectionsWithBrokers(fastify, connectionStorage, ws.clientAddress, type);
+        syncConnectionsWithBrokers(fastify, connectionStorage, {client: ws.clientAddress, type: type});
     }
 }
 module.exports = open;

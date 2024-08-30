@@ -9,7 +9,7 @@ async function listObjects(fastify) {
         const objectList = [];
 
         try {
-            const dataStream = await minioClient.listObjectsV2(bucketName, '', true);
+            const dataStream = await minioClient.minioClient.listObjectsV2(bucketName, '', true);
 
             await pipelineAsync(
                 dataStream,

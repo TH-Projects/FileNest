@@ -16,5 +16,7 @@ COPY . .
 # Exponiere den Port, den Fastify verwendet
 EXPOSE 3000
 
+ENV address=$(hostname)
+
 # Definiere den Startbefehl für die Anwendung
 CMD ["npm", "start"]

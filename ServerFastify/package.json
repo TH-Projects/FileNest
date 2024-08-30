@@ -11,13 +11,15 @@
     "@fastify/multipart": "^6.0.1",
     "axios": "^1.7.5",
     "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
     "dotenv": "^16.4.5",
     "fastify": "^4.28.1",
     "http-errors": "~1.6.3",
     "jade": "^0.29.0",
     "minio": "^8.0.1",
-    "morgan": "~1.9.1"
+    "morgan": "~1.9.1",
+    "ws": "^8.18.0",
+    "axios": "^1.7.4",
+    "process": "^0.11.10"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"

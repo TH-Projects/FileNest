@@ -15,9 +15,10 @@ async function buildUpConnection() {
 
 async function connectionCall() {
     dotenv.config();
+    console.log(`Connecting with: ws://${os.hostname()}:${process.env.PORT_SERVERFASTIFY}`)
     const data = {
-        type: "METADBSERVER",
-        url: `ws://${os.hostname()}:${process.env.PORT_SERVERMETADB}`
+        type: "SERVERFASTIFY",
+        url: `ws://${os.hostname()}:${process.env.PORT_SERVERFASTIFY}`
     };
 
     try {

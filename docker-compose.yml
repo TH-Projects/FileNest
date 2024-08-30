@@ -70,6 +70,8 @@ services:
     container_name: serverfastify1
     env_file:
       - .env
+    environment:
+      - address=serverfastify1
     ports:
       - "3000:${PORT_SERVERFASTIFY}"
 
@@ -195,7 +197,6 @@ services:
   servermetadb1:
     image: servermetadb
     build: ./MetaDBServer
-    container_name: servermetadb1
     depends_on:
       metadb1:
         condition: service_started
@@ -205,6 +206,19 @@ services:
       - MYSQL_HOST=${URL_METADB1}
     ports:
       - "7001:${PORT_SERVERMETADB}"
+
+  servermetadb2:
+    image: servermetadb
+    build: ./MetaDBServer
+    depends_on:
+      metadb1:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      - MYSQL_HOST=${URL_METADB2}
+    ports:
+      - "7002:${PORT_SERVERMETADB}"
 
 volumes:
   minio1-data:

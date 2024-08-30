@@ -1,9 +1,12 @@
 const fastify = require('fastify')({ logger: true });
 const connectionIn = require('./Socket/connectionIn');
 const connectionOut = require('./Socket/connectionOut');
+const buildUpConnection = require('./Socket/buildUpConnection');
+
 fastify.register(require('./REST/addQueue'));
 fastify.register(require('./REST/getQueue'));
 fastify.register(require('./REST/couple'));
+fastify.register(require('./REST/getCouples'));
 // Server starten
 const start = async () => {
     try {
@@ -21,7 +24,5 @@ const process = require('process');
 const env = process.env;
 const keys = Object.keys(env);
 const clientList = keys.filter(e => e.startsWith('url')).map(e => env[e])
-for(let client of clientList){
-    connectionOut(fastify, client);
-}
+buildUpConnection(fastify, clientList);
 module.exports = fastify;

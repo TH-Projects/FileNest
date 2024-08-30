@@ -17,10 +17,22 @@ function receiveMessage (fastify, message, ws) {
             break;
         case socketEnums.operation.ADDCONNECTION:
             console.log('Adding connection to storage' + message);
-            connectionStorage.addSharedConnection(
-                jsonMessage.client,
-                jsonMessage.type
-            );
+            const connections = Array.isArray(jsonMessage.clients) ? jsonMessage.clients : [jsonMessage.clients]
+            for (let connection of connections) {
+                connectionStorage.addSharedConnection(
+                    connection.client,
+                    connection.type
+                );
+            }
+            break;
+        case socketEnums.operation.REMOVECONNECTION:
+            console.log('Removing connection from storage' + message);
+            const connectionsToRemove = Array.isArray(jsonMessage.clients) ? jsonMessage.clients : [jsonMessage.clients];
+            for (let connection of connectionsToRemove) {
+                connectionStorage.removeSharedConnection(
+                    connection.client
+                );
+            }
             break;
         default:
             console.log('Unknown operation: ' + jsonMessage.syncOperation);

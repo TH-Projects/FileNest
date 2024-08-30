@@ -13,9 +13,9 @@ async function addCluster(fastify) {
         }
         const result = await cluster.addCluster(start_node_id, end_node_id);
         if(!result.success){
-            return reply.code(500).send({success:"false", error:result.message});
+            return reply.code(500).send(result);
         }
-        return reply.send({success:"true", cluster_id:result.message});
+        return reply.send(result);
     });
 }
 

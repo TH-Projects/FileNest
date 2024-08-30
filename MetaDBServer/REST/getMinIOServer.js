@@ -8,9 +8,9 @@ async function minIOServer(fastify) {
         }
         const result = await minIOServerDB.getMinIOServerByCluster(cluster_id);
         if(!result.success){
-            return reply.code(500).send({success:"false", error:result.message});
+            return reply.code(500).send(result);
         }
-        return reply.send({success:"true", minIOServer:result.message});
+        return reply.send(result);
     });
 }
 

@@ -1,6 +1,7 @@
 const fastify = require('fastify')({ logger: true });
 const buildUpConnection = require('./Socket/buildUpConnection');
 const dbConnection = require('./DB/connection');
+const connectionIn = require('./Socket/connectionIn');
 
 // Registriere CORS
 const cors = require('@fastify/cors');
@@ -20,6 +21,7 @@ fastify.register(require('./REST/getClusterForFile'));
 fastify.register(require('./REST/deleteFile'));
 fastify.register(require('./REST/addFile'));
 fastify.register(require('./REST/checkUserExistance'));
+fastify.register(require('./REST/getFile'));
 fastify.register(require('./REST/getAccountIdByUsername'));
 
 // Server starten
@@ -34,4 +36,5 @@ const start = async () => {
 start();
 buildUpConnection();
 dbConnection.register();
+connectionIn(fastify);
 module.exports = fastify;
