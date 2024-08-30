@@ -1,6 +1,7 @@
 const minioClient = require('./MinIOClient');
 const { pipeline } = require('stream'); // Import the stream module
 const axios = require('axios');
+require('dotenv').config();
 
 const CHUNK_SIZE = 1024 * 1024;
 
@@ -45,6 +46,13 @@ async function upload(fastify, options) {
                 });
             }
 
+            //Get Minio Server
+            const minIOResponse = await axios.get(process.env.NGINX_API + "/minIOServerForUpload");
+            if(!minIOResponse.data.success){
+                return reply.code(500).send(minIOResponse);
+            }
+            console.log('Minio Server: ', minIOResponse.data.message);
+            const minIO = minioClient.getMinIOClient(minIOResponse.data.message[0].address);
 
             //TODO: Check if filename has already been used by the user
 
@@ -52,9 +60,9 @@ async function upload(fastify, options) {
             fastify.log.info('#############UPLOAD FILE TO MINIO#############');
             // Check if the bucket exists, if not create it            
             const bucketName = user.username.toLowerCase();
-            const exists = await minioClient.minioClient.bucketExists(bucketName);
+            const exists = await minIO.bucketExists(bucketName);
             if (!exists) {
-                await minioClient.minioClient.makeBucket(bucketName);
+                await minIO.makeBucket(bucketName);
             }
 
             const fileSize = data.data?.length; // Safely access data.length
@@ -68,7 +76,7 @@ async function upload(fastify, options) {
 
             // MinIO upload promise
             const uploadPromise = new Promise((resolve, reject) => {
-                minioClient.minioClient.putObject(bucketName, fileName, uploadStream, fileSize, (err, etag) => {
+                minIO.putObject(bucketName, fileName, uploadStream, fileSize, (err, etag) => {
                     if (err) {
                         reject(err);
                     } else {
@@ -96,6 +104,7 @@ async function upload(fastify, options) {
                 formatedSize: formatBytes(fileSize),
                 lastModified: new Date().toISOString(), // ISO-8601 format for the current time
                 owner: user.username || null,
+                minIOServer: minIOResponse.data.message[0].minIOServer_id
             };            
 
 
@@ -119,7 +128,7 @@ async function upload(fastify, options) {
                 size: metadata.trueSize,
                 last_modify: metadata.lastModified,
                 owner_id: owner_id,
-                minIOServer: 2, // set to 2 because function for getting minio server is not implemented
+                minIOServer: metadata.minIOServer,
                 content_type: metadata.type
             }, {
                 headers: {

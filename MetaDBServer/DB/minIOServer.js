@@ -3,15 +3,18 @@ const connection = require('./connection');
 async function getMinIOServerForUpload(){
     try {
         const db = await connection.getConnection();
-        const [result] = await db.query(
-            'SELECT * ' +
-            'FROM MinIOServer ' +
-            'WHERE upload = 1'
+        const result = await db.query(
+            'SELECT cluster_id ' +
+            'FROM Cluster ' +
+            'WHERE memory_limit_reached = 0'
         );
         db.release();
+        if(result.length > 0){
+            return await getMinIOServerByCluster(result[0].cluster_id);
+        }
         return {
-            success: true,
-            message: result
+            success: false,
+            message: "No cluster available"
         };
     } catch (error) {
         console.error(error);
@@ -90,5 +93,6 @@ async function getClusterForMinIOServer(minIOServer_id) {
 module.exports = {
     addMinIOServer,
     getMinIOServerByCluster,
-    getClusterForMinIOServer
+    getClusterForMinIOServer,
+    getMinIOServerForUpload
 }

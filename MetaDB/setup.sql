@@ -22,7 +22,7 @@ CREATE TABLE `Cluster` (
   `cluster_id` INT AUTO_INCREMENT,
   `start_node_id` INT,
   `end_node_id` INT,
-
+  `memory_limit_reached` BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (`cluster_id`)
 );
 
@@ -45,6 +45,7 @@ CREATE TABLE `MinIOServer` (
   `minIOServer_id` INT AUTO_INCREMENT,
   `address` VARCHAR(256),
   `cluster_id` INT,
+  `connection_failure_datetime` DATETIME,
   PRIMARY KEY (`minIOServer_id`),
   FOREIGN KEY (`cluster_id`) REFERENCES `Cluster`(`cluster_id`)
 );
