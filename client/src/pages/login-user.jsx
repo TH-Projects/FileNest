@@ -28,7 +28,7 @@ const LoginPage = () => {
 
       if (response.ok) {
         // Login erfolgreich
-        login({ username, password }); // Set logged-in user in context
+        login({ username, password: hashedPassword }); // Set logged-in user in context
         navigate('/'); // Navigate to Dashboard
       } else {
         // Fehlerbehandlung

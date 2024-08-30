@@ -88,10 +88,32 @@ async function checkEmail(email) {
     return { count: 0 };
 }
 
+async function getAccountIdByUsername(username) {
+    try {
+        const db = await connection.getConnection();
+        const rows = await db.query(
+            'SELECT account_id FROM Account WHERE username = ?', [username]
+        );
+        db.release();
+        console.log(JSON.stringify(rows));
+        
+
+        if (rows.length > 0) {
+            return { success: true, message: rows[0].account_id };  // Rückgabe des account_id
+        } else {
+            return { success: false, message: "No account found for the given username" };
+        }
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: error.message };  // Rückgabe des Fehlertexts
+    }
+}
+
 
 module.exports = {
     getUser,
     createUser,
     checkUsername,
-    checkEmail
+    checkEmail,
+    getAccountIdByUsername,
 };

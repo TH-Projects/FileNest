@@ -5,7 +5,7 @@ const minioClient = require('./MinIOClient');
 
 async function listObjects(fastify) {
     fastify.get('/listObjects', async (request, reply) => {
-        const bucketName = 'test';
+        const bucketName = 'thprojects';
         const objectList = [];
 
         try {
