@@ -22,6 +22,7 @@ fastify.register(require('./REST/deleteFile'));
 fastify.register(require('./REST/addFile'));
 fastify.register(require('./REST/checkUserExistance'));
 fastify.register(require('./REST/getFile'));
+fastify.register(require('./REST/getAccountIdByUsername'));
 
 // Server starten
 const start = async () => {

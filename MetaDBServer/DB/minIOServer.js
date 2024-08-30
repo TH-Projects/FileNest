@@ -76,7 +76,7 @@ async function getClusterForMinIOServer(minIOServer_id) {
         db.release();
         return {
             success: true,
-            message: result
+            message: result.length > 0 ? result[0] : result
         };
     } catch (error) {
         console.error(error);
