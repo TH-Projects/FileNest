@@ -4,16 +4,6 @@ const axios = require('axios');
 
 const CHUNK_SIZE = 1024 * 1024;
 
-// Utility function to format file size
-function formatBytes(bytes) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const size = Math.ceil(bytes / Math.pow(k, i));
-    return size + " " + sizes[i];
-}
-
 async function upload(fastify, options) {
     const { fs, stream } = options;
     fastify.post('/upload', async (request, reply) => {
@@ -90,12 +80,11 @@ async function upload(fastify, options) {
             const lastDotIndex = fileName.lastIndexOf('.');
             const metadata = {
                 name: lastDotIndex !== -1 ? fileName.substring(0, lastDotIndex) : fileName, // Name without extension
-                extension: lastDotIndex !== -1 ? fileName.substring(lastDotIndex + 1) : "",
+                file_type: lastDotIndex !== -1 ? fileName.substring(lastDotIndex + 1) : "",
                 type: data.mimetype,
-                trueSize: fileSize,
-                formatedSize: formatBytes(fileSize),
-                lastModified: new Date().toISOString(), // ISO-8601 format for the current time
-                owner: user.username || null,
+                size: fileSize,
+                last_modify: new Date().toISOString(), // ISO-8601 format for the current time
+                username: user.username || null,
             };            
 
 
@@ -115,9 +104,9 @@ async function upload(fastify, options) {
             const insertResponse = await axios.post('http://nginx/addFile', {
                 etag: etag.etag,
                 name: metadata.name,
-                file_type: metadata.extension,
-                size: metadata.trueSize,
-                last_modify: metadata.lastModified,
+                file_type: metadata.file_type,
+                size: metadata.size,
+                last_modify: metadata.last_modify,
                 owner_id: owner_id,
                 minIOServer: 2, // set to 2 because function for getting minio server is not implemented
                 content_type: metadata.type

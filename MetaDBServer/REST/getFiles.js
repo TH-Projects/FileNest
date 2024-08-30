@@ -6,7 +6,7 @@ async function getFiles(fastify) {
         if(!result.success){
             return reply.code(500).send(result);
         }
-        return reply.send(result);
+        return reply.code(200).send(result);
     });
 }
 

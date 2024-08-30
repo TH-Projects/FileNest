@@ -28,7 +28,7 @@ const useFileUpload = (uploadUrl, handleCloseModal) => {
       if (file.size >= maxFileSize) {
         setResultMessage(
           <h5 className="text-danger fs-6 mt-2 mb-2">
-            Filesize too big. Size:  {formatBytes(maxFileSize)}
+            Filesize too big. Size has to be smaller than:  {formatBytes(maxFileSize)}
           </h5>
         );
         handleCloseModal();

@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+import axios from 'axios';
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import { useState, useEffect, useCallback } from "react";
 import MultiSelect from "../components/multi-select";
@@ -6,20 +6,18 @@ import FileView from "../components/view-file";
 import FileUpload from "../components/upload-file";
 import { useAuth } from "../contextes/auth-context";
 import useFileUpload from "../hooks/usefileupload";
-import testData from "../testdata.json";
 import "../style/cards.css";
 
 const FileTable = () => {
   // State Initialization
-  const { user } = useAuth(); // Get the user from context
+  const { user } = useAuth();
   const [queryData, setQueryData] = useState([]);
   const [fileMetaData, setFileMetaData] = useState([]);
   const [filenameOptions, setFilenameOptions] = useState([]);
   const [fileExtensionOptions, setFileExtensionOptions] = useState([]);
   const [fileOwnerOptions, setFileOwnerOptions] = useState([]);
   const [selectedFilenameOptions, setSelectedFilenameOptions] = useState([]);
-  const [selectedFileExtensionOptions, setSelectedFileExtensionOptions] =
-    useState([]);
+  const [selectedFileExtensionOptions, setSelectedFileExtensionOptions] = useState([]);
   const [selectedFileOwnerOptions, setSelectedFileOwnerOptions] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
@@ -27,8 +25,7 @@ const FileTable = () => {
   const handleCloseModal = () => setShowUploadModal(false);
   const handleShowModal = () => setShowUploadModal(true);
   const handleNameSelect = (vData) => setSelectedFilenameOptions(vData || []);
-  const handleExtensionSelect = (vData) =>
-    setSelectedFileExtensionOptions(vData || []);
+  const handleExtensionSelect = (vData) => setSelectedFileExtensionOptions(vData || []);
   const handleOwnerSelect = (vData) => setSelectedFileOwnerOptions(vData || []);
 
   // Rendering file views
@@ -40,16 +37,14 @@ const FileTable = () => {
 
   // Custom Hook for File Upload
   const uploadUrl = "http://localhost/upload";
-  const { handleFileChange, handleUpload, resultMessage } = useFileUpload(
-    uploadUrl,
-    handleCloseModal
-  );
+  const { handleFileChange, handleUpload, resultMessage } = useFileUpload(uploadUrl, handleCloseModal);
 
   // Handler for actual file upload to prevent multiple uploads or page reloads
   const handleFileUpload = async () => {
     if (user) {
       const metadata = await handleUpload();      
       if (metadata.metadata) {
+        console.log(metadata.metadata);
         setQueryData((prevData) => [...prevData, metadata.metadata]);
       }
     } else {
@@ -82,12 +77,12 @@ const FileTable = () => {
           : generateSelectOptions(data, "name");
       const uniqueFileExtensions =
         selectedFileExtensionOptions.length > 0
-          ? generateSelectOptions(queryData, "extension")
-          : generateSelectOptions(data, "extension");
+          ? generateSelectOptions(queryData, "file_type")
+          : generateSelectOptions(data, "file_type");
       const uniqueFileOwners =
         selectedFileOwnerOptions.length > 0
-          ? generateSelectOptions(queryData, "owner")
-          : generateSelectOptions(data, "owner");
+          ? generateSelectOptions(queryData, "username")
+          : generateSelectOptions(data, "username");
 
       setFilenameOptions(uniqueFilenames);
       setFileExtensionOptions(uniqueFileExtensions);
@@ -104,9 +99,28 @@ const FileTable = () => {
 
   // Data fetching and setting initial state
   useEffect(() => {
-    // Currently hardcoded from file
-    // Needs to be replaced by db call later
-    setQueryData(testData);
+    const fetchFiles = async () => {
+      try {
+        const response = await axios.get('http://localhost/getFiles');           
+        const files = response.data.message;             
+        
+        if (response.status === 200) {
+          setQueryData(files);  // Assuming the response contains a `files` array
+        } else {
+          console.error('Failed to fetch files');
+        }
+      } catch (error) {
+        if (error.response) {
+          console.error(`Error: ${error.response.data.message || 'An error occurred while fetching files'}`);
+        } else if (error.request) {
+          console.error('Error: No response received from the server');
+        } else {
+          console.error('Error: An unexpected error occurred');
+        }
+      }
+    };
+
+    fetchFiles();
   }, []);
 
   // Update options for filters based on data
@@ -124,23 +138,17 @@ const FileTable = () => {
     let filteredData = queryData;
     if (selectedFilenameOptions.length > 0) {
       filteredData = filteredData.filter((file) =>
-        selectedFilenameOptions
-          .map((option) => option.value)
-          .includes(file.name)
+        selectedFilenameOptions.map((option) => option.value).includes(file.name)
       );
     }
     if (selectedFileExtensionOptions.length > 0) {
       filteredData = filteredData.filter((file) =>
-        selectedFileExtensionOptions
-          .map((option) => option.value)
-          .includes(file.extension)
+        selectedFileExtensionOptions.map((option) => option.value).includes(file.file_type)
       );
     }
     if (selectedFileOwnerOptions.length > 0) {
       filteredData = filteredData.filter((file) =>
-        selectedFileOwnerOptions
-          .map((option) => option.value)
-          .includes(file.owner)
+        selectedFileOwnerOptions.map((option) => option.value).includes(file.username)
       );
     }
     setStatesForSelectOptionsFromBaseData(filteredData);
@@ -189,7 +197,7 @@ const FileTable = () => {
             variant="success"
             className="btn-md square-button"
             onClick={handleShowModal}
-            disabled={!user} // Disable the button if the user is not logged in
+            disabled={!user}
           >
             +
           </Button>
@@ -197,14 +205,14 @@ const FileTable = () => {
             show={showUploadModal}
             handleClose={handleCloseModal}
             handleFileChange={handleFileChange}
-            handleUpload={handleFileUpload} // Call the handler for actual upload
+            handleUpload={handleFileUpload}
           />
         </Col>
       </Row>
       <Row className="justify-content-center">
         <Col md={4}></Col>
         <Col md={4} className="d-flex justify-content-center align-items-center">
-          {resultMessage ? resultMessage : "No"}
+          {resultMessage}
         </Col>
         <Col md={4}></Col>
       </Row>
