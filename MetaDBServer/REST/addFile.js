@@ -7,7 +7,7 @@ async function addFile(fastify) {
         const name = data?.name
         const file_type = data?.file_type
         const size = data?.size
-        const last_modify = data?.last_modify
+        const last_modify = new Date(data?.last_modify).toISOString().slice(0, 19).replace('T', ' ');
         const owner_id = data?.owner_id
         const minIOServer = data?.minIOServer;
         const content_type = data?.content_type;

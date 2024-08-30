@@ -5,7 +5,7 @@ async function getFiles() {
     try {
         const db = await connection.getConnection();
         const result = await db.query(
-            'SELECT f.file_id, f.name, f.file_type, f.size, f.last_modify, f.owner_id, a.username ' +
+            'SELECT f.file_id, f.name, f.file_type, f.size, f.last_modify, f.content_type, a.username ' +
             'FROM File f ' +
             'JOIN Account a ON f.owner_id = a.account_id');
         db.release();
@@ -91,17 +91,19 @@ async function deleteFile(file_id) {
 
 async function addFile(etag, name, file_type, size, last_modify, owner_id, minIOServer, content_type) {
     try {
-        const minIOServerDB = minIOServerReference.getClusterForMinIOServer(minIOServer);
+        console.log('hsadklfghasjklfgbhjsagfjasgbhjfhglaks' + etag, name, file_type, size, last_modify, owner_id, minIOServer, content_type);
+        const minIOServerDB = await minIOServerReference.getClusterForMinIOServer(minIOServer);
         if (!minIOServerDB.success){
             return {
                 success: false,
                 message: minIOServerDB.message
             };
         }
+        console.log('aaaaaaaaaaaaaaaaaaa '+ JSON.stringify(minIOServerDB));
         const db = await connection.getConnection();
         const result = await db.query(
             'INSERT INTO File (etag, name, file_type, size, last_modify, owner_id, cluster_location_id, content_type) ' +
-            'VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [etag, name, file_type, size, last_modify, owner_id, minIOServerDB.cluster_location_id ,content_type]);// Replacement needed for cluster_location_id
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [etag, name, file_type, size, last_modify, owner_id, minIOServerDB.message.cluster_id ,content_type]);// Replacement needed for cluster_location_id
         db.release();
         return {
             success: true,

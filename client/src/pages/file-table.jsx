@@ -49,7 +49,7 @@ const FileTable = () => {
   const handleFileUpload = async () => {
     if (user) {
       const metadata = await handleUpload();      
-      if (metadata) {
+      if (metadata.metadata) {
         setQueryData((prevData) => [...prevData, metadata.metadata]);
       }
     } else {

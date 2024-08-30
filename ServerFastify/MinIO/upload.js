@@ -54,9 +54,9 @@ async function upload(fastify, options) {
             fastify.log.info('#############UPLOAD FILE TO MINIO#############');
             // Check if the bucket exists, if not create it            
             const bucketName = user.username.toLowerCase();
-            const exists = await minioClient.bucketExists(bucketName);
+            const exists = await minioClient.minioClient.bucketExists(bucketName);
             if (!exists) {
-                await minioClient.makeBucket(bucketName);
+                await minioClient.minioClient.makeBucket(bucketName);
             }
 
             const fileSize = data.data?.length; // Safely access data.length
@@ -70,7 +70,7 @@ async function upload(fastify, options) {
 
             // MinIO upload promise
             const uploadPromise = new Promise((resolve, reject) => {
-                minioClient.putObject(bucketName, fileName, uploadStream, fileSize, (err, etag) => {
+                minioClient.minioClient.putObject(bucketName, fileName, uploadStream, fileSize, (err, etag) => {
                     if (err) {
                         reject(err);
                     } else {
@@ -123,7 +123,8 @@ async function upload(fastify, options) {
                 size: metadata.trueSize,
                 last_modify: metadata.lastModified,
                 owner_id: owner_id,
-                minIOServer: serverUrl
+                minIOServer: 2,
+                content_type: metadata.type
             }, {
                 headers: {
                     'Content-Type': 'application/json'
