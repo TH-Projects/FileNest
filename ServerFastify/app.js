@@ -24,6 +24,7 @@ fastify.register(require('./MinIO/upload'),{
     fs: fs,
     stream: stream
 });
+fastify.register(require('./MinIO/delete'));
 fastify.register(require('./MinIO/download'));
 fastify.register(require('./MinIO/listObjects'));
 fastify.register(require('./User/checkAndCreateUser'));

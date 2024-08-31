@@ -1,6 +1,7 @@
 const minioClient = require('./MinIOClient');
 const { pipeline } = require('stream'); // Import the stream module
 const axios = require('axios');
+const { log } = require('console');
 
 const CHUNK_SIZE = 1024 * 1024;
 
@@ -100,6 +101,7 @@ async function upload(fastify, options) {
             // Create metadata object
             const lastDotIndex = fileName.lastIndexOf('.');
             const metadata = {
+                file_id: 0,
                 name: lastDotIndex !== -1 ? fileName.substring(0, lastDotIndex) : fileName, // Name without extension
                 file_type: lastDotIndex !== -1 ? fileName.substring(lastDotIndex + 1) : "",
                 type: data.mimetype,
@@ -134,6 +136,9 @@ async function upload(fastify, options) {
                     'Content-Type': 'application/json'
                 }
             });
+                       
+            // Set the file_id in the metadata object
+            metadata.file_id = await insertResponse.data.message;
 
             if (insertResponse.status !== 200) {
                 return reply.code(insertResponse.status).send({
@@ -141,7 +146,9 @@ async function upload(fastify, options) {
                     message: insertResponse.error || 'Error inserting metadata into the database'
                 });
             }
-
+            
+            console.log('File uploaded:', metadata);
+            
             return reply.status(200).send({
                 success: true,
                 etag,

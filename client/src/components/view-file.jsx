@@ -1,14 +1,14 @@
 /* eslint-disable react/prop-types */
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useAuth } from "../contextes/auth-context";
-
+import axios from "axios";
 import { saveAs } from 'file-saver';
 import "../style/cards.css";
 
 // Utility function to format a timestamp
 const formatTimestamp = (timestamp) => {
   const date = new Date(timestamp);
-  return date.toLocaleString('de-DE', {
+  return date.toLocaleString('en-US', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -29,27 +29,75 @@ function formatBytes(bytes) {
   return size + " " + sizes[i];
 }
 
-const FileView = ({ file_meta_data }) => {
+const FileView = ({ file_meta_data, onDelete }) => {  
   const { user } = useAuth();
 
   const handleDownload = async (filename) => {
     try {
-      const response = await fetch(`http://localhost:3000/download/${filename}`, {
-        method: 'GET',
+      const response = await axios.get(`http://localhost/download/${filename}`, {
+        responseType: 'blob', // Important for file download
+      });
+
+      saveAs(response.data, filename); // Use the dynamic file name
+    } catch (error) {
+      console.error('Error downloading the file:', error);
+      const resultMsg =        
+        <h5 className="text-danger fs-6 mt-2 mb-2">
+          Error downloading the file: {error.message}
+        </h5>
+      ;
+      console.log(resultMsg);
+    }
+  };
+
+  const handleDelete = async (fileId) => {
+    if (!window.confirm('Are you sure you want to delete this file?')) {
+      return;
+    }
+
+    if(!fileId || !user) {
+      const resultMsg =
+        <h5 className="text-danger fs-6 mt-2 mb-2">
+          Missing required parameters
+        </h5>
+      if (onDelete) onDelete(resultMsg);
+      return;
+    }
+    
+    try {
+      const response = await axios.delete('http://localhost/delete', {
         headers: {
-          'Accept': 'application/octet-stream',
+          'Content-Type': 'application/json',
+        },
+        data: {
+          file_id: fileId,
+          username: user.username,
+          password: user.password,
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+      if (response.data.success) {
+        const resultMsg = 
+          <h5 className="text-success fs-6 mt-2 mb-2">
+            File deleted successfully
+          </h5>
+        if (onDelete) onDelete(resultMsg);
+      } else {        
+        const resultMsg = 
+          <h5 className="text-danger fs-6 mt-2 mb-2">
+            File deletion failed: {response.data.message || 'Unknown error'}
+          </h5>
+        if (onDelete) onDelete(resultMsg);
       }
-
-      const blob = await response.blob();
-      saveAs(blob, filename); // Use the dynamic file name
+      
     } catch (error) {
-      console.error('Error downloading the file:', error);
-      alert('Fehler beim Herunterladen der Datei');
+      console.error('Error deleting the file:', error);
+      const resultMsg = 
+        <h5 className="text-danger fs-6 mt-2 mb-2">
+          Error while deleting the file: <br/>
+          {error.response.data.message}
+        </h5>;
+      if (onDelete) onDelete(resultMsg);
     }
   };
 
@@ -71,7 +119,12 @@ const FileView = ({ file_meta_data }) => {
           >
             Download
           </Button>
-          <Button variant="danger" className="w-40" disabled={!user}>
+          <Button
+            variant="danger"
+            className="w-40"
+            disabled={!user}
+            onClick={() => handleDelete(file_meta_data.file_id)}
+          >
             Delete
           </Button>
         </Col>

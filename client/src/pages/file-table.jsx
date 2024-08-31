@@ -27,13 +27,6 @@ const FileTable = () => {
   const handleExtensionSelect = (vData) => setSelectedFileExtensionOptions(vData || []);
   const handleOwnerSelect = (vData) => setSelectedFileOwnerOptions(vData || []);
 
-  // Rendering file views
-  const renderFileViews = (data) => {
-    return data.map((file, index) => (
-      <FileView key={index} file_meta_data={file} />
-    ));
-  };
-
   // Custom Hook for File Upload
   const uploadUrl = "http://localhost/upload";
   const { handleFileChange, handleUpload, resultMsg } = useFileUpload(uploadUrl, handleCloseModal);
@@ -44,12 +37,32 @@ const FileTable = () => {
     }
   }, [resultMsg]);
 
+  // Fetch file metadata from the database server
+  const fetchFiles = async () => {
+    try {
+      const response = await axios.get('http://localhost/getFiles');
+      const files = response.data.message;
+      
+      if (response.status === 200) {
+          setQueryData(files);
+      } else {
+        console.error('Failed to fetch files');
+      }
+    } catch (error) {
+      if (error.response) {
+        console.error(`Error: ${error.response.data.message || 'An error occurred while fetching files'}`);
+      } else if (error.request) {
+        console.error('Error: No response received from the server');
+      } else {
+        console.error('Error: An unexpected error occurred');
+      }
+    }
+  };
+
   const handleFileUpload = async () => {
     if (user) {
       const { success, message, metadata } = await handleUpload();
-
-      if (success) {
-        console.log(metadata);
+      if (success) {        
         setQueryData((prevData) => [...prevData, metadata]);
       } else {
         setResultMessage(message);
@@ -57,6 +70,11 @@ const FileTable = () => {
     } else {
       console.error("User not logged in");
     }
+  };
+
+  const handleFileDelete = (response) => {    
+    setResultMessage(response);
+    fetchFiles(); // Refresh the file list
   };
 
   const generateSelectOptions = useCallback((data, key) => {
@@ -103,27 +121,6 @@ const FileTable = () => {
   );
 
   useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const response = await axios.get('http://localhost/getFiles');
-        const files = response.data.message;
-
-        if (response.status === 200) {
-          setQueryData(files);
-        } else {
-          console.error('Failed to fetch files');
-        }
-      } catch (error) {
-        if (error.response) {
-          console.error(`Error: ${error.response.data.message || 'An error occurred while fetching files'}`);
-        } else if (error.request) {
-          console.error('Error: No response received from the server');
-        } else {
-          console.error('Error: An unexpected error occurred');
-        }
-      }
-    };
-
     fetchFiles();
   }, []);
 
@@ -162,6 +159,12 @@ const FileTable = () => {
     queryData,
     setStatesForSelectOptionsFromBaseData,
   ]);
+
+  const renderFileViews = (data) => {
+    return data.map((file, index) => (
+      <FileView key={index} file_meta_data={file} onDelete={handleFileDelete} />
+    ));
+  };
 
   return (
     <Container fluid style={{ marginTop: '30px', marginBottom: '30px' }}>
@@ -233,13 +236,14 @@ const FileTable = () => {
                 </Row>
               </Container>
             </Card.Header>
-            <Card.Body>{renderFileViews(fileMetaData)}</Card.Body>
+            <Card.Body>
+              {renderFileViews(fileMetaData)}
+            </Card.Body>
           </Card>
         </Col>
       </Row>
     </Container>
   );
 };
-
 
 export default FileTable;
