@@ -19,6 +19,16 @@ const formatTimestamp = (timestamp) => {
   }).replace(',', '');
 };
 
+// Utility function to format file size
+function formatBytes(bytes) {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const size = Math.ceil(bytes / Math.pow(k, i));
+  return size + " " + sizes[i];
+}
+
 const FileView = ({ file_meta_data }) => {
   const { user } = useAuth();
 
@@ -48,10 +58,10 @@ const FileView = ({ file_meta_data }) => {
     <Container fluid>
       <Row className="table-row align-items-center r-h-3">
         <Col md={4}>{file_meta_data.name}</Col>
-        <Col md={1}>{file_meta_data.extension}</Col>
-        <Col md={1}>{file_meta_data.formatedSize}</Col>
-        <Col md={2}>{file_meta_data.owner}</Col>
-        <Col md={2}>{formatTimestamp(file_meta_data.lastModified)}</Col>
+        <Col md={1}>{file_meta_data.file_type}</Col>
+        <Col md={1}>{formatBytes(file_meta_data.size)}</Col>
+        <Col md={2}>{file_meta_data.username}</Col>
+        <Col md={2}>{formatTimestamp(file_meta_data.last_modify)}</Col>
         <Col md={2} className="d-flex justify-content-end">
           <Button
             variant="success"

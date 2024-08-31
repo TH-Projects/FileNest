@@ -9,12 +9,36 @@ async function getFiles() {
             'FROM File f ' +
             'JOIN Account a ON f.owner_id = a.account_id');
         db.release();
-        console.log(JSON.stringify(result));
         return {
             success: true,
             message: result
         };
     } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            message: error
+        };
+    }
+}
+
+async function getFilenamesForUsername(username){
+    try {
+        const db = await connection.getConnection();
+        let result = await db.query(
+            'SELECT f.name, a.username ' +
+            'FROM File f ' +
+            'JOIN Account a ON f.owner_id = a.account_id ' +
+            'WHERE a.username = ?', [username]);
+        db.release();        
+        if(result.length > 0){
+            result = result;
+        }
+        return {
+            success: true,
+            message: result
+        };
+    } catch (error){
         console.error(error);
         return {
             success: false,
@@ -99,7 +123,6 @@ async function addFile(etag, name, file_type, size, last_modify, owner_id, minIO
                 message: minIOServerDB.message
             };
         }
-        console.log('aaaaaaaaaaaaaaaaaaa '+ JSON.stringify(minIOServerDB));
         const db = await connection.getConnection();
         const result = await db.query(
             'INSERT INTO File (etag, name, file_type, size, last_modify, owner_id, cluster_location_id, content_type) ' +
@@ -124,5 +147,6 @@ module.exports = {
     getFile,
     getClusterForFile,
     deleteFile,
-    addFile
+    addFile,
+    getFilenamesForUsername
 };
