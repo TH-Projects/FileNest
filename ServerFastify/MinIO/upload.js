@@ -5,16 +5,6 @@ require('dotenv').config();
 
 const CHUNK_SIZE = 1024 * 1024;
 
-// Utility function to format file size
-function formatBytes(bytes) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const size = Math.ceil(bytes / Math.pow(k, i));
-    return size + " " + sizes[i];
-}
-
 async function upload(fastify, options) {
     const { fs, stream } = options;
     fastify.post('/upload', async (request, reply) => {
@@ -27,8 +17,6 @@ async function upload(fastify, options) {
                 throw new Error('File data is missing or malformed');
             }
 
-
-            fastify.log.info('#############AUTHENTICATE USER#############');
             // Authenticate the user
             const authResponse = await axios.post('http://nginx/authUser', {
                 username: user.username,
@@ -53,11 +41,36 @@ async function upload(fastify, options) {
             }
             console.log('Minio Server: ', minIOResponse.data.message);
             const minIO = minioClient.getMinIOClient(minIOResponse.data.message[0].address);
+            // Check if filename has already been used by the user
+            const filenameResponse = await axios.get('http://nginx/getFilenamesForUsername', {
+                params: {
+                    username: user.username
+                },
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            let isDuplicate = false;
+            filenameResponse.data.message.forEach(file => {
+                const lastDotIndex = data.filename.lastIndexOf('.');
+                const dataFilename = lastDotIndex === -1 ? data.filename : data.filename.substring(0, lastDotIndex);
+                
+                if(file.name === dataFilename){
+                    isDuplicate = true;
+                }
+            });
 
-            //TODO: Check if filename has already been used by the user
-
-
-            fastify.log.info('#############UPLOAD FILE TO MINIO#############');
+            if(isDuplicate){
+                fastify.log.error('Filename already exists');
+                return reply.code(400).send({
+                    success: false,
+                    message: 'Filename already exists'
+                });
+            }else{
+                fastify.log.info('Filename is available');
+            }
+            
             // Check if the bucket exists, if not create it            
             const bucketName = user.username.toLowerCase();
             const exists = await minIO.bucketExists(bucketName);
@@ -91,24 +104,18 @@ async function upload(fastify, options) {
 
             // Wait for the upload to complete
             const etag = await uploadPromise;
-
-            
-            fastify.log.info('#############CREATE METADATA OBJECT#############');
+         
             // Create metadata object
             const lastDotIndex = fileName.lastIndexOf('.');
             const metadata = {
                 name: lastDotIndex !== -1 ? fileName.substring(0, lastDotIndex) : fileName, // Name without extension
-                extension: lastDotIndex !== -1 ? fileName.substring(lastDotIndex + 1) : "",
+                file_type: lastDotIndex !== -1 ? fileName.substring(lastDotIndex + 1) : "",
                 type: data.mimetype,
-                trueSize: fileSize,
-                formatedSize: formatBytes(fileSize),
-                lastModified: new Date().toISOString(), // ISO-8601 format for the current time
-                owner: user.username || null,
-                minIOServer: minIOResponse.data.message[0].minIOServer_id
+                size: fileSize,
+                last_modify: new Date().toISOString(), // ISO-8601 format for the current time
+                username: user.username || null,
             };            
 
-
-            fastify.log.info('#############INSERT METADATA INTO DATABASE#############');
             // Get Account ID from the database
             const accountResponse = await axios.get('http://nginx/getAccountIdByUsername', {
                 params: {
@@ -124,11 +131,11 @@ async function upload(fastify, options) {
             const insertResponse = await axios.post('http://nginx/addFile', {
                 etag: etag.etag,
                 name: metadata.name,
-                file_type: metadata.extension,
-                size: metadata.trueSize,
-                last_modify: metadata.lastModified,
+                file_type: metadata.file_type,
+                size: metadata.size,
+                last_modify: metadata.last_modify,
                 owner_id: owner_id,
-                minIOServer: metadata.minIOServer,
+                minIOServer: minIOResponse.data.message[0].minIOServer_id,
                 content_type: metadata.type
             }, {
                 headers: {

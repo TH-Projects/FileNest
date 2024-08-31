@@ -27,15 +27,13 @@ const LoginPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Login erfolgreich
+        // Login successful
         login({ username, password: hashedPassword }); // Set logged-in user in context
         navigate('/'); // Navigate to Dashboard
       } else {
-        // Fehlerbehandlung
         setError(data.message || 'Login failed');
       }
     } catch (error) {
-      console.error('An error occurred:', error);
       setError('An unexpected error occurred. Please try again later.');
     }
   };
