@@ -6,7 +6,6 @@ const enums = require('./enums');
 
 async function buildUpConnection(fastify) {
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-    console.log('Sending: ' + 'ws://' + os.hostname() + ':' + process.env.PORT_BROKER);
     let success = false;
     let tries = 0;
     while(!success && tries < 15){

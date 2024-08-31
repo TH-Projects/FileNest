@@ -25,7 +25,6 @@ function connectionIn (fastify){
             let jsonMessage;
             if(Buffer.isBuffer(message)){
                 jsonMessage = JSON.parse(message.toString());
-                console.log('Buffer message: ' + JSON.stringify(jsonMessage));
             }
             else{
                 jsonMessage = JSON.parse(message);
@@ -36,7 +35,6 @@ function connectionIn (fastify){
                 for(let connection of broker){
                     if(!connectionStorage.connectionStorage.find(entry => entry.ws.clientAddress === connection.client)
                         && (new URL(connection.client))?.hostname !== os.hostname()){
-                        console.log('New broker connection: ' + connection.client);
                         connectionOut(fastify, connection.client, connection.type);
                     }
                 }

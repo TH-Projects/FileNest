@@ -12,8 +12,6 @@ function syncConnectionsWithBrokers(fastify, connectionStorage, clients, syncOpe
         type: enums.connectionTypes.BROKER
     });
     const brokers = connectionStorage.getConnectionsByType(enums.connectionTypes.BROKER);
-    console.log('Syncing connections with brokers: ' + JSON.stringify(clients));
-    console.log('ToBuffer: ' + Buffer.from(JSON.stringify(clients)).toString());
     for (let broker of brokers) {
         sendMessage(
             fastify,

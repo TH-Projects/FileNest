@@ -10,7 +10,6 @@ const connectionStorage = require("./connectionStorage");
 // Connections to other instances
 function connectionOut(fastify, url, type = enums.connectionTypes.BROKER) {
     if((new URL(url))?.hostname === os.hostname()){
-        console.log('Url: ' + url + ' Hostname: ' + os.hostname());
         return;
     }
     const ws = new WebSocket(url);
@@ -29,7 +28,6 @@ function connectionOut(fastify, url, type = enums.connectionTypes.BROKER) {
         let jsonMessage;
         if(Buffer.isBuffer(message)){
             jsonMessage = JSON.parse(message.toString());
-            console.log('Buffer message: ' + JSON.stringify(jsonMessage));
         }
         else{
             jsonMessage = JSON.parse(message);
@@ -40,7 +38,6 @@ function connectionOut(fastify, url, type = enums.connectionTypes.BROKER) {
             for(let connection of broker){
                 if(!connectionStorage.connectionStorage.find(entry => entry.ws.clientAddress === connection.client)
                     && (new URL(connection.client))?.hostname !== os.hostname()){
-                    console.log('New broker connection: ' + connection.client);
                     connectionOut(fastify, connection.client, connection.type);
                 }
             }
