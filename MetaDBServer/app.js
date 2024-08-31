@@ -23,6 +23,8 @@ fastify.register(require('./REST/addFile'));
 fastify.register(require('./REST/checkUserExistance'));
 fastify.register(require('./REST/getFile'));
 fastify.register(require('./REST/getAccountIdByUsername'));
+fastify.register(require('./REST/getMinIOServerForUpload'));
+fastify.register(require('./REST/getFilenamesForUsername'));
 
 // Server starten
 const start = async () => {
