@@ -7,7 +7,7 @@ async function buildUpConnection() {
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     let connection = false;
     while (!connection) {
-        await sleep(500);
+        await sleep(1000);
         connection = await connectionCall();
     }
     console.log('Connection established');

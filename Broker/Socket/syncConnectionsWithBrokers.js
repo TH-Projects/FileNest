@@ -7,10 +7,15 @@ function syncConnectionsWithBrokers(fastify, connectionStorage, clients, syncOpe
     if(!clients || clients.length === 0){
         return;
     }
-    clients.push({
-        client: 'ws://' + os.hostname() + ':' + process.env.PORT_BROKER,
-        type: enums.connectionTypes.BROKER
-    });
+    if(!Array.isArray(clients)){
+        clients = [clients];
+    }
+    if(!clients.find(client => client === 'ws://' + os.hostname() + ':' + process.env.PORT_BROKER)){
+        clients.push({
+            client: 'ws://' + os.hostname() + ':' + process.env.PORT_BROKER,
+            type: enums.connectionTypes.BROKER
+        });
+    }
     const brokers = connectionStorage.getConnectionsByType(enums.connectionTypes.BROKER);
     for (let broker of brokers) {
         sendMessage(

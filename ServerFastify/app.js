@@ -37,6 +37,8 @@ fastify.setNotFoundHandler((request, reply) => {
 // Server starten
 const start = async () => {
     try {
+        connectionIn(fastify);
+        await buildUpConnection();
         await fastify.listen({ port: 3000, host: '0.0.0.0' });
     } catch (err) {
         fastify.log.error(err);
@@ -44,6 +46,5 @@ const start = async () => {
     }
 };
 start();
-connectionIn(fastify);
-buildUpConnection();
+
 module.exports = fastify;

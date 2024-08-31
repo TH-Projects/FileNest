@@ -20,11 +20,10 @@ function connectionOut(fastify, url, type = enums.connectionTypes.BROKER) {
     connectionStorage.addConnection(ws, type);
     console.log('ConnOut ' + url);
     ws.on('open', () => {
-        open(fastify, ws, type);
+        open(fastify, ws, type, true);
     });
 
     ws.on('message', (message) => {
-        console.log('Received message: ' + JSON.stringify(message));
         let jsonMessage;
         if(Buffer.isBuffer(message)){
             jsonMessage = JSON.parse(message.toString());

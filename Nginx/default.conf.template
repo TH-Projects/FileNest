@@ -1,13 +1,5 @@
-upstream serverfastify{
-    server ${URL_SERVERFASTIFY1}:${PORT_SERVERFASTIFY};
-}
-
 upstream reactapp{
     server ${URL_REACTAPP}:${PORT_REACTAPP};
-}
-
-upstream servermetadb{
-    server ${URL_SERVERMETADB1}:${PORT_SERVERMETADB};
 }
 
 server {
