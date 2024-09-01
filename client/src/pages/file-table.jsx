@@ -38,7 +38,7 @@ const FileTable = () => {
   };
 
   // Reports the response of the file delete to the user
-  const handleFileDelete = (response) => {    
+  const handleFileDelete = (response) => {
     setResultMessage(response);
     fetchFiles(); // Refresh the file list shown in the table
     setTimeout(() => setResultMessage(null), 10000);  // Reset resultMessage after 10 seconds

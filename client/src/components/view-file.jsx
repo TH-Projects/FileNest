@@ -21,7 +21,7 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
       if (onDownload) onDownload(createResultMessage(true, 'File downloaded successfully'));
       saveAs(response.data, `${name}.${file_type}`);
     } catch (error) {      
-      if (onDownload) onDownload(createResultMessage(false, `Error downloading the file: ${error.message}`));
+      if (onDownload) onDownload(createResultMessage(false, error.response.data.message));
     }
   };
 
@@ -40,11 +40,12 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
       });
 
       const isSuccess = response.data.success;
-      const message = isSuccess ? 'File deleted successfully' : `File deletion failed: ${response.data.message || 'Unknown error'}`;
+      const message = isSuccess ? 'File deleted successfully' : `File deletion failed: Unknown error}`;
+
       if (onDelete) onDelete(createResultMessage(isSuccess, message));
     } catch (error) {
-      console.error('Error deleting the file:', error);
-      if (onDelete) onDelete(createResultMessage(false, `Error while deleting the file: ${error.message}`));
+      console.error('Error deleting the file:', error); 
+      if (onDelete) onDelete(createResultMessage(false, error.response.data.message));
     }
   };
 
