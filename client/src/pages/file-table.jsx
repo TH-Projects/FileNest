@@ -137,7 +137,6 @@ const FileTable = () => {
     ]
   );
 
-  
   // Update the file metadata and select options when the query data changes
   useEffect(() => {
     if (!queryData) return;

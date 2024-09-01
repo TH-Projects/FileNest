@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-// FileView.js
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useAuth } from "../contextes/auth-context";
 import axios from "axios";
