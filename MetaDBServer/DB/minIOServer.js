@@ -2,6 +2,7 @@ const connection = require('./connection');
 
 async function getMinIOServerForUpload(){
     try {
+        let minIOServer;
         const db = await connection.getConnection();
         const result = await db.query(
             'SELECT cluster_id ' +
@@ -10,7 +11,22 @@ async function getMinIOServerForUpload(){
         );
         db.release();
         if(result.length > 0){
-            return await getMinIOServerByCluster(result[0].cluster_id);
+            for(const cluster of result){
+                minIOServer = await getMinIOServerByCluster(cluster.cluster_id);
+                if(!minIOServer.success){
+                    console.log('failed to get minIOServer');
+                    continue;
+                }
+                console.log(JSON.stringify(minIOServer));
+                minIOServer = minIOServer.message.filter(server => !server.connection_failure_datetime);
+                if(minIOServer.length > 0){
+                    return {
+                        success: true,
+                        message: minIOServer
+                    };
+                }
+            }
+
         }
         return {
             success: false,
@@ -90,9 +106,32 @@ async function getClusterForMinIOServer(minIOServer_id) {
     }
 }
 
+async function markNonReachableServer(minIOServer_id){
+    try {
+        const db = await connection.getConnection();
+        const [result] = await db.query(
+            'UPDATE MinIOServer ' +
+            'SET connection_failure_datetime = CURRENT_TIMESTAMP ' +
+            'WHERE minIOServer_id = ?', [minIOServer_id]
+        );
+        db.release();
+        return {
+            success: true,
+            message: result.affectedRows > 0 ? "Server marked as non-reachable" : "Server not found"
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            message: error
+        };
+    }
+}
+
 module.exports = {
     addMinIOServer,
     getMinIOServerByCluster,
     getClusterForMinIOServer,
-    getMinIOServerForUpload
+    getMinIOServerForUpload,
+    markNonReachableServer
 }

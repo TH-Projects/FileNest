@@ -2,6 +2,7 @@ const enums = require('./enums');
 const user = require('../DB/user');
 const file = require('../DB/files');
 const cluster = require('../DB/cluster');
+const minIOServer = require('../DB/minIOServer');
 
 async function receiveMessage(fastify, message){
     console.log('Received message: ' + message);
@@ -32,6 +33,10 @@ async function handleMessage(message){
         case enums.operations.ADDCLUSTER:
             console.log('Add Cluster');
             await addCluster(message.data.start_node_id, message.data.end_node_id);
+            break;
+        case enums.operations.MARK_NON_REACHABLE_SERVER:
+            console.log('Mark Non Reachable Server');
+            await markNonReachableServer(message.data.minIOServer_id);
             break;
         default:
             console.log('Unknown operation: ' + message.operation);
@@ -121,6 +126,14 @@ async function addCluster(start_node_id, end_node_id){
         return;
     }
     return await cluster.addCluster(start_node_id, end_node_id);
+}
+
+async function markNonReachableServer(minIOServer_id){
+    if(!minIOServer_id) {
+        console.log('No minIOServer provided');
+        return;
+    }
+    return await minIOServer.markNonReachableServer(minIOServer_id);
 }
 
 module.exports = receiveMessage;

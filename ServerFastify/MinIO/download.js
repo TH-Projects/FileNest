@@ -1,6 +1,7 @@
 const minioClient = require('./MinIOClient');
 const axios = require("axios");
 require('dotenv').config();
+const {clientTypes, operationTypes} = require('./enums');
 
 async function download (fastify) {
     fastify.get('/download', async (request, reply) => {
@@ -29,7 +30,7 @@ async function download (fastify) {
             }
             catch (error){
                 console.log(error);
-                //TODO: in DB als fehlgeschlagen markieren
+                await markNonReachableServer(minIOServer);
             }
         }
         return reply.code(500).send('No MinIO Server available');
@@ -73,6 +74,23 @@ async function getMinIOServer(cluster_location_id){
     } catch (error){
         console.log(error);
         return undefined;
+    }
+}
+
+async function markNonReachableServer(minIOServer){
+    try {
+        const data = {
+            type: clientTypes.METADBSERVER,
+            message: {
+                operation: operationTypes.MARK_NON_REACHABLE_SERVER,
+                data: {
+                    minIOServer_id: minIOServer.minIOServer_id
+                }
+            }
+        }
+        await axios.post(process.env.NGINX_API + `/addQueue`, data);
+    } catch (error){
+        console.log(error);
     }
 }
 module.exports = download;

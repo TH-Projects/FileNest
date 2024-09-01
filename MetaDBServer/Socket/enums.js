@@ -4,6 +4,7 @@ const operations = Object.freeze({
     ADDFILE: 'ADDFILE',
     ADDMINIOSERVER: 'ADDMINIOSERVER',
     ADDCLUSTER: 'ADDCLUSTER',
+    MARK_NON_REACHABLE_SERVER: 'MARK_NON_REACHABLE_SERVER'
 });
 
 module.exports = {
