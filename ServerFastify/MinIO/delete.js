@@ -3,75 +3,32 @@ const axios = require('axios');
 
 async function deleteFile(fastify, options) {
     fastify.delete('/delete', async (request, reply) => {
-        try {            
+        try {
             const { file_id, username, password } = request.body;
-            console.log('file_id:', file_id);
-            console.log('username:', username);
-            console.log('password:', password);
-            
 
             if (!file_id || !username || !password) {
-                return reply.code(400).send({
-                    success: false,
-                    message: 'Missing required parameters'
-                });
-            }
-            
-            // Authenticate the user
-            const authResponse = await axios.post('http://nginx/authUser', {
-                username,
-                password
-            }, {
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (authResponse.status !== 200) {
-                return reply.code(authResponse.status).send({
-                    success: false,
-                    message: authResponse.data.error || 'Login failed'
-                });
-            }
-            
-            // Get file metadata from the database
-            const fileResponse = await axios.get('http://nginx/getFile', {
-                params: { file_id },
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (fileResponse.status !== 200 || !fileResponse.data.success) {
-                return reply.code(400).send({
-                    success: false,
-                    message: fileResponse.data.message || 'File not found'
-                });
+                return sendError(reply, 400, 'Missing required parameters');
             }
 
-            const fileMetadata = fileResponse.data.message;
-            
-            // Ensure the user is the owner of the file
+            const isAuthenticated = await authenticateUser(username, password);
+            if (!isAuthenticated) {
+                return sendError(reply, 401, 'Login failed');
+            }
+
+            const fileMetadata = await getFileMetadata(file_id);
+            if (!fileMetadata) {
+                return sendError(reply, 400, 'File not found');
+            }
+
             if (fileMetadata.username !== username) {
-                return reply.code(403).send({
-                    success: false,
-                    message: 'You do not have permission to delete this file'
-                });
+                return sendError(reply, 403, 'You do not have permission to delete this file');
             }
             
-            // Delete file from MinIO
-            const bucketName = username.toLowerCase();
-            await minioClient.minioClient.removeObject(bucketName, `${fileMetadata.name}.${fileMetadata.file_type}`);
-            fastify.log.info('File deleted from MinIO successfully.');
+            await deleteFileFromMinIO(username.toLowerCase(), fileMetadata.name, fileMetadata.file_type, fastify);
             
-            // Delete file metadata from the database            
-            const deleteResponse = await axios.delete('http://nginx/removeMetaInfo', {
-                headers: { 'Content-Type': 'application/json' },
-                data: { file_id }
-            });            
+            await deleteFileMetadata(file_id, fastify);
 
-            if (deleteResponse.status !== 200 || !deleteResponse.data.success) {
-                return reply.code(400).send({
-                    success: false,
-                    message: deleteResponse.data.message || 'Error deleting file metadata'
-                });
-            }
+            fastify.log.info('File deleted successfully');
 
             return reply.status(200).send({
                 success: true,
@@ -79,12 +36,80 @@ async function deleteFile(fastify, options) {
             });
 
         } catch (err) {
-            fastify.log.error(err);
-            if (!reply.sent) {
-                reply.status(500).send({ success: false, error: err.message });
-            }
+            handleError(reply, err, fastify);
         }
     });
 }
+
+// Helper Functions
+
+const sendError = (reply, statusCode, message) => {
+    return reply.code(statusCode).send({
+        success: false,
+        message
+    });
+};
+
+const handleError = (reply, error, fastify) => {
+    fastify.log.error('Delete file error:', error);
+    if (!reply.sent) {
+        reply.status(500).send({ success: false, error: error.message });
+    }
+};
+
+const authenticateUser = async (username, password) => {
+    try {
+        const authResponse = await axios.post('http://nginx/authUser', {
+            username,
+            password
+        }, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+        return authResponse.status === 200;
+    } catch (error) {
+        throw new Error('Authentication error');
+    }
+};
+
+const getFileMetadata = async (file_id) => {
+    try {
+        const fileResponse = await axios.get('http://nginx/getFile', {
+            params: { file_id },
+            headers: { 'Content-Type': 'application/json' }
+        });
+        if (fileResponse.status === 200 && fileResponse.data.success) {
+            return fileResponse.data.message;
+        } else {
+            throw new Error(fileResponse.data.message || 'File not found');
+        }
+    } catch (error) {
+        throw new Error('Failed to get file metadata');
+    }
+};
+
+const deleteFileFromMinIO = async (bucketName, fileName, fileType, fastify) => {
+    try {
+        await minioClient.minioClient.removeObject(bucketName, `${fileName}.${fileType}`);
+        fastify.log.info('File deleted from MinIO successfully.');
+    } catch (error) {
+        fastify.log.error('Error deleting file from MinIO:', error);        
+        throw new Error('Failed to delete file from MinIO');
+    }
+};
+
+const deleteFileMetadata = async (file_id, fastify) => {
+    try {
+        const deleteResponse = await axios.delete('http://nginx/removeMetaInfo', {
+            headers: { 'Content-Type': 'application/json' },
+            data: { file_id }
+        });
+        if (deleteResponse.status !== 200 || !deleteResponse.data.success) {
+            throw new Error(deleteResponse.data.message || 'Error deleting file metadata');
+        }
+    } catch (error) {
+        fastify.log.error('Error deleting file metadata:', error);
+        throw new Error('Failed to delete file metadata');
+    }
+};
 
 module.exports = deleteFile;
