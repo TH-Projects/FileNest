@@ -1,126 +1,66 @@
 /* eslint-disable react/prop-types */
+// FileView.js
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useAuth } from "../contextes/auth-context";
 import axios from "axios";
 import { saveAs } from 'file-saver';
+import { formatTimestamp, formatBytes, createResultMessage } from '../utils/utils';
 import "../style/cards.css";
-
-// Utility function to format a timestamp
-const formatTimestamp = (timestamp) => {
-  const date = new Date(timestamp);
-  return date.toLocaleString('en-US', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false, // 24-hour format
-  }).replace(',', '');
-};
-
-// Utility function to format file size
-function formatBytes(bytes) {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  const size = Math.ceil(bytes / Math.pow(k, i));
-  return size + " " + sizes[i];
-}
 
 const FileView = ({ file_meta_data, onDelete, onDownload }) => {  
   const { user } = useAuth();
+  const { file_id, name, file_type, size, username, last_modify } = file_meta_data;
 
-  const handleDownload = async (fileId, filename) => {
+  const handleDownload = async () => {
     try {
       const response = await axios.get('http://localhost/download', {
-        params: { 
-          file_id: fileId,
-        },
-        responseType: 'blob', // Important for file download
+        params: { file_id },
+        responseType: 'blob',
       });
 
-      const resultMsg =
-        <h5 className="text-success fs-6 mt-2 mb-2">
-          File downloaded successfully
-        </h5>;
-      if (onDownload) onDownload(resultMsg);
-      saveAs(response.data, filename); // Using file-saver library
+      if (onDownload) onDownload(createResultMessage(true, 'File downloaded successfully'));
+      saveAs(response.data, `${name}.${file_type}`);
     } catch (error) {      
-      const resultMsg =      
-        <h5 className="text-danger fs-6 mt-2 mb-2">
-          Error downloading the file: {error.message}
-        </h5>;
-      if (onDownload) onDownload(resultMsg);
+      if (onDownload) onDownload(createResultMessage(false, `Error downloading the file: ${error.message}`));
     }
   };
 
-  const handleDelete = async (fileId) => {
-    if (!window.confirm('Are you sure you want to delete this file?')) {
-      return;
-    }
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this file?')) return;
 
-    if(!fileId || !user) {
-      const resultMsg =
-        <h5 className="text-danger fs-6 mt-2 mb-2">
-          Missing required parameters
-        </h5>
-      if (onDelete) onDelete(resultMsg);
+    if(!file_id || !user) {
+      if (onDelete) onDelete(createResultMessage(false, 'Missing required parameters'));
       return;
     }
     
     try {
       const response = await axios.delete('http://localhost/delete', {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          file_id: fileId,
-          username: user.username,
-          password: user.password,
-        },
+        headers: { 'Content-Type': 'application/json' },
+        data: { file_id, username: user.username, password: user.password },
       });
 
-      if (response.data.success) {
-        const resultMsg = 
-          <h5 className="text-success fs-6 mt-2 mb-2">
-            File deleted successfully
-          </h5>
-        if (onDelete) onDelete(resultMsg);
-      } else {        
-        const resultMsg = 
-          <h5 className="text-danger fs-6 mt-2 mb-2">
-            File deletion failed: {response.data.message || 'Unknown error'}
-          </h5>
-        if (onDelete) onDelete(resultMsg);
-      }
-      
+      const isSuccess = response.data.success;
+      const message = isSuccess ? 'File deleted successfully' : `File deletion failed: ${response.data.message || 'Unknown error'}`;
+      if (onDelete) onDelete(createResultMessage(isSuccess, message));
     } catch (error) {
       console.error('Error deleting the file:', error);
-      const resultMsg = 
-        <h5 className="text-danger fs-6 mt-2 mb-2">
-          Error while deleting the file: <br/>
-          {error.message}
-        </h5>;
-      if (onDelete) onDelete(resultMsg);
+      if (onDelete) onDelete(createResultMessage(false, `Error while deleting the file: ${error.message}`));
     }
   };
-
 
   return (
     <Container fluid>
       <Row className="table-row align-items-center r-h-3">
-        <Col md={4}>{file_meta_data.name}</Col>
-        <Col md={1}>{file_meta_data.file_type}</Col>
-        <Col md={1}>{formatBytes(file_meta_data.size)}</Col>
-        <Col md={2}>{file_meta_data.username}</Col>
-        <Col md={2}>{formatTimestamp(file_meta_data.last_modify)}</Col>
+        <Col md={4}>{name}</Col>
+        <Col md={1}>{file_type}</Col>
+        <Col md={1}>{formatBytes(size)}</Col>
+        <Col md={2}>{username}</Col>
+        <Col md={2}>{formatTimestamp(last_modify)}</Col>
         <Col md={2} className="d-flex justify-content-end">
           <Button
             variant="success"
             className="w-40 me-2"
-            onClick={() => handleDownload(file_meta_data.file_id, `${file_meta_data.name}.${file_meta_data.file_type}`)}
+            onClick={handleDownload}
           >
             Download
           </Button>
@@ -128,7 +68,7 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
             variant="danger"
             className="w-40"
             disabled={!user}
-            onClick={() => handleDelete(file_meta_data.file_id)}
+            onClick={handleDelete}
           >
             Delete
           </Button>
