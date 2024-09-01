@@ -129,7 +129,7 @@ const FileTable = () => {
   }, []);
 
   useEffect(() => {
-    if (!queryData || queryData.length === 0) return;
+    if (!queryData) return;
 
     setFileMetaData(queryData);
     setStatesForSelectOptionsFromBaseData(queryData);
