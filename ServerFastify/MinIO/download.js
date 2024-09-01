@@ -45,7 +45,10 @@ async function download (fastify) {
 
                 // Datei aus dem Bucket lesen und an den Client senden
                 await readFile(minIOClient, bucketName, fileName, file.content_type, reply);
-                return;
+                return reply.status(200).send({
+                    success: true,
+                    message: 'File downloaded successfully'
+                });
             }
             catch (error){
                 console.error(error);

@@ -40,13 +40,18 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
         },
         responseType: 'blob', // Important for file download
       });
+
+      const resultMsg =
+        <h5 className="text-success fs-6 mt-2 mb-2">
+          File downloaded successfully
+        </h5>;
+      if (onDownload) onDownload(resultMsg);
       saveAs(response.data, filename); // Using file-saver library
     } catch (error) {      
       const resultMsg =      
         <h5 className="text-danger fs-6 mt-2 mb-2">
           Error downloading the file: {error.message}
-        </h5>
-      ;
+        </h5>;
       if (onDownload) onDownload(resultMsg);
     }
   };
