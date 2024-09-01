@@ -11,11 +11,26 @@ async function upload(fastify, options) {
         try {
             const data = request.body.file?.[0]; // Access the first item in the file array, if it exists
             const userString = request.body.user; // user object as string
-            const user = JSON.parse(userString); // Parse the user object            
+            const user = JSON.parse(userString); // Parse the user object   
+            const fileName = data.filename;
+            const uploadStream = new stream.PassThrough();
+            const fileBuffer = data.data; // Buffer contains the file data         
 
             if (!data) {
                 throw new Error('File data is missing or malformed');
             }
+
+            // Define the regex for valid filenames
+            const validFilenameRegex = /^[a-zA-Z0-9_\-. ]+$/;
+
+            // Check if the filename is valid
+            if (!validFilenameRegex.test(fileName)) {
+                return reply.code(400).send({
+                    success: false,
+                    message: 'Filename contains invalid characters. Only letters, numbers, hyphens, underscores, and spaces are allowed'
+                });
+            }
+
 
             // Authenticate the user
             const authResponse = await axios.post('http://nginx/authUser', {
@@ -82,10 +97,6 @@ async function upload(fastify, options) {
             if (!fileSize) {
                 throw new Error('File size is missing or malformed');
             }
-
-            const fileName = data.filename;
-            const uploadStream = new stream.PassThrough();
-            const fileBuffer = data.data; // Buffer contains the file data
 
             // MinIO upload promise
             const uploadPromise = new Promise((resolve, reject) => {
