@@ -1,7 +1,7 @@
-const user = require('../DB/user');
 const axios = require("axios");
 require('dotenv').config();
 const enums = require('../Socket/enums');
+const {clientTypes} = require("./enums");
 
 async function createUser(fastify) {
     fastify.post('/createUser', async (request, reply) => {
@@ -20,18 +20,13 @@ async function createUser(fastify) {
         }
 
         return await shareToBroker(username, password, email);
-        /*const result = await user.createUser(username, password, email);
-        if(!result.success){
-            return reply.code(500).send(result);
-        }*/
-        //return reply.send({success:true});
     });
 }
 
 async function shareToBroker(username, password, email){
     try {
         const data = {
-            type: 'METADBSERVER',
+            type: clientTypes.METADBSERVER,
             message: {
                 operation: enums.operations.CREATEUSER,
                 data: {

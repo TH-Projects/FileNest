@@ -18,8 +18,6 @@ fastify.register(require('./REST/addCluster'));
 fastify.register(require('./REST/addMinIOServer'));
 fastify.register(require('./REST/getMinIOServer'));
 fastify.register(require('./REST/getClusterForFile'));
-fastify.register(require('./REST/deleteFile'));
-fastify.register(require('./REST/addFile'));
 fastify.register(require('./REST/checkUserExistance'));
 fastify.register(require('./REST/getFile'));
 fastify.register(require('./REST/getAccountIdByUsername'));
