@@ -29,24 +29,25 @@ function formatBytes(bytes) {
   return size + " " + sizes[i];
 }
 
-const FileView = ({ file_meta_data, onDelete }) => {  
+const FileView = ({ file_meta_data, onDelete, onDownload }) => {  
   const { user } = useAuth();
 
-  const handleDownload = async (filename) => {
+  const handleDownload = async (fileId, filename) => {
     try {
-      const response = await axios.get(`http://localhost/download/${filename}`, {
+      const response = await axios.get('http://localhost/download', {
+        params: { 
+          file_id: fileId,
+        },
         responseType: 'blob', // Important for file download
       });
-
-      saveAs(response.data, filename); // Use the dynamic file name
-    } catch (error) {
-      console.error('Error downloading the file:', error);
-      const resultMsg =        
+      saveAs(response.data, filename); // Using file-saver library
+    } catch (error) {      
+      const resultMsg =      
         <h5 className="text-danger fs-6 mt-2 mb-2">
           Error downloading the file: {error.message}
         </h5>
       ;
-      console.log(resultMsg);
+      if (onDownload) onDownload(resultMsg);
     }
   };
 
@@ -95,7 +96,7 @@ const FileView = ({ file_meta_data, onDelete }) => {
       const resultMsg = 
         <h5 className="text-danger fs-6 mt-2 mb-2">
           Error while deleting the file: <br/>
-          {error.response.data.message}
+          {error.message}
         </h5>;
       if (onDelete) onDelete(resultMsg);
     }
@@ -114,8 +115,7 @@ const FileView = ({ file_meta_data, onDelete }) => {
           <Button
             variant="success"
             className="w-40 me-2"
-            disabled={!user}
-            onClick={() => handleDownload(`${file_meta_data.name}.${file_meta_data.extension}`)}
+            onClick={() => handleDownload(file_meta_data.file_id, `${file_meta_data.name}.${file_meta_data.file_type}`)}
           >
             Download
           </Button>

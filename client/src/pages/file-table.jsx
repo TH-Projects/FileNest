@@ -77,6 +77,10 @@ const FileTable = () => {
     fetchFiles(); // Refresh the file list
   };
 
+  const handleFileDownload = (response) => {
+    setResultMessage(response); 
+  };
+
   const generateSelectOptions = useCallback((data, key) => {
     if (!data || data.length === 0) return [];
     return [...new Set(data.map((item) => item[key]))].map((value) => ({
@@ -162,7 +166,7 @@ const FileTable = () => {
 
   const renderFileViews = (data) => {
     return data.map((file, index) => (
-      <FileView key={index} file_meta_data={file} onDelete={handleFileDelete} />
+      <FileView key={index} file_meta_data={file} onDelete={handleFileDelete} onDownload={handleFileDownload} />
     ));
   };
 
