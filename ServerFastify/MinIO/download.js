@@ -1,6 +1,7 @@
 const minioClient = require('./MinIOClient');
 const axios = require('axios');
 require('dotenv').config();
+const {clientTypes, operationTypes} = require('./enums');
 
 async function download(fastify) {
   fastify.get('/download', async (request, reply) => {
@@ -47,7 +48,7 @@ async function download(fastify) {
           return await readFile(minIOClientInstance, bucketName, fileName, file.content_type, reply);
         } catch (error) {
           console.error(`Error reading file from MinIO server ${minIOServer.address}:`, error);
-          // TODO: Mark in database as failed
+          await markNonReachableServer(minIOServer);
         }
       }
 
@@ -93,6 +94,23 @@ async function getFile(fileId) {
     console.error('Error fetching file metadata:', error);
     return null;
   }
+}
+
+async function markNonReachableServer(minIOServer){
+    try {
+        const data = {
+            type: clientTypes.METADBSERVER,
+            message: {
+                operation: operationTypes.MARK_NON_REACHABLE_SERVER,
+                data: {
+                    minIOServer_id: minIOServer.minIOServer_id
+                }
+            }
+        }
+        await axios.post(process.env.NGINX_API + `/addQueue`, data);
+    } catch (error){
+        console.log(error);
+    }
 }
 
 async function getMinIOServers(clusterLocationId) {
