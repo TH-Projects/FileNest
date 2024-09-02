@@ -68,10 +68,21 @@ const FileTable = () => {
     setTimeout(() => setResultMessage(null), 10000);  // Reset resultMessage after 10 seconds
   }, [resultMsg]);
 
-  // Fetch file metadata from the database server on startup
-  useEffect(() => {fetchFiles()}, []);
+  // triggers metadata fetching from the database server
+  useEffect(() => {
+    // Initial fetch on component mount
+    fetchFiles();
 
-  // Fetch file metadata from the database server on startup
+    // Set up the interval to fetch every 3 minutes
+    const intervalId = setInterval(() => {      
+      fetchFiles();
+    }, 180000); // 180,000 milliseconds = 3 minutes
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // Fetch file metadata from the database server
   const fetchFiles = async () => {
     try {
       const response = await axios.get('http://localhost/getFiles');

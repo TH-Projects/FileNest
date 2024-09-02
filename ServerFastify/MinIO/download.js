@@ -53,7 +53,7 @@ async function download(fastify) {
 
       return reply.status(500).send({
         success: false,
-        message: 'Failed to read file from all MinIO servers'
+        message: 'Failed to read file from all servers. Please refresh your browser and try again, because it could be deleted by the owner' 
       });
     } catch (error) {
       console.error('Error handling download request:', error);
