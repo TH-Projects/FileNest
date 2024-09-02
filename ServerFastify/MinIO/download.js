@@ -1,80 +1,99 @@
 const minioClient = require('./MinIOClient');
-const axios = require("axios");
+const axios = require('axios');
 require('dotenv').config();
 const {clientTypes, operationTypes} = require('./enums');
 
-async function download (fastify) {
-    fastify.get('/download', async (request, reply) => {
-        const file_id = request.query?.file_id;
-        if(!file_id){
-            return reply.code(400).send('file_id not provided');
-        }
-        const file = await getFile(file_id);
-        if(file === undefined){
-            return reply.code(500).send('getFile DB Request failed');
-        }
-        const minIOServerResultList = await getMinIOServer(file.cluster_location_id);
-        if(minIOServerResultList === undefined){
-            return reply.code(500).send('getMinIOServer DB Request failed');
-        }
+async function download(fastify) {
+  fastify.get('/download', async (request, reply) => {
+    const { file_id } = request.query || {};
 
-        for (const minIOServer of minIOServerResultList){
-            try {
-                console.log(minIOServer);
-                const minIOClient = minioClient.getMinIOClient(minIOServer.address);
-                if(!minIOClient){
-                    continue;
-                }
-                await readFile(minIOClient, file.username, file.name, file.content_type, reply);
-                return;
-            }
-            catch (error){
-                console.log(error);
-                await markNonReachableServer(minIOServer);
-            }
+    if (!file_id) {
+      return reply.code(400).send({
+        success: false,
+        message: 'Missing required parameters'
+      });
+    }
+
+    try {
+      // Get file metadata from the database
+      const file = await getFile(file_id);
+      if (!file) {
+        return reply.code(500).send({
+          success: false,
+          message: 'Failed to get file metadata'
+        });
+      }
+
+      // Get MinIO servers where the file is stored
+      const minIOServers = await getMinIOServers(file.cluster_location_id);
+      if (!minIOServers) {
+        return reply.code(500).send({
+          success: false,
+          message: 'Failed to get MinIO servers'
+        });
+      }
+
+      // Try to read the file from one of the cluster servers
+      for (const minIOServer of minIOServers) {
+        try {
+          const minIOClientInstance = minioClient.getMinIOClient(minIOServer.address);
+          if (!minIOClientInstance) {
+            continue;
+          }
+
+          const bucketName = file.username.toLowerCase();
+          const fileName = `${file.name}.${file.file_type}`;
+
+          // Read file from the bucket and send to the client
+          return await readFile(minIOClientInstance, bucketName, fileName, file.content_type, reply);
+        } catch (error) {
+          console.error(`Error reading file from MinIO server ${minIOServer.address}:`, error);
+          await markNonReachableServer(minIOServer);
         }
-        return reply.code(500).send('No MinIO Server available');
+      }
+
+      return reply.status(500).send({
+        success: false,
+        message: 'Failed to read file from all servers. Please refresh your browser and try again, because it could be deleted by the owner' 
+      });
+    } catch (error) {
+      console.error('Error handling download request:', error);
+      return reply.status(500).send({
+        success: false,
+        message: 'An unexpected error occurred'
+      });
+    }
+  });
+}
+
+async function readFile(minIOClient, bucketName, fileName, contentType, reply) {
+  try {
+    const dataStream = await minIOClient.getObject(bucketName, fileName);
+    reply.header('Content-Disposition', `attachment; filename="${fileName}"`);
+    reply.header('Content-Type', contentType);
+    return reply.status(200).send(dataStream);
+  } catch (err) {
+    console.error('Error sending file:', err);
+    return reply.status(500).send({
+      success: false,
+      message: 'Failed to send file from MinIO server'
     });
+  }
 }
 
-async function readFile(minIOClient, bucket, filename, content_type, reply){
-    try {
-        const dataStream = await minIOClient.getObject(bucket, filename);
-        reply.header('Content-Disposition', `attachment; filename="${filename}"`);
-        reply.header('Content-Type', content_type);
-        return reply.send(dataStream);
-    } catch (err) {
-        console.log.error(err);
-        return reply.status(500).send(err.message);
+async function getFile(fileId) {
+  try {
+    const response = await axios.get(`${process.env.NGINX_API}/getFile`, {
+      params: { file_id: fileId }
+    });
+    if (response.data.success) {
+      return response.data.message;
     }
-}
-
-async function getFile(file_id){
-    try {
-        const fileResult = await axios.get(process.env.NGINX_API + `/getFile?file_id=${file_id}`);
-        if(!fileResult?.data?.success){
-            return undefined;
-        }
-        return fileResult.data.message;
-
-    } catch (error){
-        console.log(error);
-        return undefined;
-    }
-}
-
-async function getMinIOServer(cluster_location_id){
-    try {
-        const minIOServerResult = await axios.get(process.env.NGINX_API + `/minIOServer?cluster_id=${cluster_location_id}`)
-        if(!minIOServerResult?.data?.success){
-            return undefined;
-        }
-        return minIOServerResult.data.message;
-
-    } catch (error){
-        console.log(error);
-        return undefined;
-    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching file metadata:', error);
+    return null;
+  }
 }
 
 async function markNonReachableServer(minIOServer){
@@ -93,4 +112,20 @@ async function markNonReachableServer(minIOServer){
         console.log(error);
     }
 }
+
+async function getMinIOServers(clusterLocationId) {
+  try {
+    const response = await axios.get(`${process.env.NGINX_API}/minIOServer`, {
+      params: { cluster_id: clusterLocationId }
+    });
+    if (response.data.success) {
+      return response.data.message;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching MinIO servers:', error);
+    return null;
+  }
+}
+
 module.exports = download;
