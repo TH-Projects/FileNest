@@ -11,13 +11,14 @@ fastify.register(require('./REST/getCouples'));
 // Server starten
 const start = async () => {
     try {
+        connectionIn(fastify);
         await fastify.listen({port:parseInt(process.env.PORT_BROKER, 10), host:'0.0.0.0'});
+        await buildUpConnection(fastify);
     } catch (err) {
         fastify.log.error(err);
         process.exit(1);
     }
 };
 start();
-connectionIn(fastify);
-buildUpConnection(fastify);
+
 module.exports = fastify;
