@@ -3,6 +3,8 @@ import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contextes/auth-context';
 import CryptoJS from 'crypto-js';
+import axios from 'axios';
+import '../style/AccountPage.css'; // Importiere CSS-Datei für Stile
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -18,15 +20,14 @@ const LoginPage = () => {
     const hashedPassword = CryptoJS.SHA256(password).toString();
 
     try {
-      const response = await fetch('http://localhost/loginUser', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password: hashedPassword })
+      const { data, status } = await axios.post('http://localhost/loginUser', {
+        username,
+        password: hashedPassword
+      }, {
+        headers: { 'Content-Type': 'application/json' }
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (status === 200) {
         // Login successful
         login({ username, password: hashedPassword }); // Set logged-in user in context
         navigate('/'); // Navigate to Dashboard
@@ -39,12 +40,11 @@ const LoginPage = () => {
   };
 
   return (
-    <Container fluid className="auth-container">
-      <Row style={{ minHeight: '20vh' }}></Row>
-      <Row md={6} className="justify-content-md-center">
-        <Col md={6} lg={4}>
+    <Container className="auth-container">
+      <Row className="justify-content-center align-items-center h-100 row-expanded-width">
+        <Col md={6} lg={4} className="form-col">
           <h2 className="text-center">Login</h2>
-          {error && <p className="text-danger">{error}</p>}
+          {error && <p className="text-danger text-center">{error}</p>}
           <Form onSubmit={handleSubmit}>
             <Form.Group controlId="formBasicUsername" className="mb-3">
               <Form.Label>Username</Form.Label>
@@ -77,7 +77,6 @@ const LoginPage = () => {
           </p>
         </Col>
       </Row>
-      <Row style={{ minHeight: '20vh' }}></Row>
     </Container>
   );
 };

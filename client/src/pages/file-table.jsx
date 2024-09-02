@@ -9,7 +9,10 @@ import useFileUpload from "../hooks/usefileupload";
 import "../style/cards.css";
 
 const FileTable = () => {
+  // User authentication context
   const { user } = useAuth();
+
+  // State variables
   const [queryData, setQueryData] = useState([]);
   const [fileMetaData, setFileMetaData] = useState([]);
   const [filenameOptions, setFilenameOptions] = useState([]);
@@ -21,35 +24,31 @@ const FileTable = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [resultMessage, setResultMessage] = useState(null);
 
+  // UI interaction handlers
   const handleCloseModal = () => setShowUploadModal(false);
   const handleShowModal = () => setShowUploadModal(true);
-  const handleNameSelect = (vData) => setSelectedFilenameOptions(vData || []);
-  const handleExtensionSelect = (vData) => setSelectedFileExtensionOptions(vData || []);
-  const handleOwnerSelect = (vData) => setSelectedFileOwnerOptions(vData || []);
+  const handleNameSelect = vData => setSelectedFilenameOptions(vData || []);
+  const handleExtensionSelect = vData => setSelectedFileExtensionOptions(vData || []);
+  const handleOwnerSelect = vData => setSelectedFileOwnerOptions(vData || []);
 
-  // Rendering file views
-  const renderFileViews = (data) => {
-    return data.map((file, index) => (
-      <FileView key={index} file_meta_data={file} />
-    ));
+  // Reports the response of the file download to the user
+  const handleFileDownload = (response) => {
+    setResultMessage(response);
+    setTimeout(() => setResultMessage(null), 10000);  // Reset resultMessage after 10 seconds
   };
 
-  // Custom Hook for File Upload
-  const uploadUrl = "http://localhost/upload";
-  const { handleFileChange, handleUpload, resultMsg } = useFileUpload(uploadUrl, handleCloseModal);
+  // Reports the response of the file delete to the user
+  const handleFileDelete = (response) => {
+    setResultMessage(response);
+    fetchFiles(); // Refresh the file list shown in the table
+    setTimeout(() => setResultMessage(null), 10000);  // Reset resultMessage after 10 seconds
+  };
 
-  useEffect(() => {
-    if (resultMsg) {
-      setResultMessage(resultMsg);
-    }
-  }, [resultMsg]);
-
+  // Reports the response of the file upload to the user
   const handleFileUpload = async () => {
     if (user) {
       const { success, message, metadata } = await handleUpload();
-
-      if (success) {
-        console.log(metadata);
+      if (success) {        
         setQueryData((prevData) => [...prevData, metadata]);
       } else {
         setResultMessage(message);
@@ -59,6 +58,51 @@ const FileTable = () => {
     }
   };
 
+  // Custom Hook for File Upload
+  const uploadUrl = "http://localhost/upload";
+  const { handleFileChange, handleUpload, resultMsg } = useFileUpload(uploadUrl, handleCloseModal);
+
+  // Set the result message from the file upload
+  useEffect(() => {
+    if (resultMsg) setResultMessage(resultMsg);
+    setTimeout(() => setResultMessage(null), 10000);  // Reset resultMessage after 10 seconds
+  }, [resultMsg]);
+
+  // triggers metadata fetching from the database server
+  useEffect(() => {
+    // Initial fetch on component mount
+    fetchFiles();
+
+    // Set up the interval to fetch every 20 seconds
+    const intervalId = setInterval(() => {      
+      fetchFiles();
+    }, 20000); // 20,000 milliseconds = 20 seconds
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // Fetch file metadata from the database server
+  const fetchFiles = async () => {
+    try {
+      const response = await axios.get('http://localhost/getFiles');
+      if (response.status === 200) {
+        setQueryData(response.data.message);
+      } else {
+        console.error('Failed to fetch files');
+      }
+    } catch (error) {
+      if (error.response) {
+        console.error(`Error: ${error.response.data.message || 'An error occurred while fetching files'}`);
+      } else if (error.request) {
+        console.error('Error: No response received from the server');
+      } else {
+        console.error('Error: An unexpected error occurred');
+      }
+    }
+  };
+  
+  // Generate unique select options from file metadata
   const generateSelectOptions = useCallback((data, key) => {
     if (!data || data.length === 0) return [];
     return [...new Set(data.map((item) => item[key]))].map((value) => ({
@@ -67,6 +111,7 @@ const FileTable = () => {
     }));
   }, []);
 
+  // Set the select options for filename, file extension, and file owner
   const setStatesForSelectOptionsFromBaseData = useCallback(
     (data) => {
       if (!data || data.length === 0) {
@@ -76,6 +121,7 @@ const FileTable = () => {
         return;
       }
 
+      // Generate select options from query data or filtred data
       const uniqueFilenames =
         selectedFilenameOptions.length > 0
           ? generateSelectOptions(queryData, "name")
@@ -102,38 +148,15 @@ const FileTable = () => {
     ]
   );
 
+  // Update the file metadata and select options when the query data changes
   useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const response = await axios.get('http://localhost/getFiles');
-        const files = response.data.message;
-
-        if (response.status === 200) {
-          setQueryData(files);
-        } else {
-          console.error('Failed to fetch files');
-        }
-      } catch (error) {
-        if (error.response) {
-          console.error(`Error: ${error.response.data.message || 'An error occurred while fetching files'}`);
-        } else if (error.request) {
-          console.error('Error: No response received from the server');
-        } else {
-          console.error('Error: An unexpected error occurred');
-        }
-      }
-    };
-
-    fetchFiles();
-  }, []);
-
-  useEffect(() => {
-    if (!queryData || queryData.length === 0) return;
+    if (!queryData) return;
 
     setFileMetaData(queryData);
     setStatesForSelectOptionsFromBaseData(queryData);
   }, [queryData, setStatesForSelectOptionsFromBaseData]);
 
+  // Update the file metadata and select options when the select options change
   useEffect(() => {
     if (!queryData || queryData.length === 0) return;
 
@@ -163,6 +186,13 @@ const FileTable = () => {
     setStatesForSelectOptionsFromBaseData,
   ]);
 
+  // Render the file views from the file metadata
+  const renderFileViews = (data) => {
+    return data.map((file, index) => (
+      <FileView key={index} file_meta_data={file} onDelete={handleFileDelete} onDownload={handleFileDownload} />
+    ));
+  };
+  
   return (
     <Container fluid style={{ marginTop: '30px', marginBottom: '30px' }}>
       <Row className="justify-content-center mb-3">
@@ -233,13 +263,14 @@ const FileTable = () => {
                 </Row>
               </Container>
             </Card.Header>
-            <Card.Body>{renderFileViews(fileMetaData)}</Card.Body>
+            <Card.Body>
+              {renderFileViews(fileMetaData)}
+            </Card.Body>
           </Card>
         </Col>
       </Row>
     </Container>
   );
 };
-
 
 export default FileTable;

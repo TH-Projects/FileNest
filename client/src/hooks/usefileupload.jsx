@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../contextes/auth-context";
 import axios from "axios";
 import { Spinner } from 'react-bootstrap';
+import {createResultMessage} from '../utils/utils';
 
 const useFileUpload = (uploadUrl, handleCloseModal) => {
   const { user } = useAuth();
@@ -14,11 +15,7 @@ const useFileUpload = (uploadUrl, handleCloseModal) => {
 
     if (file) {
       if (file.size >= maxFileSize) {
-        setResultMsg(
-          <h5 className="text-danger fs-6 mt-2 mb-2">
-            Filesize too big. Size has to be smaller than: 10MB
-          </h5>
-        );
+        setResultMsg(createResultMessage(false, 'File size exceeds the maximum limit of 10 MB'));
         handleCloseModal();
         setSelectedFile(null);
         return;
@@ -53,27 +50,15 @@ const useFileUpload = (uploadUrl, handleCloseModal) => {
       });
 
       if (response.status === 200) {
-        setResultMsg(
-          <h5 className="text-success fs-6 mt-2 mb-2">
-            File uploaded successfully
-          </h5>
-        );
+        setResultMsg(createResultMessage(true, 'File uploaded successfully'));
         return { success: true, message: 'File uploaded successfully', metadata: response.data.metadata };
       } else {
-        setResultMsg(
-          <h5 className="text-danger fs-6 mt-2 mb-2">
-            File upload failed: {response.data.message || response.statusText}
-          </h5>
-        );
+        setResultMsg(createResultMessage(false, response.data.message || response.statusText));
         return { success: false, message: response.data.message || response.statusText, metadata: null };
       }
 
     } catch (error) {
-      setResultMsg(
-        <h5 className="text-danger fs-6 mt-2 mb-2">
-          Error uploading file: {error.response?.data?.message || error.message}
-        </h5>
-      );
+      setResultMsg(createResultMessage(false, error.response?.data?.message || error.message));
       return { success: false, message: error.response?.data?.message || error.message, metadata: null };
     } finally {
       handleCloseModal();

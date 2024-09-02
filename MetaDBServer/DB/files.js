@@ -96,13 +96,13 @@ async function getClusterForFile(file_id) {
 async function deleteFile(file_id) {
     try {
         const db = await connection.getConnection();
-        const [result] = await db.query(
-            'DELETE FROM File ' +
-            'WHERE file_id = ?', [file_id]);
+        const result = await db.query(
+            'DELETE FROM File WHERE file_id = ?', [file_id]
+        );
         db.release();
         return {
             success: true,
-            message: result.affectedRows
+            message: `Deleted ${result.affectedRows} record(s)`
         };
     } catch (error) {
         console.error(error);
@@ -115,7 +115,7 @@ async function deleteFile(file_id) {
 
 async function addFile(etag, name, file_type, size, last_modify, owner_id, minIOServer, content_type) {
     try {
-        console.log('hsadklfghasjklfgbhjsagfjasgbhjfhglaks' + etag, name, file_type, size, last_modify, owner_id, minIOServer, content_type);
+        // Get the appropriate MinIO server cluster
         const minIOServerDB = await minIOServerReference.getClusterForMinIOServer(minIOServer);
         if (!minIOServerDB.success){
             return {
@@ -126,7 +126,9 @@ async function addFile(etag, name, file_type, size, last_modify, owner_id, minIO
         const db = await connection.getConnection();
         const result = await db.query(
             'INSERT INTO File (etag, name, file_type, size, last_modify, owner_id, cluster_location_id, content_type) ' +
-            'VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [etag, name, file_type, size, last_modify, owner_id, minIOServerDB.message.cluster_id ,content_type]);// Replacement needed for cluster_location_id
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
+            [etag, name, file_type, size, last_modify, owner_id, minIOServerDB.message.cluster_id ,content_type]
+        );
         db.release();
         return {
             success: true,
