@@ -29,7 +29,7 @@ function connectionIn (fastify){
                 jsonMessage = JSON.parse(message);
             }
             const clients = Array.isArray(jsonMessage.clients) ? jsonMessage.clients : [jsonMessage.clients];
-            const broker = clients.filter(client => client.type === enums.connectionTypes.BROKER);
+            const broker = clients.filter(client => client?.type === enums.connectionTypes.BROKER);
             if(broker.length > 0 && jsonMessage.syncOperation === enums.operation.ADDCONNECTION){
                 for(let connection of broker){
                     if(!connectionStorage.connectionStorage.find(entry => entry.ws.clientAddress === connection.client)

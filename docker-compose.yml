@@ -122,8 +122,8 @@ services:
     volumes:
       - .env:/usr/local/bin/.env
       - /var/lib/mysql
-    expose:
-      - "${PORT_METADB}"
+    ports:
+      - "9000-9100:${PORT_METADB}"
     depends_on:
       - broker
 

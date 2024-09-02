@@ -18,7 +18,6 @@ fastify.register(require('./REST/addCluster'));
 fastify.register(require('./REST/addMinIOServer'));
 fastify.register(require('./REST/getMinIOServer'));
 fastify.register(require('./REST/getClusterForFile'));
-fastify.register(require('./REST/addFile'));
 fastify.register(require('./REST/checkUserExistance'));
 fastify.register(require('./REST/getFile'));
 fastify.register(require('./REST/getAccountIdByUsername'));
@@ -29,10 +28,10 @@ fastify.register(require('./REST/removeMetaInfo'));
 // Server starten
 const start = async () => {
     try {
+        await fastify.listen({port:3001, host:'0.0.0.0'});
         const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         console.log('Sleeping for 30 seconds');
         await sleep(30000);
-        await fastify.listen({port:3001, host:'0.0.0.0'});
         await dbConnection.register();
         connectionIn(fastify);
         await buildUpConnection();

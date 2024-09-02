@@ -2,6 +2,7 @@ const minioClient = require('./MinIOClient');
 const axios = require('axios');
 const { PassThrough } = require('stream');
 require('dotenv').config();
+const { clientTypes, operationTypes } = require('./enums');
 
 async function upload(fastify, options) {
     const { stream } = options;
@@ -25,7 +26,6 @@ async function upload(fastify, options) {
             if (!isValidFilename(fileName)) {
                 return sendError(reply, 400, 'Filename contains invalid characters. Only letters, numbers, hyphens, underscores, and spaces are allowed');
             }
-
             const isAuthenticated = await authenticateUser(user);
             if (!isAuthenticated) {
                 return sendError(reply, 401, 'User authentication failed');
@@ -55,6 +55,7 @@ async function upload(fastify, options) {
             });
 
         } catch (err) {
+            console.log(err);
             handleError(reply, err, fastify);
         }
     });
@@ -163,7 +164,7 @@ const createFileMetadata = (fileName, fileSize, mimeType, username) => {
         file_type: lastDotIndex !== -1 ? fileName.substring(lastDotIndex + 1) : '',
         type: mimeType,
         size: fileSize,
-        last_modify: new Date().toISOString(),
+        last_modify: new Date().toISOString().slice(0, 19).replace('T', ' '),
         username: username || null
     };
 };
@@ -182,13 +183,23 @@ const getAccountId = async (username) => {
 
 const insertFileMetadata = async (metadata, ownerId, minIOServerId, etag) => {
     try {
-        const response = await axios.post('http://nginx/addFile', {
-            etag: etag.etag,
-            ...metadata,
-            owner_id: ownerId,
-            minIOServer: minIOServerId,
-            content_type: metadata.type
-        }, {
+        const data = {
+            type: clientTypes.METADBSERVER,
+            message: {
+                operation: operationTypes.ADDFILE,
+                data: {
+                    etag: etag.etag,
+                    name: metadata.name,
+                    file_type: metadata.file_type,
+                    size: metadata.size,
+                    last_modify: metadata.last_modify,
+                    owner_id: ownerId,
+                    minIOServer: minIOServerId,
+                    content_type: metadata.type
+                }
+            }
+        }
+        const response = await axios.post('http://nginx/addQueue', data, {
             headers: { 'Content-Type': 'application/json' }
         });
 
