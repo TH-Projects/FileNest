@@ -1,5 +1,7 @@
 const connectionOut = require('../Socket/connectionOut');
 const enums = require('../Socket/enums');
+const os = require('os');
+const buildUpConnection = require('../Socket/buildUpConnection');
 
 async function couple(fastify) {
   fastify.post('/couple', async (request, reply) => {
@@ -11,6 +13,8 @@ async function couple(fastify) {
       if(!type){
           reply.code(400).send({status: 'error', message: 'No type provided'});
       }
+      console.log('Coupling: ' + url);
+
       connectionOut(fastify, url, type);
       return { couple: 'success' }
   })
