@@ -73,10 +73,10 @@ const FileTable = () => {
     // Initial fetch on component mount
     fetchFiles();
 
-    // Set up the interval to fetch every 3 minutes
+    // Set up the interval to fetch every 20 seconds
     const intervalId = setInterval(() => {      
       fetchFiles();
-    }, 180000); // 180,000 milliseconds = 3 minutes
+    }, 20000); // 20,000 milliseconds = 20 seconds
 
     // Clean up the interval on component unmount
     return () => clearInterval(intervalId);
