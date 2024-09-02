@@ -1,0 +1,28 @@
+html, body {
+    height: 100%;
+    margin: 0;
+  }
+  
+  .auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height:80vh;
+  }
+  
+  .row-expanded-width {
+    width: 80%; 
+  }
+  
+  .form-col {
+    width: 40%;
+  }
+  
+  h2 {
+    margin-bottom: 1rem;
+  }
+  
+  .text-danger {
+    margin-bottom: 1rem;
+  }
+  

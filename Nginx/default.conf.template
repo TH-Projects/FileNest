@@ -37,7 +37,7 @@ server {
     }
 
     # Proxy for fastify backend server
-    location ~* ^/(download|upload|listObjects|checkAndCreateUser|loginUser){
+    location ~* ^/(download|upload|delete|listObjects|checkAndCreateUser|loginUser){
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -49,7 +49,7 @@ server {
     }
 
     # Proxy for database server
-    location ~* ^/(getFiles|authUser|createUser|addCluster|addFile|addMinIOServer|deleteFile|getClusterForFile|MinIOServer|getFile|checkUserExistance|getAccountIdByUsername|minIOServerForUpload) {
+    location ~* ^/(getFiles|authUser|createUser|addCluster|addFile|addMinIOServer|deleteFile|getClusterForFile|MinIOServer|getFile|checkUserExistance|getAccountIdByUsername|removeMetaInfo|minIOServerForUpload) {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

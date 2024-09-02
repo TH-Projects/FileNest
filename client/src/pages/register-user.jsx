@@ -1,7 +1,8 @@
-/* eslint-disable no-useless-escape */
 import { useState } from 'react';
-import { Form, Button, Container, Row, Col } from 'react-bootstrap';
+import { Form, Button, Row, Col, Container } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import '../style/AccountPage.css'; // Importiere CSS-Datei für Stile
 
 const RegisterPage = () => {
   const [username, setUsername] = useState('');
@@ -15,37 +16,33 @@ const RegisterPage = () => {
     event.preventDefault();
 
     if (password !== confirmPassword) {
-        setError("Passwords do not match!");
-        return;
+      setError("Passwords do not match!");
+      return;
     }
 
     try {
-        // Request Nginx-Proxy, to forward the request to the Fastify-Server        
-        const response = await fetch('http://localhost/checkAndCreateUser', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, email, password })
-        });
+      const { data, status } = await axios.post('http://localhost/checkAndCreateUser', {
+        username,
+        email,
+        password
+      }, {
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-        if (response.ok !== true) {
-            const error = await response.text();
-            const errorObject = JSON.parse(error);            
-            setError(errorObject.message || 'Registration failed!');
-        } else {
-            //TODO: Log user instantly in after registration when login is implemented
-            navigate('/login');
-        }
-
+      if (status === 200) {
+        navigate('/login');
+      } else {
+        setError(data.message || 'Registration failed!');
+      }
     } catch (error) {
-        setError('An error occurred while registering the user.');
+      setError('An error occurred while registering the user.');
     }
-};
+  };
 
   return (
     <Container className="auth-container">
-      <Row style={{ minHeight: '10vh' }}></Row>
-      <Row className="justify-content-md-center">
-        <Col md={6} lg={4}>
+      <Row className="justify-content-center align-items-center h-100 row-expanded-width">
+        <Col md={6} lg={4} className="form-col">
           <h2 className="text-center">Register</h2>
           {error && <p className="text-danger text-center">{error}</p>}
           <Form onSubmit={handleSubmit}>
@@ -102,7 +99,6 @@ const RegisterPage = () => {
           </p>
         </Col>
       </Row>
-      <Row style={{ minHeight: '10vh' }}></Row>
     </Container>
   );
 };
