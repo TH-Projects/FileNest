@@ -6,14 +6,10 @@ services:
       context: FileStorage
       dockerfile: Dockerfile
     depends_on:
-      minio1:
-        condition: service_started
-      minio2:
-        condition: service_started
-      minio3:
-        condition: service_started
-      minio4:
-        condition: service_started
+      - minio1
+      - minio2
+      - minio3
+      - minio4
     command: ["./createuser.sh", "http://minio1:9000"]
     volumes:
       - .env:/usr/local/bin/.env
@@ -100,43 +96,84 @@ services:
     env_file:
       - .env
     depends_on:
-      serverfastify:
-        condition: service_started
-      reactapp:
-        condition: service_started
-      broker:
-        condition: service_started
-      servermetadb:
-        condition: service_started
+      - serverfastify
+      - reactapp
+      - broker
+      - servermetadb1
+      - servermetadb2
+      - servermetadb3
     ports:
       - "${PORT_NGINX}:${PORT_NGINX}"
 
-  metadb:
+  metadb1:
     image: metadb
     build: MetaDB
     env_file:
       - .env
-    deploy:
-      mode: replicated
-      replicas: 1
     volumes:
       - .env:/usr/local/bin/.env
       - /var/lib/mysql
     ports:
-      - "9000-9100:${PORT_METADB}"
-    depends_on:
-      - broker
+      - "8001:${PORT_METADB}"
+  metadb2:
+    image: metadb
+    build: MetaDB
+    env_file:
+      - .env
+    volumes:
+      - .env:/usr/local/bin/.env
+      - /var/lib/mysql
+    ports:
+      - "8002:${PORT_METADB}"
 
-  servermetadb:
+  metadb3:
+    image: metadb
+    build: MetaDB
+    env_file:
+      - .env
+    volumes:
+      - .env:/usr/local/bin/.env
+      - /var/lib/mysql
+    ports:
+      - "8003:${PORT_METADB}"
+
+  servermetadb1:
     image: servermetadb
     build: ./MetaDBServer
     depends_on:
-      - metadb
+      - metadb1
       - broker
     env_file:
       - .env
     environment:
-      - MYSQL_HOST=metadb
+      - MYSQL_HOST=metadb1
+    expose:
+      - "${PORT_SERVERMETADB}"
+
+  servermetadb2:
+    image: servermetadb
+    build: ./MetaDBServer
+    depends_on:
+      - metadb2
+      - broker
+    env_file:
+      - .env
+    environment:
+      - MYSQL_HOST=metadb2
+    expose:
+      - "${PORT_SERVERMETADB}"
+
+
+  servermetadb3:
+    image: servermetadb
+    build: ./MetaDBServer
+    depends_on:
+      - metadb3
+      - broker
+    env_file:
+      - .env
+    environment:
+      - MYSQL_HOST=metadb3
     expose:
       - "${PORT_SERVERMETADB}"
 

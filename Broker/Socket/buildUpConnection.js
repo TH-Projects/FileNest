@@ -15,13 +15,6 @@ async function buildUpConnection(fastify) {
         success = await coupleCall('http://filenest-broker-1:6001/couple');
         tries++;
     }
-    tries = 0;
-    while(!success && tries < 15){
-        const waitTime = Math.floor(Math.random() * (1000 - 800 + 1)) + 100;
-        await sleep(waitTime);
-        success = await coupleCall('http://nginx/couple');
-        tries++;
-    }
 }
 
 async function coupleCall(url){

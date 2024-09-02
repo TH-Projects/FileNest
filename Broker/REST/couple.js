@@ -3,6 +3,8 @@ const connectionStorage = require('../Socket/connectionStorage');
 const enums = require('../Socket/enums');
 const axios = require('axios');
 const crypto = require('crypto');
+const os = require('os');
+require('dotenv').config();
 
 async function couple(fastify) {
   fastify.post('/couple', async (request, reply) => {
