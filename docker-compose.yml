@@ -140,6 +140,18 @@ services:
     expose:
       - "${PORT_SERVERMETADB}"
 
+  admin:
+    image: admin
+    build: ./Admin
+    env_file:
+      - .env
+    depends_on:
+      - broker
+      - metadb
+      - servermetadb
+    ports:
+      - "3000:${PORT_ADMIN}"
+
 volumes:
   minio1-data:
   minio2-data:
