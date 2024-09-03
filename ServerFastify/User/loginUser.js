@@ -31,7 +31,7 @@ async function loginUserRoutes(fastify) {
                 return reply.send({
                     success: true,
                     message: 'Login successful',
-                    user: { username }
+                    user: { username, password }
                 });
             }
 

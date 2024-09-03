@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contextes/auth-context';
 import CryptoJS from 'crypto-js';
 import axios from 'axios';
-import '../style/AccountPage.css'; // Importiere CSS-Datei für Stile
+import '../style/AccountPage.css';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -27,15 +27,17 @@ const LoginPage = () => {
         headers: { 'Content-Type': 'application/json' }
       });
 
-      if (status === 200) {
-        // Login successful
-        login({ username, password: hashedPassword }); // Set logged-in user in context
-        navigate('/'); // Navigate to Dashboard
+      if (status === 200 && data.success) {
+        // Login erfolgreich
+        const userData = { username, password: hashedPassword };
+        login(userData); // Set userData in context and localStorage
+
+        navigate('/'); // Nav to home page
       } else {
-        setError(data.message || 'Login failed');
+        setError(data.message || 'Login fehlgeschlagen');
       }
     } catch (error) {
-      setError(error.response.data.message || 'An unexpected error occurred. Please try again later.');
+      setError(error.response?.data?.message || 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es später erneut.');
     }
   };
 
