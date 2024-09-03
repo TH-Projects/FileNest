@@ -16,7 +16,6 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
         params: { file_id },
         responseType: 'blob',
       });
-      console.log("Response from download", response);      
       if (onDownload) onDownload(createResultMessage(true, 'File downloaded successfully'));
       saveAs(response.data, `${name}.${file_type}`);
     } catch (error) {

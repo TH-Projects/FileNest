@@ -153,13 +153,11 @@ const uploadFile = async (minIO, bucketName, fileName, fileBuffer, fileSize) => 
 const createFileMetadata = (fileName, fileSize, mimeType, username) => {
     const lastDotIndex = fileName.lastIndexOf('.');
     return {
-        file_id: 0,
         name: lastDotIndex !== -1 ? fileName.substring(0, lastDotIndex) : fileName,
         file_type: lastDotIndex !== -1 ? fileName.substring(lastDotIndex + 1) : '',
         type: mimeType,
         size: fileSize,
-        last_modify: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        username: username || null
+        last_modify: new Date().toISOString().slice(0, 19).replace('T', ' ')
     };
 };
 
@@ -195,10 +193,10 @@ const insertFileMetadata = async (metadata, ownerId, minIOServerId, etag) => {
         }
         const response = await axios.post('http://nginx/addQueue', data, {
             headers: { 'Content-Type': 'application/json' }
-        });
+        });        
 
         if (response.status === 200) {
-            metadata.file_id = response.data.message;            
+            console.log('File metadata inserted successfully:');
         } else {
             throw new Error('Error inserting metadata into the database');
         }

@@ -47,9 +47,9 @@ const FileTable = () => {
   // Reports the response of the file upload to the user
   const handleFileUpload = async () => {
     if (user) {
-      const { success, message, metadata } = await handleUpload();
+      const { success, message } = await handleUpload();
       if (success) {        
-        setQueryData((prevData) => [...prevData, metadata]);
+        fetchFiles(); // Refresh the file list shown in the table
       } else {
         setResultMessage(message);
       }
