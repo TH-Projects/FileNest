@@ -28,10 +28,7 @@ fastify.register(require('./REST/removeMetaInfo'));
 // Server starten
 const start = async () => {
     try {
-        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-        console.log('Sleeping for 15 seconds');
         await fastify.listen({port:3001, host:'0.0.0.0'});
-        await sleep(15000);
         await dbConnection.register();
         connectionIn(fastify);
         await buildUpConnection();
