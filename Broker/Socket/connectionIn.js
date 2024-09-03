@@ -21,6 +21,7 @@ function connectionIn (fastify){
         connectionStorage.addConnection(ws, enums.connectionTypes.BROKER);
         open(fastify, ws, enums.connectionTypes.BROKER);
         ws.on('message', (message) => {
+            console.log('Message: ' + message);
             let jsonMessage;
             if(Buffer.isBuffer(message)){
                 jsonMessage = JSON.parse(message.toString());

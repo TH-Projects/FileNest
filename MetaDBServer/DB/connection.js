@@ -7,9 +7,7 @@ dotenv.config();
 
 // Erstelle eine Fastify-Instanz mit benutzerdefinierten Zeitüberschreitungen
 const server = fastify({
-    logger: true,
-    timeout: 60000,
-    pluginTimeout: 120000 // 2 Minuten Timeout für Plugins
+    logger: true
 });
 
 // Registriere das fastify-mariadb Plugin
@@ -19,7 +17,6 @@ async function register() {
             promise: true,
             connectionString: `mariadb://${process.env.MYSQL_USER}:${process.env.MYSQL_PASSWORD}@${process.env.MYSQL_HOST}:${process.env.PORT_METADB}/${process.env.MYSQL_DATABASE}`
         });
-
         // Warte, bis alle Plugins bereit sind
         await server.ready();
     } catch (err) {

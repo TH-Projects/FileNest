@@ -3,6 +3,7 @@ require('dotenv').config();
 const axios = require('axios');
 const os = require('os');
 const enums = require('./enums');
+const queue = require('../Queue/queue');
 
 async function buildUpConnection(fastify) {
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -11,18 +12,29 @@ async function buildUpConnection(fastify) {
     while(!success && tries < 15){
         const waitTime = Math.floor(Math.random() * (1000 - 800 + 1)) + 100;
         await sleep(waitTime);
-        success = await coupleCall();
+        success = await coupleCall('http://filenest-broker-1:6001/couple');
+        tries++;
+    }
+    tries = 0;
+    while(!success && tries < 15){
+        const waitTime = Math.floor(Math.random() * (1000 - 800 + 1)) + 100;
+        await sleep(waitTime);
+        success = await coupleCall('http://nginx/couple');
         tries++;
     }
 }
 
-async function coupleCall(){
+async function coupleCall(url){
     try {
-        await axios.post( 'http://filenest-broker-1:6001/couple', {
+        const response = await axios.post( url, {
             url: 'ws://' + os.hostname() + ':' + process.env.PORT_BROKER,
             type: enums.connectionTypes.BROKER
         });
-        return true;
+        if(response.data.couple === 'success'){
+            queue.queue = response.data.data;
+            return true;
+        }
+        return false;
     } catch (e) {
         console.log('Error buildUpConnection');
         return false;

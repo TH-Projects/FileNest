@@ -1,4 +1,4 @@
-const fastify = require('fastify')({ logger: true, timeout: 60000, pluginTimeout: 60000 * 2});
+const fastify = require('fastify')({ logger: true});
 const buildUpConnection = require('./Socket/buildUpConnection');
 const dbConnection = require('./DB/connection');
 const connectionIn = require('./Socket/connectionIn');
@@ -28,10 +28,10 @@ fastify.register(require('./REST/removeMetaInfo'));
 // Server starten
 const start = async () => {
     try {
-        await fastify.listen({port:3001, host:'0.0.0.0'});
         const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-        console.log('Sleeping for 30 seconds');
-        await sleep(30000);
+        console.log('Sleeping for 15 seconds');
+        await fastify.listen({port:3001, host:'0.0.0.0'});
+        await sleep(15000);
         await dbConnection.register();
         connectionIn(fastify);
         await buildUpConnection();
