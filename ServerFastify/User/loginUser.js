@@ -26,21 +26,23 @@ async function loginUserRoutes(fastify) {
                 password
             });
 
-            // Successful authentication
-            return reply.send({
-                success: true,
-                message: 'Login successful',
-                user: { username }
-            });
+            if(loginResponse.status === 200) {
+                // Successful authentication
+                return reply.send({
+                    success: true,
+                    message: 'Login successful',
+                    user: { username }
+                });
+            }
 
         } catch (error) {
             fastify.log.error(error);
 
             if (error.response) {
-                // The request was made and the server responded with a status code
+                // The request was made and the server responded with a status code                
                 return reply.code(error.response.status).send({
                     success: false,
-                    message: error.response.data.error || 'Login failed'
+                    message: error.response.data.message || 'Login failed'
                 });
             } else if (error.request) {
                 // The request was made but no response was received

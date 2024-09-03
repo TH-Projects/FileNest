@@ -7,7 +7,7 @@ import { formatTimestamp, formatBytes, createResultMessage } from '../utils/util
 import "../style/cards.css";
 
 const FileView = ({ file_meta_data, onDelete, onDownload }) => {  
-  const { user } = useAuth();
+  const { user } = useAuth();  
   const { file_id, name, file_type, size, username, last_modify } = file_meta_data;
 
   const handleDownload = async () => {
@@ -16,11 +16,24 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
         params: { file_id },
         responseType: 'blob',
       });
-
+      console.log("Response from download", response);      
       if (onDownload) onDownload(createResultMessage(true, 'File downloaded successfully'));
       saveAs(response.data, `${name}.${file_type}`);
-    } catch (error) {      
-      if (onDownload) onDownload(createResultMessage(false, error.response.data.message));
+    } catch (error) {
+
+      if (error.response && error.response.data instanceof Blob) {
+        // convert blob to text
+        error.response.data.text().then(text => {
+          try {
+            const errorResponse = JSON.parse(text);
+            if (onDownload) onDownload(createResultMessage(false, errorResponse.message));
+            console.error('Fehlermeldung:', errorResponse.message);
+          } catch (e) {
+            if (onDownload) onDownload(createResultMessage(false, error.response.data));
+          }
+        });
+      }       
+      if (onDownload) onDownload(createResultMessage(false, 'Unknown error'));
     }
   };
 

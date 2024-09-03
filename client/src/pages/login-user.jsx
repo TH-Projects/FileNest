@@ -35,7 +35,7 @@ const LoginPage = () => {
         setError(data.message || 'Login failed');
       }
     } catch (error) {
-      setError('An unexpected error occurred. Please try again later.');
+      setError(error.response.data.message || 'An unexpected error occurred. Please try again later.');
     }
   };
 

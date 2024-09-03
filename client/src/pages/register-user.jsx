@@ -34,8 +34,8 @@ const RegisterPage = () => {
       } else {
         setError(data.message || 'Registration failed!');
       }
-    } catch (error) {
-      setError('An error occurred while registering the user.');
+    } catch (error) {      
+      setError(error.response.data.message || 'An error occurred while registering the user.');
     }
   };
 

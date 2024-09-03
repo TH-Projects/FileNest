@@ -16,8 +16,8 @@ async function download(fastify) {
 
     try {
       // Get file metadata from the database
-      const file = await getFile(file_id);
-      if (!file) {
+      const file = await getFile(file_id);      
+      if (!file) {        
         return reply.code(500).send({
           success: false,
           message: 'Failed to get file metadata'
@@ -91,7 +91,7 @@ async function getFile(fileId) {
     }
     return null;
   } catch (error) {
-    console.error('Error fetching file metadata:', error);
+    console.error('Error fetching file metadata:', error.response.data);
     return null;
   }
 }

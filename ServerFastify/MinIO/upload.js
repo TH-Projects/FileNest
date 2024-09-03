@@ -5,8 +5,6 @@ require('dotenv').config();
 const { clientTypes, operationTypes } = require('./enums');
 
 async function upload(fastify, options) {
-    const { stream } = options;
-
     fastify.post('/upload', async (request, reply) => {
         try {
             const data = request.body.file?.[0];
@@ -15,17 +13,14 @@ async function upload(fastify, options) {
             const fileBuffer = data.data;
             const fileSize = fileBuffer.length;
 
-            if (!fileSize) {
-                return sendError(reply, 400, 'File size is missing or malformed');
-            }
-
-            if (!data || !fileName || !fileBuffer) {
+            if (!data || !fileName || !fileBuffer || ! fileSize) {
                 return sendError(reply, 400, 'File data is missing or malformed');
             }
 
-            if (!isValidFilename(fileName)) {
-                return sendError(reply, 400, 'Filename contains invalid characters. Only letters, numbers, hyphens, underscores, and spaces are allowed');
+            if (!isValidFilename(fileName)) {                
+                return sendError(reply, 400, 'Filename contains invalid characters. Only letters (A-Z, a-z), numbers, hyphens, underscores, and spaces are allowed');
             }
+
             const isAuthenticated = await authenticateUser(user);
             if (!isAuthenticated) {
                 return sendError(reply, 401, 'User authentication failed');
@@ -35,7 +30,7 @@ async function upload(fastify, options) {
 
             const isDuplicate = await checkDuplicateFileName(user.username, fileName);
             if (isDuplicate) {
-                return sendError(reply, 400, 'Filename already exists');
+                return sendError(reply, 400, 'Filename already exists for this user. Please rename the file and try again');
             }
 
             await ensureBucketExists(minIO, user.username.toLowerCase());
@@ -45,6 +40,7 @@ async function upload(fastify, options) {
             const metadata = createFileMetadata(fileName, fileSize, data.mimetype, user.username);
             const ownerId = await getAccountId(user.username);
             await insertFileMetadata(metadata, ownerId, minIOServerId, etag);
+            
 
             fastify.log.info('File uploaded successfully:', metadata);
 
@@ -55,7 +51,6 @@ async function upload(fastify, options) {
             });
 
         } catch (err) {
-            console.log(err);
             handleError(reply, err, fastify);
         }
     });
@@ -63,7 +58,7 @@ async function upload(fastify, options) {
 
 // Helper Functions
 
-const isValidFilename = (filename) => {
+const isValidFilename = (filename) => {    
     const validFilenameRegex = /^[a-zA-Z0-9_\-. ]+$/;
     return validFilenameRegex.test(filename);
 };
@@ -118,7 +113,6 @@ const checkDuplicateFileName = async (username, fileName) => {
             params: { username },
             headers: { 'Content-Type': 'application/json' }
         });
-
         const fileBaseName = fileName.split('.').slice(0, -1).join('.');
         return filenameResponse.data.message.some(file => file.name === fileBaseName);
     } catch (error) {
@@ -204,7 +198,7 @@ const insertFileMetadata = async (metadata, ownerId, minIOServerId, etag) => {
         });
 
         if (response.status === 200) {
-            metadata.file_id = response.data.message;
+            metadata.file_id = response.data.message;            
         } else {
             throw new Error('Error inserting metadata into the database');
         }
