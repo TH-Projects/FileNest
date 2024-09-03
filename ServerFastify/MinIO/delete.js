@@ -1,5 +1,6 @@
 const minioClient = require('./MinIOClient');
 const axios = require('axios');
+const { clientTypes, operationTypes } = require('./enums')
 
 async function deleteFile(fastify, options) {
     fastify.delete('/delete', async (request, reply) => {
@@ -98,12 +99,24 @@ const deleteFileFromMinIO = async (bucketName, fileName, fileType, fastify) => {
 };
 
 const deleteFileMetadata = async (file_id, fastify) => {
+    
     try {
-        const deleteResponse = await axios.delete('http://nginx/removeMetaInfo', {
-            headers: { 'Content-Type': 'application/json' },
-            data: { file_id }
+        const data = {
+            type: clientTypes.METADBSERVER,
+            message: {
+                operation: operationTypes.DELETEFILE,
+                data: {
+                    file_id: file_id
+                }
+            }
+        }
+
+        const deleteResponse = await axios.post('http://nginx/addQueue',data, {
+            headers: { 'Content-Type': 'application/json' }
         });
-        if (deleteResponse.status !== 200 || !deleteResponse.data.success) {
+        console.log(deleteResponse);
+        
+        if (deleteResponse.status !== 200 || !deleteResponse.data.status === 'success') {
             throw new Error(deleteResponse.data.message || 'Error deleting file metadata');
         }
     } catch (error) {

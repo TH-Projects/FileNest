@@ -5,6 +5,7 @@ const clientTypes = Object.freeze({
 const operationTypes = Object.freeze({
     MARK_NON_REACHABLE_SERVER: 'MARK_NON_REACHABLE_SERVER',
     ADDFILE: 'ADDFILE',
+    DELETEFILE: 'DELETEFILE',
 });
 
 
