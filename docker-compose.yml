@@ -112,7 +112,7 @@ services:
       - .env
     volumes:
       - .env:/usr/local/bin/.env
-      - /var/lib/mysql
+      - metadb1-data:/var/lib/mysql
     ports:
       - "8001:${PORT_METADB}"
   metadb2:
@@ -122,7 +122,7 @@ services:
       - .env
     volumes:
       - .env:/usr/local/bin/.env
-      - /var/lib/mysql
+      - metadb2-data:/var/lib/mysql
     ports:
       - "8002:${PORT_METADB}"
 
@@ -133,7 +133,7 @@ services:
       - .env
     volumes:
       - .env:/usr/local/bin/.env
-      - /var/lib/mysql
+      - metadb3-data:/var/lib/mysql
     ports:
       - "8003:${PORT_METADB}"
 
@@ -182,5 +182,6 @@ volumes:
   minio2-data:
   minio3-data:
   minio4-data:
-  metadb-data:
-    driver: local
+  metadb1-data:
+  metadb2-data:
+  metadb3-data:
