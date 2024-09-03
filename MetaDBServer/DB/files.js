@@ -130,6 +130,7 @@ async function addFile(etag, name, file_type, size, last_modify, owner_id, minIO
             [etag, name, file_type, size, last_modify, owner_id, minIOServerDB.message.cluster_id ,content_type]
         );
         db.release();
+        console.log('Added file', result.insertId);
         return {
             success: true,
             message: result.insertId
