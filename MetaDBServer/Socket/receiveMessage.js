@@ -38,6 +38,10 @@ async function handleMessage(message){
             console.log('Mark Non Reachable Server');
             await markNonReachableServer(message.data.minIOServer_id);
             break;
+        case enums.operations.UPDATEMINIOSERVER:
+            console.log('Update MinIOServer');
+            await updateMinIOServer(message.data.minIOServer_id, message.data.active);
+            break;
         default:
             console.log('Unknown operation: ' + message.operation);
             break;
@@ -134,6 +138,30 @@ async function markNonReachableServer(minIOServer_id){
         return;
     }
     return await minIOServer.markNonReachableServer(minIOServer_id);
+}
+
+async function updateMinIOServer(minIOServer_id, active){
+    if(!minIOServer_id) {
+        console.log('No minIOServer_id provided');
+        return;
+    }
+    if(!active) {
+        console.log('No active provided');
+        return;
+    }
+    return await minIOServer.updateMinIOServer(minIOServer_id, active);
+}
+
+async function updateMemoryLimit(cluster_id, memory_limit_reached){
+    if(!cluster_id) {
+        console.log('No cluster_id provided');
+        return;
+    }
+    if(!memory_limit_reached) {
+        console.log('No memory_limit_reached provided');
+        return;
+    }
+    return await minIOServer.updateMemoryLimit(cluster_id, memory_limit_reached);
 }
 
 module.exports = receiveMessage;

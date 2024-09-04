@@ -8,6 +8,8 @@
   "dependencies": {
     "axios": "^1.7.5",
     "fastify": "^4.28.1",
-    "http-errors": "~1.6.3"
+    "http-errors": "~1.6.3",
+    "dotenv": "^16.4.5",
+    "minio": "^8.0.1"
   }
 }
