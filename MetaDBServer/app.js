@@ -24,6 +24,9 @@ fastify.register(require('./REST/getAccountIdByUsername'));
 fastify.register(require('./REST/getMinIOServerForUpload'));
 fastify.register(require('./REST/getFilenamesForUsername'));
 fastify.register(require('./REST/removeMetaInfo'));
+fastify.register(require('./REST/getAllMinIOServer'));
+fastify.register(require('./REST/updateMinIOServer'));
+fastify.register(require('./REST/updateMemoryLimit'));
 
 // Server starten
 const start = async () => {
