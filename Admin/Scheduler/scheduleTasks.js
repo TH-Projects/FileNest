@@ -31,8 +31,9 @@ const handleServerChange = async (active, server) => {
 }
 
 const handleSpace = async (server, usagePercentage) => {
-    const memory_limit_reached = server.memory_limit_reached === 0;
-    const serverSpace = usagePercentage > 10;
+    const memory_limit_reached = server.memory_limit_reached === 1;
+    const serverSpace = usagePercentage > 95;
+    console.log(memory_limit_reached, serverSpace);
     if(!(serverSpace === memory_limit_reached)){
         const response = await axios.post(process.env.NGINX_API + '/updateMemoryLimit', {
             cluster_id: server.cluster_id,

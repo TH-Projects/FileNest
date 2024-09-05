@@ -8,10 +8,11 @@ async function updateMemoryLimit(fastify) {
         const data = request.body;
         const cluster_id = data?.cluster_id;
         const memory_limit_reached = data?.memory_limit_reached;
+        console.log(data);
         if(!cluster_id) {
             return reply.code(400).send('cluster_id not provided');
         }
-        if(!memory_limit_reached) {
+        if(memory_limit_reached === undefined) {
             return reply.code(400).send('memory_limit_reached not provided');
         }
         return await shareToBroker(cluster_id, memory_limit_reached);

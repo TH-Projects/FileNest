@@ -42,6 +42,10 @@ async function handleMessage(message){
             console.log('Update MinIOServer');
             await updateMinIOServer(message.data.minIOServer_id, message.data.active);
             break;
+        case enums.operations.MEMORYLIMIT:
+            console.log('Update Memory Limit');
+            await updateMemoryLimit(message.data.cluster_id, message.data.memory_limit_reached);
+            break;
         default:
             console.log('Unknown operation: ' + message.operation);
             break;
@@ -157,11 +161,11 @@ async function updateMemoryLimit(cluster_id, memory_limit_reached){
         console.log('No cluster_id provided');
         return;
     }
-    if(!memory_limit_reached) {
+    if(memory_limit_reached === undefined) {
         console.log('No memory_limit_reached provided');
         return;
     }
-    return await minIOServer.updateMemoryLimit(cluster_id, memory_limit_reached);
+    return await cluster.updateMemoryLimit(cluster_id, memory_limit_reached);
 }
 
 module.exports = receiveMessage;

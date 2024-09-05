@@ -43,5 +43,6 @@ async function updateMemoryLimit (cluster_id, memory_limit_reached) {
 }
 
 module.exports = {
-    addCluster
+    addCluster,
+    updateMemoryLimit
 }
