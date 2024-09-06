@@ -9,7 +9,7 @@ async function createUserRoutes(fastify) {
     fastify.post('/checkAndCreateUser', async (request, reply) => {
         const { username, email, password } = request.body;
 
-        // Validate the input data using business logic functions
+        // Validate the username and email
         const checkResult = await checkUserExistance(username, email);
         if (!checkResult.success) {
             return reply.status(400).send({
@@ -18,6 +18,7 @@ async function createUserRoutes(fastify) {
             });
         }
 
+        // Validate the password
         const passwordValidationResult = validatePassword(password);
         if (!passwordValidationResult.success) {
             return reply.status(400).send({
@@ -30,9 +31,7 @@ async function createUserRoutes(fastify) {
         const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
 
         // Try to create the user
-        const createResult = await createUser(username, email, hashedPassword);
-        console.log("createResult:", createResult.success);
-        
+        const createResult = await createUser(username, email, hashedPassword);        
         if (!createResult.success) {
             return reply.status(500).send({
                 success: false,
@@ -46,7 +45,9 @@ async function createUserRoutes(fastify) {
         });
     });
 
+    // Check if the username and email are already in the database
     const checkUserExistance = async (username, email) => {
+        // Check if username and email are provided
         if (!username || !email) {
             return {
                 success: false,
@@ -85,7 +86,9 @@ async function createUserRoutes(fastify) {
         }
     };
 
+    // Validate the password with a regex
     const validatePassword = (password) => {
+        // Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-])[A-Za-z\d@$!%*?&\-]{8,}$/;
         if (!passwordRegex.test(password)) {
             return {
@@ -96,7 +99,9 @@ async function createUserRoutes(fastify) {
         return { success: true };
     };
 
+    // Create the user in the database
     const createUser = async (username, email, password) => {
+        // Check if username, email, and password are provided
         if (!username || !email || !password) {
             return {
                 success: false,
@@ -104,6 +109,7 @@ async function createUserRoutes(fastify) {
             };
         }
 
+        // Share the user data with the broker
         try {
             const result = await shareToBroker(username, password, email);
             
@@ -127,6 +133,7 @@ async function createUserRoutes(fastify) {
         }
     };
 
+    // Share the user data with the broker to insert it into all databases
     const shareToBroker = async (username, password, email) => {
         try {
             const data = {
