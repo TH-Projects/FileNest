@@ -62,5 +62,8 @@ INSERT INTO Role (name) VALUE ('member');
 # "testmember" pwd: "member"
 INSERT INTO Account (username, password, email, role_id) VALUE ('root', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', 'root@supersavesecurity.com',1);
 INSERT INTO Account (username, password, email, role_id) VALUE ('testmember', 'e31ab643c44f7a0ec824b59d1194d60dac334200d845e61d2d289daa0f087ea4', 'member@supersavesecurity.com',2);
-INSERT INTO Cluster (start_node_id, end_node_id) VALUE (1, 1);
+INSERT INTO Cluster (start_node_id, end_node_id) VALUE (1, 4);
 INSERT INTO MinIOServer (address, cluster_id) VALUE ('minio1', 1);
+INSERT INTO MinIOServer (address, cluster_id) VALUE ('minio2', 1);
+INSERT INTO MinIOServer (address, cluster_id) VALUE ('minio3', 1);
+INSERT INTO MinIOServer (address, cluster_id) VALUE ('minio4', 1);

@@ -84,6 +84,28 @@ async function getMinIOServerByCluster(cluster_id) {
     }
 }
 
+async function getAllMinIOServer() {
+    try {
+        const db = await connection.getConnection();
+        const result = await db.query(
+            'SELECT m.*, c.memory_limit_reached ' +
+            'FROM MinIOServer m ' +
+            'INNER JOIN Cluster c ON m.cluster_id = c.cluster_id'
+        );
+        db.release();
+        return {
+            success: true,
+            message: result
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            message: error
+        };
+    }
+}
+
 async function getClusterForMinIOServer(minIOServer_id) {
     try {
         const db = await connection.getConnection();
@@ -109,7 +131,7 @@ async function getClusterForMinIOServer(minIOServer_id) {
 async function markNonReachableServer(minIOServer_id){
     try {
         const db = await connection.getConnection();
-        const [result] = await db.query(
+        const result = await db.query(
             'UPDATE MinIOServer ' +
             'SET connection_failure_datetime = CURRENT_TIMESTAMP ' +
             'WHERE minIOServer_id = ?', [minIOServer_id]
@@ -128,10 +150,35 @@ async function markNonReachableServer(minIOServer_id){
     }
 }
 
+async function updateMinIOServer(minIOServer_id, active){
+    try {
+        const db = await connection.getConnection();
+        const result = await db.query(
+            'UPDATE MinIOServer ' +
+            'SET connection_failure_datetime = ? ' +
+            'WHERE minIOServer_id = ?', [active ? null : new Date(), minIOServer_id]
+        );
+        db.release();
+        return {
+            success: true,
+            message: result.affectedRows > 0 ? "Server updated successfully" : "Server not found"
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            message: error
+        };
+    }
+}
+
+
 module.exports = {
     addMinIOServer,
     getMinIOServerByCluster,
     getClusterForMinIOServer,
     getMinIOServerForUpload,
-    markNonReachableServer
+    markNonReachableServer,
+    getAllMinIOServer,
+    updateMinIOServer
 }
