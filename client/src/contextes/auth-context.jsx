@@ -1,5 +1,5 @@
-/* eslint-disable react/prop-types */
 /* eslint-disable react-refresh/only-export-components */
+/* eslint-disable react/prop-types */
 import { createContext, useContext, useState, useEffect } from "react";
 
 // Create a context for authentication
@@ -11,9 +11,13 @@ export const useAuth = () => useContext(AuthContext);
 // AuthProvider component to wrap the app and provide auth state
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    // Try to get user from localStorage
-    const storedUser = sessionStorage.getItem("user");
+    // Try to get user from sessionStorage
+    const storedUser = sessionStorage.getItem("fileNestUser");
     return storedUser ? JSON.parse(storedUser) : null;
+  });
+  const [token, setToken] = useState(() => {
+    const storedToken = sessionStorage.getItem("fileNestToken");
+    return storedToken || null;
   });
 
   useEffect(() => {
@@ -21,6 +25,7 @@ export const AuthProvider = ({ children }) => {
       if (event.key === 'user') {
         const newUser = event.newValue ? JSON.parse(event.newValue) : null;
         setUser(newUser);
+        setToken(newUser ? newUser.token : null);
       }
     };
 
@@ -33,16 +38,20 @@ export const AuthProvider = ({ children }) => {
 
   const login = (userData) => {
     setUser(userData);
-    sessionStorage.setItem("user", JSON.stringify(userData));
+    setToken(userData.token);
+    sessionStorage.setItem("fileNestUser", JSON.stringify(userData));
+    sessionStorage.setItem("fileNestToken", userData.token);
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("user");
+    setToken(null);
+    sessionStorage.removeItem("fileNestUser");
+    sessionStorage.removeItem("fileNestToken");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, token }}>
       {children}
     </AuthContext.Provider>
   );

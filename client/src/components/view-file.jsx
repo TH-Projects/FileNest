@@ -7,7 +7,7 @@ import { formatTimestamp, formatBytes, createResultMessage } from '../utils/util
 import "../style/cards.css";
 
 const FileView = ({ file_meta_data, onDelete, onDownload }) => {  
-  const { user } = useAuth();  
+  const { token } = useAuth();  
   const { file_id, name, file_type, size, username, last_modify } = file_meta_data;
 
   const handleDownload = async () => {
@@ -19,14 +19,13 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
       if (onDownload) onDownload(createResultMessage(true, 'File downloaded successfully'));
       saveAs(response.data, `${name}.${file_type}`);
     } catch (error) {
-
       if (error.response && error.response.data instanceof Blob) {
         // convert blob to text
         error.response.data.text().then(text => {
           try {
             const errorResponse = JSON.parse(text);
             if (onDownload) onDownload(createResultMessage(false, errorResponse.message));
-            console.error('Fehlermeldung:', errorResponse.message);
+            console.error('ErrorMsg:', errorResponse.message);
           } catch (e) {
             if (onDownload) onDownload(createResultMessage(false, error.response.data));
           }
@@ -39,24 +38,27 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this file?')) return;
 
-    if(!file_id || !user) {
+    if(!file_id || !token) {
       if (onDelete) onDelete(createResultMessage(false, 'Missing required parameters'));
       return;
     }
     
     try {
       const response = await axios.delete('http://localhost/delete', {
-        headers: { 'Content-Type': 'application/json' },
-        data: { file_id, username: user.username, password: user.password },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        data: { file_id },
       });
 
       const isSuccess = response.data.success;
-      const message = isSuccess ? 'File deleted successfully' : `File deletion failed: Unknown error}`;
+      const message = isSuccess ? 'File deleted successfully' : `File deletion failed: Unknown error`;
 
       if (onDelete) onDelete(createResultMessage(isSuccess, message));
     } catch (error) {
       console.error('Error deleting the file:', error); 
-      if (onDelete) onDelete(createResultMessage(false, error.response.data.message));
+      if (onDelete) onDelete(createResultMessage(false, error.response?.data?.message || 'Unknown error'));
     }
   };
 
@@ -79,7 +81,7 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
           <Button
             variant="danger"
             className="w-40"
-            disabled={!user}
+            disabled={!token}
             onClick={handleDelete}
           >
             Delete

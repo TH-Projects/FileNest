@@ -1,19 +1,21 @@
 const minioClient = require('./MinIOClient');
 const axios = require('axios');
 const { PassThrough } = require('stream');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { clientTypes, operationTypes } = require('./enums');
 
+const JWT_SECRET = process.env.JWT_SECRET;  // Key saved in .env file
+
 async function upload(fastify, options) {
-    fastify.post('/upload', async (request, reply) => {
-        try {
+    fastify.post('/upload', async (request, reply) => {        
+        try {            
             const data = request.body.file?.[0];
-            const user = JSON.parse(request.body.user);
             const fileName = data.filename;
             const fileBuffer = data.data;
-            const fileSize = fileBuffer.length;
+            const fileSize = fileBuffer.length;            
 
-            if (!data || !fileName || !fileBuffer || ! fileSize) {
+            if (!data || !fileName || !fileBuffer || !fileSize) {
                 return sendError(reply, 400, 'File data is missing or malformed');
             }
 
@@ -21,26 +23,32 @@ async function upload(fastify, options) {
                 return sendError(reply, 400, 'Filename contains invalid characters. Only letters (A-Z, a-z), numbers, hyphens, underscores, and spaces are allowed');
             }
 
-            const isAuthenticated = await authenticateUser(user);
-            if (!isAuthenticated) {
-                return sendError(reply, 401, 'User authentication failed');
+            // Authenticate user using JWT
+            const token = request.headers.authorization?.split(' ')[1]; // Assumes format: "Bearer <token>"
+            if (!token) {
+                return sendError(reply, 401, 'Token is missing');
+            }            
+
+            const authResponse = await authenticateUser(token);
+            if (!authResponse.success) {                
+                return sendError(reply, 401, 'User authentication failedttt');
             }
+            const authenticatedUsername = authResponse.username;
 
             const { minIOServerId, minIO } = await getMinIOServerForUpload();
 
-            const isDuplicate = await checkDuplicateFileName(user.username, fileName);
+            const isDuplicate = await checkDuplicateFileName(authenticatedUsername, fileName);
             if (isDuplicate) {
                 return sendError(reply, 400, 'Filename already exists for this user. Please rename the file and try again');
             }
 
-            await ensureBucketExists(minIO, user.username.toLowerCase());
+            await ensureBucketExists(minIO, authenticatedUsername.toLowerCase());
 
-            const etag = await uploadFile(minIO, user.username.toLowerCase(), fileName, fileBuffer, fileSize);
+            const etag = await uploadFile(minIO, authenticatedUsername.toLowerCase(), fileName, fileBuffer, fileSize);
 
-            const metadata = createFileMetadata(fileName, fileSize, data.mimetype, user.username);
-            const ownerId = await getAccountId(user.username);
+            const metadata = createFileMetadata(fileName, fileSize, data.mimetype, authenticatedUsername);
+            const ownerId = await getAccountId(authenticatedUsername);
             await insertFileMetadata(metadata, ownerId, minIOServerId, etag);
-            
 
             fastify.log.info('File uploaded successfully:', metadata);
 
@@ -55,8 +63,6 @@ async function upload(fastify, options) {
         }
     });
 }
-
-// Helper Functions
 
 const isValidFilename = (filename) => {    
     const validFilenameRegex = /^[a-zA-Z0-9_\-. ]+$/;
@@ -77,17 +83,13 @@ const handleError = (reply, error, fastify) => {
     }
 };
 
-const authenticateUser = async (user) => {
+const authenticateUser = async (token) => {
     try {
-        const authResponse = await axios.post('http://nginx/authUser', {
-            username: user.username,
-            password: user.password
-        }, {
-            headers: { 'Content-Type': 'application/json' }
-        });
-        return authResponse.status === 200;
+        const decoded = jwt.verify(token, JWT_SECRET);        
+        return { success: true, message: 'user authenticated in db' , username: decoded.username}; // Return user data
     } catch (error) {
-        throw new Error('Authentication error');
+        console.error('JWT authentication error:', error);
+        return {success: false, message: 'authentication in db failed'}; // Token is invalid or expired
     }
 };
 

@@ -12,7 +12,6 @@ fastify.register(cors, {
 });
 
 fastify.register(require('./REST/getFiles'));
-fastify.register(require('./REST/authUser'));
 fastify.register(require('./REST/createUser'));
 fastify.register(require('./REST/addCluster'));
 fastify.register(require('./REST/addMinIOServer'));

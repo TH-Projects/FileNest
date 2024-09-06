@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { useAuth } from "../contextes/auth-context";
 import axios from "axios";
 import { Spinner } from 'react-bootstrap';
-import {createResultMessage} from '../utils/utils';
+import { createResultMessage } from '../utils/utils';
+import { useAuth } from '../contextes/auth-context'; // Importieren Sie den AuthContext
 
 const useFileUpload = (uploadUrl, handleCloseModal) => {
-  const { user } = useAuth();
   const [selectedFile, setSelectedFile] = useState(null);
   const [resultMsg, setResultMsg] = useState(null);
+  const { token } = useAuth(); // Holen Sie sich den Token aus dem AuthContext
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -31,7 +31,6 @@ const useFileUpload = (uploadUrl, handleCloseModal) => {
 
     const formData = new FormData();
     formData.append("file", selectedFile);
-    formData.append("user", JSON.stringify(user));
 
     try {
       setResultMsg(
@@ -45,7 +44,8 @@ const useFileUpload = (uploadUrl, handleCloseModal) => {
 
       const response = await axios.post(uploadUrl, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`,
         }
       });
 
