@@ -28,8 +28,7 @@ const RegisterPage = () => {
       }, {
         headers: { 'Content-Type': 'application/json' }
       });
-
-      if (status === 200) {
+      if (status >= 200 && status < 300) {
         navigate('/login');
       } else {
         setError(data.message || 'Registration failed!');
