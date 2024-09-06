@@ -13,12 +13,14 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  // Handle form submission of the login form
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     const hashedPassword = CryptoJS.SHA256(password).toString();
 
     try {
+      // Send login request to the database server
       const { data, status } = await axios.post('http://localhost/loginUser', {
         username,
         password: hashedPassword

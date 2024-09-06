@@ -29,7 +29,7 @@ const Titlebar = () => {
           </h5>
         </Navbar.Text>
         <Button variant="outline-info" size="lg" onClick={handleLogInOutClick}>
-          {user ? "Abmelden" : "Log In"}
+          {user ? "Log Out" : "Log In"}
         </Button>
       </Container>
     </Navbar>

@@ -10,8 +10,10 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
   const { token } = useAuth();  
   const { file_id, name, file_type, size, username, last_modify } = file_meta_data;
 
+  // Handle click on download button
   const handleDownload = async () => {
     try {
+      // Try to download the requested file
       const response = await axios.get('http://localhost/download', {
         params: { file_id },
         responseType: 'blob',
@@ -35,7 +37,9 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
     }
   };
 
+  // Handle click on delete button
   const handleDelete = async () => {
+    // Ask for confirmation before deleting the file
     if (!window.confirm('Are you sure you want to delete this file?')) return;
 
     if(!file_id || !token) {
@@ -44,6 +48,7 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
     }
     
     try {
+      // Try to delete the requested file
       const response = await axios.delete('http://localhost/delete', {
         headers: {
           'Content-Type': 'application/json',
