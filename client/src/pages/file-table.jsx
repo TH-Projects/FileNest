@@ -34,14 +34,12 @@ const FileTable = () => {
   // Reports the response of the file download to the user
   const handleFileDownload = (response) => {
     setResultMessage(response);
-    setTimeout(() => setResultMessage(null), 10000);  // Reset resultMessage after 10 seconds
   };
 
   // Reports the response of the file delete to the user
   const handleFileDelete = (response) => {
     setResultMessage(response);
     fetchFiles(); // Refresh the file list shown in the table
-    setTimeout(() => setResultMessage(null), 10000);  // Reset resultMessage after 10 seconds
   };
 
   // Reports the response of the file upload to the user
@@ -65,7 +63,6 @@ const FileTable = () => {
   // Set the result message from the file upload
   useEffect(() => {
     if (resultMsg) setResultMessage(resultMsg);
-    setTimeout(() => setResultMessage(null), 10000);  // Reset resultMessage after 10 seconds
   }, [resultMsg]);
 
   // triggers metadata fetching from the database server
