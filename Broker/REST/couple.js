@@ -3,9 +3,9 @@ const connectionStorage = require('../Socket/connectionStorage');
 const enums = require('../Socket/enums');
 const axios = require('axios');
 const crypto = require('crypto');
-const os = require('os');
 require('dotenv').config();
 
+// Couple with another broker
 async function couple(fastify) {
   fastify.post('/couple', async (request, reply) => {
       const url = request.body.url;
@@ -25,6 +25,7 @@ async function couple(fastify) {
   })
 }
 
+// Get the current queue from the coupled brokers
 async function getCurrentQueue(){
     let brokerConnections = connectionStorage.getAllConnectionAddressesByType(enums.connectionTypes.BROKER);
     brokerConnections = brokerConnections.map((connection) => {
@@ -55,6 +56,7 @@ async function getCurrentQueue(){
     return [];
 }
 
+// Generate a hash from the data
 function generateHash(data) {
     return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
 }

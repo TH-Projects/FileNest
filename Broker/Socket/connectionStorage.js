@@ -21,6 +21,7 @@ function addConnection(ws, type) {
     }
 }
 
+// Add a shared connection to the storage
 function addSharedConnection(clientAddress, type) {
     if(!sharedConnections.find((entry) => entry.clientAddress === clientAddress)
         && !connectionStorage.find((entry) => entry.ws._url?.replace(/\//g, "") === clientAddress?.replace(/\//g, ""))){
@@ -28,10 +29,12 @@ function addSharedConnection(clientAddress, type) {
     }
 }
 
+// Remove a shared connection from the storage
 function removeSharedConnection(clientAddress) {
     sharedConnections = sharedConnections.filter((entry) => entry.clientAddress !== clientAddress);
 }
 
+// Get all connections by type
 function getConnectionsByType(type, sharedConnections = false) {
     if(sharedConnections){
         return sharedConnections.filter((entry) => entry.type === type);
@@ -39,12 +42,14 @@ function getConnectionsByType(type, sharedConnections = false) {
     return connectionStorage.filter((entry) => entry.type === type);
 }
 
+// Get all connection addresses by type
 function getAllConnectionAddressesByType(type) {
     const connectedClients = connectionStorage.filter((entry) => entry.type === type).map(entry => entry.ws.clientAddress);
     const sharedClients = sharedConnections.filter((entry) => entry.type === type).map(entry => entry.clientAddress);
     return [...connectedClients, ...sharedClients];
 }
 
+// Get all connections without a specific type
 function getConnectionsWithoutType(type, sharedConnections = false) {
     if (sharedConnections) {
         return sharedConnections.filter((entry) => entry.type !== type);
@@ -52,12 +57,8 @@ function getConnectionsWithoutType(type, sharedConnections = false) {
     return connectionStorage.filter((entry) => entry.type !== type);
 }
 
-function getClientByAddress(clientAddress) {
-    return  connectionStorage.find((entry) => entry.ws.clientAddress === clientAddress);
-}
-
+// Get all connections
 function getAllConnections(){
-
     const connectedClients = connectionStorage.map(entry => ({
         client: entry.ws.clientAddress,
         type: entry.type
@@ -70,8 +71,6 @@ function getAllConnections(){
     return [...connectedClients, ...sharedClients];
 }
 
-
-
 module.exports = {
     connectionStorage,
     sharedConnections,
@@ -79,7 +78,6 @@ module.exports = {
     addConnection,
     getConnectionsByType,
     getConnectionsWithoutType,
-    getClientByAddress,
     addSharedConnection,
     getAllConnectionAddressesByType,
     removeSharedConnection,

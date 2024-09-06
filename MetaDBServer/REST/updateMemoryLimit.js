@@ -3,6 +3,7 @@ require('dotenv').config();
 const enums = require('../Socket/enums');
 const {clientTypes} = require("./enums");
 
+// Update the memory limit for a cluster
 async function updateMemoryLimit(fastify) {
     fastify.post('/updateMemoryLimit', async (request, reply) => {
         const data = request.body;
@@ -19,6 +20,7 @@ async function updateMemoryLimit(fastify) {
     });
 }
 
+// Share the memory limit update to the broker
 async function shareToBroker(cluster_id, memory_limit_reached){
     try {
         const data = {

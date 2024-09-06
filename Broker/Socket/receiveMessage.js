@@ -38,4 +38,5 @@ function receiveMessage (fastify, jsonMessage, ws) {
             break;
     }
 }
+
 module.exports = receiveMessage;

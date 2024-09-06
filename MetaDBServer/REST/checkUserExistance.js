@@ -1,5 +1,6 @@
 const { checkUsername, checkEmail } = require('../DB/user'); 
 
+// Check if a user with the given username and email already exists
 async function checkUserExistance(fastify) {
     fastify.post('/checkUserExistance', async (request, reply) => {
         const { username, email } = request.body;

@@ -1,6 +1,7 @@
 const Minio = require("minio");
 require('dotenv').config();
 
+// Get MinIO client
 const getMinIOClient = (address) =>{
     const addressSplit = address.split(':')
     return new Minio.Client({

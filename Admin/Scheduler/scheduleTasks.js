@@ -2,6 +2,7 @@ const checkServer = require('./checkServer');
 const getMinIOServer = require('./getMinIOServer');
 const axios = require("axios");
 
+//schedules the tasks to check the MinIO servers
 const scheduleTasks = async () => {
     const minIOServer = await getMinIOServer();
     if(minIOServer.success) {
@@ -17,6 +18,7 @@ const scheduleTasks = async () => {
     }
 }
 
+//updates the server status in the MetaDB
 const handleServerChange = async (active, server) => {
     const serverActive = server.connection_failure_datetime === null;
     if(!(active === serverActive)){
@@ -30,6 +32,7 @@ const handleServerChange = async (active, server) => {
     }
 }
 
+//updates the memory limit reached status in the MetaDB
 const handleSpace = async (server, usagePercentage) => {
     const memory_limit_reached = server.memory_limit_reached === 1;
     const serverSpace = usagePercentage > 95;

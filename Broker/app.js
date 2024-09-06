@@ -13,7 +13,7 @@ const start = async () => {
     try {
         await fastify.listen({port:parseInt(process.env.PORT_BROKER, 10), host:'0.0.0.0'});
         connectionIn(fastify);
-        await buildUpConnection(fastify);
+        await buildUpConnection();
     } catch (err) {
         fastify.log.error(err);
         process.exit(1);

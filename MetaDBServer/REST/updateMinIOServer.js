@@ -3,6 +3,7 @@ require('dotenv').config();
 const enums = require('../Socket/enums');
 const {clientTypes} = require("./enums");
 
+// Update the minIO server
 async function updateMinIOServer(fastify) {
     fastify.post('/updateMinIOServer', async (request, reply) => {
         const data = request.body;
@@ -18,6 +19,7 @@ async function updateMinIOServer(fastify) {
     });
 }
 
+// Share the minIO server update to the broker
 async function shareToBroker(minIOServer_id, active){
     try {
         const data = {

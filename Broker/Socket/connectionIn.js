@@ -4,14 +4,13 @@ const close = require('./closeConnection');
 const open = require('./openConnection');
 const enums = require('./enums');
 const connectionStorage = require('./connectionStorage');
-const syncConnectionsWithBrokers = require('./syncConnectionsWithBrokers');
 const connectionOut = require('./connectionOut');
 const os = require('os');
 
 // Connections from other instances
 function connectionIn (fastify){
     const wss = new WebSocket.Server({ server: fastify.server });
-    // WebSocket-Verbindungshandler
+    // Connection from other brokers
     wss.on('connection', (ws, req) => {
         Object.defineProperty(ws, 'clientAddress', {
             value: 'ws://' + req.headers.host,
@@ -20,6 +19,8 @@ function connectionIn (fastify){
         console.log('ConnIn ' + req.headers.host);
         connectionStorage.addConnection(ws, enums.connectionTypes.BROKER);
         open(fastify, ws, enums.connectionTypes.BROKER);
+
+        // Receive messages
         ws.on('message', (message) => {
             console.log('Message: ' + message);
             let jsonMessage;
@@ -42,6 +43,7 @@ function connectionIn (fastify){
             receive(fastify, jsonMessage, ws);
         });
 
+        // Close the connection
         ws.on('close', () => {
             close(fastify, ws);
         });

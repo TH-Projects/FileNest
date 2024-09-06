@@ -1,11 +1,11 @@
-const connectionOut = require('./connectionOut');
 require('dotenv').config();
 const axios = require('axios');
 const os = require('os');
 const enums = require('./enums');
 const queue = require('../Queue/queue');
 
-async function buildUpConnection(fastify) {
+// Build up the connection to other brokers
+async function buildUpConnection() {
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     let success = false;
     let tries = 0;
@@ -24,6 +24,7 @@ async function buildUpConnection(fastify) {
     }
 }
 
+// Call the couple endpoint
 async function coupleCall(url){
     try {
         const response = await axios.post( url, {
