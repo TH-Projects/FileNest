@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
     return storedUser ? JSON.parse(storedUser) : null;
   });
   const [token, setToken] = useState(() => {
+    // Try to get token from sessionStorage
     const storedToken = sessionStorage.getItem("fileNestToken");
     return storedToken || null;
   });
@@ -36,6 +37,7 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  // Set session storage and state when user logs in
   const login = (userData) => {
     setUser(userData);
     setToken(userData.token);
@@ -43,6 +45,7 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.setItem("fileNestToken", userData.token);
   };
 
+  // Clear session storage and state when user logs out
   const logout = () => {
     setUser(null);
     setToken(null);

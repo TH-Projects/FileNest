@@ -1,3 +1,4 @@
+// Tranform the timestamp to a human-readable format
 export const formatTimestamp = (timestamp) => {
   const date = new Date(timestamp);
   return date.toLocaleString('en-US', {
@@ -11,6 +12,7 @@ export const formatTimestamp = (timestamp) => {
   }).replace(',', '');
 };
   
+// Function to format file size in bytes to human-readable format
 export const formatBytes = (bytes) => {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
@@ -20,6 +22,7 @@ export const formatBytes = (bytes) => {
   return size + " " + sizes[i];
 };
 
+// Component for displaying a result/error message to the user
 export const createResultMessage = (isSuccess, message) => (
   <h5 className={`text-${isSuccess ? 'success' : 'danger'} fs-6 mt-2 mb-2`}>
       {message}
