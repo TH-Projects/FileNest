@@ -31,13 +31,21 @@ async function upload(fastify, options) {
 
             const authResponse = await authenticateUser(token);
             if (!authResponse.success) {                
-                return sendError(reply, 401, 'User authentication failedttt');
+                return sendError(reply, 401, 'User authentication failed');
             }
             const authenticatedUsername = authResponse.username;
 
             const { minIOServerId, minIO } = await getMinIOServerForUpload();
 
-            const isDuplicate = await checkDuplicateFileName(authenticatedUsername, fileName);
+            const filenameResponse = await getFilenamesForUser(authenticatedUsername);
+            const userFiles = filenameResponse.message;
+            
+            const userFileLimit = checkUserFileLimit(userFiles);
+            if (!userFileLimit.success) {
+                return sendError(reply, 400, 'User has reached the maximum file limit of 10 files');
+            }
+
+            const isDuplicate = await checkDuplicateFileName(userFiles, fileName);
             if (isDuplicate) {
                 return sendError(reply, 400, 'Filename already exists for this user. Please rename the file and try again');
             }
@@ -109,18 +117,32 @@ const getMinIOServerForUpload = async () => {
     }
 };
 
-const checkDuplicateFileName = async (username, fileName) => {
+const getFilenamesForUser = async (username) => {
+    const filenameResponse = await axios.get('http://nginx/getFilenamesForUsername', {
+        params: { username },
+        headers: { 'Content-Type': 'application/json' }
+    });
+    if(filenameResponse.status === 200) {
+        return filenameResponse.data;
+    }
+}
+
+const checkDuplicateFileName = (files, fileName) => {
     try {
-        const filenameResponse = await axios.get('http://nginx/getFilenamesForUsername', {
-            params: { username },
-            headers: { 'Content-Type': 'application/json' }
-        });
         const fileBaseName = fileName.split('.').slice(0, -1).join('.');
-        return filenameResponse.data.message.some(file => file.name === fileBaseName);
+        return files.some(file => file.name === fileBaseName);
     } catch (error) {
         throw new Error('Failed to check duplicate filename');
     }
 };
+
+const checkUserFileLimit = (files) => {
+    if(files.length >= 10) {
+        return {success: false, message: 'User has reached the maximum file limit of 10 files'};
+    }else{
+        return {success: true, message: 'User has not reached the maximum file limit'};
+    }
+}
 
 const ensureBucketExists = async (minIO, bucketName) => {
     try {
@@ -198,7 +220,7 @@ const insertFileMetadata = async (metadata, ownerId, minIOServerId, etag) => {
         });        
 
         if (response.status === 200) {
-            console.log('File metadata inserted successfully:');
+            console.log('File metadata inserted successfully');
         } else {
             throw new Error('Error inserting metadata into the database');
         }
