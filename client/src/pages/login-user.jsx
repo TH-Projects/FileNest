@@ -16,26 +16,27 @@ const LoginPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Hash the password
     const hashedPassword = CryptoJS.SHA256(password).toString();
 
     try {
       const { data, status } = await axios.post('http://localhost/loginUser', {
         username,
         password: hashedPassword
-      }, {
-        headers: { 'Content-Type': 'application/json' }
       });
 
-      if (status === 200) {
-        // Login successful
-        login({ username, password: hashedPassword }); // Set logged-in user in context
-        navigate('/'); // Navigate to Dashboard
+      if (status === 200 && data.success) {
+        // Create user data object
+        const userData = {
+          username,
+          token: data.token
+        };
+        login(userData);  // Save user data in context
+        navigate('/'); // Nav to home page
       } else {
         setError(data.message || 'Login failed');
       }
     } catch (error) {
-      setError(error.response.data.message || 'An unexpected error occurred. Please try again later.');
+      setError(error.response?.data?.message || 'An error occurred. Please try again later.');
     }
   };
 

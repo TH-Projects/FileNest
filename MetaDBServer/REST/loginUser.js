@@ -1,6 +1,10 @@
-const axios = require('axios'); // Axios importieren
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const user = require('../DB/user');
 
-async function loginUserRoutes(fastify) {
+const JWT_SECRET = process.env.JWT_SECRET;  // Key saved in .env file
+
+async function loginUserRoute(fastify) {
     fastify.post('/loginUser', async (request, reply) => {
         const { username, password } = request.body;
 
@@ -20,45 +24,54 @@ async function loginUserRoutes(fastify) {
         }
 
         try {
-            // Request to database server to authenticate user
-            const loginResponse = await axios.post('http://nginx/authUser', {
-                username,
-                password
-            });
+            // Request database to authenticate user
+            const authResponse = await authenticateUser(username, password);
 
-            if(loginResponse.status === 200) {
-                // Successful authentication
+            // User authentication successful
+            if (authResponse.success) {
+                // Create JWT token
+                const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '1h' }); // Token valid for 1 hour
+
                 return reply.send({
                     success: true,
                     message: 'Login successful',
-                    user: { username }
+                    token
+                });
+            } else {
+                // Authentication failed
+                return reply.code(401).send({
+                    success: false,
+                    message: authResponse.message
                 });
             }
 
         } catch (error) {
             fastify.log.error(error);
-
-            if (error.response) {
-                // The request was made and the server responded with a status code                
-                return reply.code(error.response.status).send({
-                    success: false,
-                    message: error.response.data.message || 'Login failed'
-                });
-            } else if (error.request) {
-                // The request was made but no response was received
-                return reply.status(500).send({
-                    success: false,
-                    message: 'No response received from the server'
-                });
-            } else {
-                // Something happened in setting up the request that triggered an error
-                return reply.status(500).send({
-                    success: false,
-                    message: 'An error occurred while processing the request'
-                });
-            }
+            return reply.status(500).send({
+                success: false,
+                message: 'An error occurred while processing the request'
+            });
         }
     });
+
+    const authenticateUser = async (username, password) => {
+        if (!username) {
+            return { success: false, message: "Username not provided" };
+        }
+        if (!password) {
+            return { success: false, message: "Password not provided" };
+        }
+        try {
+            const result = await user.getUser(username, password);
+            if (!result.success) {
+                return { success: false, message: "Username or password incorrect" };
+            }
+            return { success: true, message: "User authenticated" };
+        } catch (err) {
+            console.error('Authentication error:', err);
+            return { success: false, message: 'An error occurred during authentication' };
+        }
+    }
 }
 
-module.exports = loginUserRoutes;
+module.exports = loginUserRoute;

@@ -121,7 +121,7 @@ const FileTable = () => {
         return;
       }
 
-      // Generate select options from query data or filtred data
+      // Generate select options from query data or filtered data
       const uniqueFilenames =
         selectedFilenameOptions.length > 0
           ? generateSelectOptions(queryData, "name")
