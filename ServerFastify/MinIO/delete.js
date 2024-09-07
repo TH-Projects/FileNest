@@ -1,32 +1,42 @@
 const minioClient = require('./MinIOClient');
 const axios = require('axios');
 const { clientTypes, operationTypes } = require('./enums')
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Delete a file
 async function deleteFile(fastify, options) {
     fastify.delete('/delete', async (request, reply) => {
         try {
-            const { file_id, username, password } = request.body;
-
-            if (!file_id || !username || !password) {
+            const { file_id } = request.body;
+            if (!file_id) {
                 return sendError(reply, 400, 'Missing required parameters');
             }
 
-            const isAuthenticated = await authenticateUser(username, password);
-            if (!isAuthenticated) {
-                return sendError(reply, 401, 'Login failed');
+            // Authenticate user using JWT
+            const token = request.headers.authorization?.split(' ')[1]; // Assumes format: "Bearer <token>"
+            if (!token) {
+                return sendError(reply, 401, 'Token is missing');
+            }  
+
+            const authResponse = await authenticateUser(token);            
+            if (!authResponse.success) {
+                return sendError(reply, 401, 'Authentication failed');
             }
+            const authenticatedUsername = authResponse.username;
 
             const fileMetadata = await getFileMetadata(file_id);
             if (!fileMetadata) {
                 return sendError(reply, 400, 'File not found');
             }
 
-            if (fileMetadata.username !== username) {
+            if (fileMetadata.username !== authenticatedUsername) {
                 return sendError(reply, 403, 'You do not have permission to delete this file');
             }
             
-            await deleteFileFromMinIO(username.toLowerCase(), fileMetadata.name, fileMetadata.file_type, fastify);
+            await deleteFileFromMinIO(authenticatedUsername.toLowerCase(), fileMetadata.name, fileMetadata.file_type, fastify);
             
             await deleteFileMetadata(file_id, fastify);
 
@@ -61,17 +71,13 @@ const handleError = (reply, error, fastify) => {
 };
 
 // Authenticate user
-const authenticateUser = async (username, password) => {
+const authenticateUser = async (token) => {
     try {
-        const authResponse = await axios.post('http://nginx/authUser', {
-            username,
-            password
-        }, {
-            headers: { 'Content-Type': 'application/json' }
-        });
-        return authResponse.status === 200;
+        const decoded = jwt.verify(token, JWT_SECRET);        
+        return { success: true, message: 'user authenticated in db' , username: decoded.username}; // Return user data
     } catch (error) {
-        throw new Error('Authentication error');
+        console.error('JWT authentication error:', error);
+        return {success: false, message: 'authentication in db failed'}; // Token is invalid or expired
     }
 };
 

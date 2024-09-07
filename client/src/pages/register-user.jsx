@@ -12,15 +12,18 @@ const RegisterPage = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  // Handle form submission of the registration form
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    // Check if both entered passwords match
     if (password !== confirmPassword) {
       setError("Passwords do not match!");
       return;
     }
 
     try {
+      // Send registration request to the database server
       const { data, status } = await axios.post('http://localhost/checkAndCreateUser', {
         username,
         email,
@@ -28,9 +31,8 @@ const RegisterPage = () => {
       }, {
         headers: { 'Content-Type': 'application/json' }
       });
-
-      if (status === 200) {
-        navigate('/login');
+      if (status >= 200 && status < 300) {
+        navigate('/login'); // Nav to login page if create account was successful
       } else {
         setError(data.message || 'Registration failed!');
       }

@@ -12,18 +12,18 @@ fastify.register(cors, {
 });
 
 fastify.register(require('./REST/getFiles'));
-fastify.register(require('./REST/authUser'));
 fastify.register(require('./REST/createUser'));
 fastify.register(require('./REST/addCluster'));
 fastify.register(require('./REST/addMinIOServer'));
 fastify.register(require('./REST/getMinIOServer'));
 fastify.register(require('./REST/getClusterForFile'));
-fastify.register(require('./REST/checkUserExistance'));
 fastify.register(require('./REST/getFile'));
 fastify.register(require('./REST/getAccountIdByUsername'));
 fastify.register(require('./REST/getMinIOServerForUpload'));
 fastify.register(require('./REST/getFilenamesForUsername'));
 fastify.register(require('./REST/removeMetaInfo'));
+fastify.register(require('./REST/checkAndCreateUser'));
+fastify.register(require('./REST/loginUser'))
 fastify.register(require('./REST/getAllMinIOServer'));
 fastify.register(require('./REST/updateMinIOServer'));
 fastify.register(require('./REST/updateMemoryLimit'));

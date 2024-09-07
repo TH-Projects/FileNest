@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { useAuth } from "../contextes/auth-context";
 import axios from "axios";
 import { Spinner } from 'react-bootstrap';
-import {createResultMessage} from '../utils/utils';
+import { createResultMessage } from '../utils/utils';
+import { useAuth } from '../contextes/auth-context';
 
 const useFileUpload = (uploadUrl, handleCloseModal) => {
-  const { user } = useAuth();
   const [selectedFile, setSelectedFile] = useState(null);
   const [resultMsg, setResultMsg] = useState(null);
+  const { token } = useAuth();
 
+  // Handle file selection in the upload form
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     const maxFileSize = 10 * 1024 * 1024; // 10 MB
@@ -26,12 +27,13 @@ const useFileUpload = (uploadUrl, handleCloseModal) => {
     }
   };
 
+  // Handle file upload when the user clicks the upload button
   const handleUpload = async () => {
     if (!selectedFile) return;
 
+    // Create a FormData object to send the file
     const formData = new FormData();
     formData.append("file", selectedFile);
-    formData.append("user", JSON.stringify(user));
 
     try {
       setResultMsg(
@@ -43,9 +45,11 @@ const useFileUpload = (uploadUrl, handleCloseModal) => {
         </div>
       );
 
+      // Upload the file to the server using JWT authentication
       const response = await axios.post(uploadUrl, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`,
         }
       });
 

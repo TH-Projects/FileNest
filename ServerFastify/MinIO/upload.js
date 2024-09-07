@@ -1,20 +1,22 @@
 const minioClient = require('./MinIOClient');
 const axios = require('axios');
 const { PassThrough } = require('stream');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { clientTypes, operationTypes } = require('./enums');
 
+const JWT_SECRET = process.env.JWT_SECRET;  // Key saved in .env file
+
 // Upload a file
 async function upload(fastify, options) {
-    fastify.post('/upload', async (request, reply) => {
-        try {
+    fastify.post('/upload', async (request, reply) => {        
+        try {            
             const data = request.body.file?.[0];
-            const user = JSON.parse(request.body.user);
             const fileName = data.filename;
             const fileBuffer = data.data;
-            const fileSize = fileBuffer.length;
+            const fileSize = fileBuffer.length;            
 
-            if (!data || !fileName || !fileBuffer || ! fileSize) {
+            if (!data || !fileName || !fileBuffer || !fileSize) {
                 return sendError(reply, 400, 'File data is missing or malformed');
             }
 
@@ -22,24 +24,39 @@ async function upload(fastify, options) {
                 return sendError(reply, 400, 'Filename contains invalid characters. Only letters (A-Z, a-z), numbers, hyphens, underscores, and spaces are allowed');
             }
 
-            const isAuthenticated = await authenticateUser(user);
-            if (!isAuthenticated) {
+            // Authenticate user using JWT
+            const token = request.headers.authorization?.split(' ')[1]; // Assumes format: "Bearer <token>"
+            if (!token) {
+                return sendError(reply, 401, 'Token is missing');
+            }            
+
+            const authResponse = await authenticateUser(token);
+            if (!authResponse.success) {                
                 return sendError(reply, 401, 'User authentication failed');
             }
+            const authenticatedUsername = authResponse.username;
 
             const { minIOServerId, minIO } = await getMinIOServerForUpload();
 
-            const isDuplicate = await checkDuplicateFileName(user.username, fileName);
+            const filenameResponse = await getFilenamesForUser(authenticatedUsername);
+            const userFiles = filenameResponse.message;
+            
+            const userFileLimit = checkUserFileLimit(userFiles);
+            if (!userFileLimit.success) {
+                return sendError(reply, 400, 'User has reached the maximum file limit of 10 files');
+            }
+
+            const isDuplicate = await checkDuplicateFileName(userFiles, fileName);
             if (isDuplicate) {
                 return sendError(reply, 400, 'Filename already exists for this user. Please rename the file and try again');
             }
 
-            await ensureBucketExists(minIO, user.username.toLowerCase());
+            await ensureBucketExists(minIO, authenticatedUsername.toLowerCase());
 
-            const etag = await uploadFile(minIO, user.username.toLowerCase(), fileName, fileBuffer, fileSize);
+            const etag = await uploadFile(minIO, authenticatedUsername.toLowerCase(), fileName, fileBuffer, fileSize);
 
-            const metadata = createFileMetadata(fileName, fileSize, data.mimetype, user.username);
-            const ownerId = await getAccountId(user.username);
+            const metadata = createFileMetadata(fileName, fileSize, data.mimetype, authenticatedUsername);
+            const ownerId = await getAccountId(authenticatedUsername);
             await insertFileMetadata(metadata, ownerId, minIOServerId, etag);
 
             fastify.log.info('File uploaded successfully:', metadata);
@@ -55,8 +72,6 @@ async function upload(fastify, options) {
         }
     });
 }
-
-// Helper Functions
 // Check if the filename is valid
 const isValidFilename = (filename) => {    
     const validFilenameRegex = /^[a-zA-Z0-9_\-. ]+$/;
@@ -80,17 +95,13 @@ const handleError = (reply, error, fastify) => {
 };
 
 // Authenticate user
-const authenticateUser = async (user) => {
+const authenticateUser = async (token) => {
     try {
-        const authResponse = await axios.post('http://nginx/authUser', {
-            username: user.username,
-            password: user.password
-        }, {
-            headers: { 'Content-Type': 'application/json' }
-        });
-        return authResponse.status === 200;
+        const decoded = jwt.verify(token, JWT_SECRET);        
+        return { success: true, message: 'user authenticated in db' , username: decoded.username}; // Return user data
     } catch (error) {
-        throw new Error('Authentication error');
+        console.error('JWT authentication error:', error);
+        return {success: false, message: 'authentication in db failed'}; // Token is invalid or expired
     }
 };
 
@@ -112,18 +123,32 @@ const getMinIOServerForUpload = async () => {
 };
 
 // Check if the filename already exists for the user
-const checkDuplicateFileName = async (username, fileName) => {
+const getFilenamesForUser = async (username) => {
+    const filenameResponse = await axios.get('http://nginx/getFilenamesForUsername', {
+        params: { username },
+        headers: { 'Content-Type': 'application/json' }
+    });
+    if(filenameResponse.status === 200) {
+        return filenameResponse.data;
+    }
+}
+
+const checkDuplicateFileName = (files, fileName) => {
     try {
-        const filenameResponse = await axios.get('http://nginx/getFilenamesForUsername', {
-            params: { username },
-            headers: { 'Content-Type': 'application/json' }
-        });
         const fileBaseName = fileName.split('.').slice(0, -1).join('.');
-        return filenameResponse.data.message.some(file => file.name === fileBaseName);
+        return files.some(file => file.name === fileBaseName);
     } catch (error) {
         throw new Error('Failed to check duplicate filename');
     }
 };
+
+const checkUserFileLimit = (files) => {
+    if(files.length >= 10) {
+        return {success: false, message: 'User has reached the maximum file limit of 10 files'};
+    }else{
+        return {success: true, message: 'User has not reached the maximum file limit'};
+    }
+}
 
 // Ensure bucket exists
 const ensureBucketExists = async (minIO, bucketName) => {
@@ -206,7 +231,7 @@ const insertFileMetadata = async (metadata, ownerId, minIOServerId, etag) => {
         });        
 
         if (response.status === 200) {
-            console.log('File metadata inserted successfully:');
+            console.log('File metadata inserted successfully');
         } else {
             throw new Error('Error inserting metadata into the database');
         }
