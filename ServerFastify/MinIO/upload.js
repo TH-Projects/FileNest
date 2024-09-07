@@ -8,7 +8,7 @@ const { clientTypes, operationTypes } = require('./enums');
 const JWT_SECRET = process.env.JWT_SECRET;  // Key saved in .env file
 
 // Upload a file
-async function upload(fastify, options) {
+const upload = async (fastify, options) => {
     fastify.post('/upload', async (request, reply) => {        
         try {            
             const data = request.body.file?.[0];

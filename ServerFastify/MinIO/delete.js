@@ -7,7 +7,7 @@ require('dotenv').config();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // Delete a file
-async function deleteFile(fastify, options) {
+const deleteFile = async (fastify, options) => {
     fastify.delete('/delete', async (request, reply) => {
         try {
             const { file_id } = request.body;

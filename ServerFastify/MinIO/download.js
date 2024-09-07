@@ -4,7 +4,7 @@ require('dotenv').config();
 const {clientTypes, operationTypes} = require('./enums');
 
 // Download a file
-async function download(fastify) {
+const download = async (fastify) => {
   fastify.get('/download', async (request, reply) => {
     const { file_id } = request.query || {};
 
@@ -68,7 +68,7 @@ async function download(fastify) {
 }
 
 // Read file from MinIO and send to the client
-async function readFile(minIOClient, bucketName, fileName, contentType, reply) {
+const readFile = async (minIOClient, bucketName, fileName, contentType, reply) => {
   try {
     const dataStream = await minIOClient.getObject(bucketName, fileName);
     reply.header('Content-Disposition', `attachment; filename="${fileName}"`);
@@ -84,7 +84,7 @@ async function readFile(minIOClient, bucketName, fileName, contentType, reply) {
 }
 
 // Get file metadata from the database
-async function getFile(fileId) {
+const getFile = async (fileId) => {
   try {
     const response = await axios.get(`${process.env.NGINX_API}/getFile`, {
       params: { file_id: fileId }
@@ -100,7 +100,7 @@ async function getFile(fileId) {
 }
 
 // Mark a MinIO server as non-reachable
-async function markNonReachableServer(minIOServer){
+const markNonReachableServer = async (minIOServer) =>{
     try {
         const data = {
             type: clientTypes.METADBSERVER,
@@ -118,7 +118,7 @@ async function markNonReachableServer(minIOServer){
 }
 
 // Get MinIO servers where the file is stored
-async function getMinIOServers(clusterLocationId) {
+const getMinIOServers = async (clusterLocationId) => {
   try {
     const response = await axios.get(`${process.env.NGINX_API}/minIOServer`, {
       params: { cluster_id: clusterLocationId }
