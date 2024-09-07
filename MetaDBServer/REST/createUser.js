@@ -4,7 +4,7 @@ const enums = require('../Socket/enums');
 const {clientTypes} = require("./enums");
 
 // Create a user in the system
-async function createUser(fastify) {
+const createUser = async (fastify) => {
     fastify.post('/createUser', async (request, reply) => {
         const data = request.body;
         const username = data?.username;
@@ -25,7 +25,7 @@ async function createUser(fastify) {
 }
 
 // Share the user information with the broker
-async function shareToBroker(username, password, email){
+const shareToBroker = async (username, password, email) => {
     try {
         const data = {
             type: clientTypes.METADBSERVER,

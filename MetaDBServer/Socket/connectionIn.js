@@ -3,7 +3,7 @@ const connectionStorage = require('./connectionStorage');
 const receiveMessage = require('./receiveMessage');
 
 // Connections from other instances
-function connectionIn (fastify){
+const connectionIn = (fastify) =>{
     const wss = new WebSocket.Server({ server: fastify.server });
 
     // Handle incoming connections

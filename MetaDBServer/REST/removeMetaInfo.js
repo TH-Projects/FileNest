@@ -1,7 +1,7 @@
 const file = require('../DB/files');
 
 // Remove the meta info for a file
-async function removeMetaInfo(fastify) {
+const removeMetaInfo = async (fastify) => {
     fastify.delete('/removeMetaInfo', async (request, reply) => {
         const { file_id } = request.body;
         console.log('INSIDE DELETE FILE IN DB SERVER');

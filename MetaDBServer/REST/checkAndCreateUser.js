@@ -5,7 +5,7 @@ require('dotenv').config();
 const enums = require('../Socket/enums');
 const { clientTypes } = require("./enums");
 
-async function createUserRoutes(fastify) {
+const createUserRoutes = async (fastify) => {
     fastify.post('/checkAndCreateUser', async (request, reply) => {
         const { username, email, password } = request.body;
 

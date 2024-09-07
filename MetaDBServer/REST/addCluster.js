@@ -4,7 +4,7 @@ const enums = require('../Socket/enums');
 const {clientTypes} = require("./enums");
 
 // Add a cluster to the system
-async function addCluster(fastify) {
+const addCluster = async (fastify) => {
     fastify.post('/addCluster', async (request, reply) => {
         const data = request.body;
         const start_node_id = data?.start_node_id;
@@ -20,7 +20,7 @@ async function addCluster(fastify) {
 }
 
 // Share the cluster information with the broker
-async function shareToBroker(start_node_id, end_node_id){
+const shareToBroker = async (start_node_id, end_node_id) => {
     try {
         const data = {
             type: clientTypes.METADBSERVER,

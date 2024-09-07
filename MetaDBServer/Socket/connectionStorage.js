@@ -4,12 +4,12 @@ const buildUpConnection = require('./buildUpConnection');
 let connection = undefined;
 
 // Set the connection
-function setConnection (conn) {
+const setConnection = (conn) => {
     connection = conn;
 }
 
 // Remove the connection
-function removeConnection () {
+const removeConnection = () => {
     connection = undefined;
     buildUpConnection();
 }

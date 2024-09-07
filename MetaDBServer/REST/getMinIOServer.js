@@ -1,7 +1,7 @@
 const minIOServerDB = require('../DB/minIOServer');
 
 // Get the minIO server for a cluster
-async function minIOServer(fastify) {
+const minIOServer = async (fastify) => {
     fastify.get('/minIOServer', async (request, reply) => {
         const cluster_id = request.query?.cluster_id;
         if(!cluster_id) {

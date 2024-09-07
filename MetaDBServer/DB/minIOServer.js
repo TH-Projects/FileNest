@@ -1,7 +1,7 @@
 const connection = require('./connection');
 
 // Get the minIO server for upload based on memory limit and connection status
-async function getMinIOServerForUpload(){
+const getMinIOServerForUpload = async () => {
     try {
         let minIOServer;
         const db = await connection.getConnection();
@@ -42,7 +42,7 @@ async function getMinIOServerForUpload(){
 }
 
 // Get the minIO server by a cluster
-async function getMinIOServerByCluster(cluster_id) {
+const getMinIOServerByCluster = async (cluster_id) => {
     try {
         const db = await connection.getConnection();
         const result = await db.query(
@@ -65,7 +65,7 @@ async function getMinIOServerByCluster(cluster_id) {
 }
 
 // Get all minIO servers
-async function getAllMinIOServer() {
+const getAllMinIOServer = async () => {
     try {
         const db = await connection.getConnection();
         const result = await db.query(
@@ -88,7 +88,7 @@ async function getAllMinIOServer() {
 }
 
 // Get the cluster for a minIO server
-async function getClusterForMinIOServer(minIOServer_id) {
+const getClusterForMinIOServer = async (minIOServer_id) =>{
     try {
         const db = await connection.getConnection();
         const result = await db.query(
@@ -111,7 +111,7 @@ async function getClusterForMinIOServer(minIOServer_id) {
 }
 
 // Mark a server as non-reachable
-async function markNonReachableServer(minIOServer_id){
+const markNonReachableServer = async (minIOServer_id) => {
     try {
         const db = await connection.getConnection();
         const result = await db.query(
@@ -134,7 +134,7 @@ async function markNonReachableServer(minIOServer_id){
 }
 
 // Update the minIO server
-async function updateMinIOServer(minIOServer_id, active){
+const updateMinIOServer = async (minIOServer_id, active) =>{
     try {
         const db = await connection.getConnection();
         const result = await db.query(

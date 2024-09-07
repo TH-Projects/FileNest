@@ -5,7 +5,7 @@ const cluster = require('../DB/cluster');
 const minIOServer = require('../DB/minIOServer');
 
 // Receive a message from the broker
-async function receiveMessage(fastify, message){
+const receiveMessage = async (fastify, message) => {
     console.log('Received message: ' + message);
     const data = JSON.parse(message);
     for(const message of data.messages){
@@ -14,7 +14,7 @@ async function receiveMessage(fastify, message){
 }
 
 // Handle the message
-async function handleMessage(message){
+const handleMessage = async (message) => {
     switch (message.operation) {
         case enums.operations.CREATEUSER:
             console.log('Create User');
@@ -55,7 +55,7 @@ async function handleMessage(message){
 }
 
 // Create a user
-async function createUser(username, password, email){
+const createUser = async (username, password, email) => {
     if(!username) {
         console.log('No username provided');
         return;
@@ -72,7 +72,7 @@ async function createUser(username, password, email){
 }
 
 // Delete a file
-async function deleteFile(file_id){
+const deleteFile = async (file_id) => {
     if(!file_id) {
         console.log('No file_id provided');
         return;
@@ -81,7 +81,7 @@ async function deleteFile(file_id){
 }
 
 // Add a file
-async function addFile(etag, name, file_type, size, last_modify, owner_id, minIOServer, content_type){
+const addFile = async (etag, name, file_type, size, last_modify, owner_id, minIOServer, content_type) => {
     if(!etag) {
         console.log('No etag provided');
         return;
@@ -118,7 +118,7 @@ async function addFile(etag, name, file_type, size, last_modify, owner_id, minIO
 }
 
 // Add a MinIO server
-async function addMinIOServer(address, cluster_id){
+const addMinIOServer = async (address, cluster_id) => {
     if(!address) {
         console.log('No address provided');
         return;
@@ -131,7 +131,7 @@ async function addMinIOServer(address, cluster_id){
 }
 
 // Add a cluster
-async function addCluster(start_node_id, end_node_id){
+const addCluster = async (start_node_id, end_node_id) => {
     if(!start_node_id) {
         console.log('No start_node_id provided');
         return;
@@ -144,7 +144,7 @@ async function addCluster(start_node_id, end_node_id){
 }
 
 // Mark a non-reachable server
-async function markNonReachableServer(minIOServer_id){
+const markNonReachableServer = async (minIOServer_id) => {
     if(!minIOServer_id) {
         console.log('No minIOServer provided');
         return;
@@ -153,7 +153,7 @@ async function markNonReachableServer(minIOServer_id){
 }
 
 // Update a MinIO server
-async function updateMinIOServer(minIOServer_id, active){
+const updateMinIOServer = async (minIOServer_id, active) => {
     if(!minIOServer_id) {
         console.log('No minIOServer_id provided');
         return;
@@ -166,7 +166,7 @@ async function updateMinIOServer(minIOServer_id, active){
 }
 
 // Update the memory limit for a cluster
-async function updateMemoryLimit(cluster_id, memory_limit_reached){
+const updateMemoryLimit = async (cluster_id, memory_limit_reached) => {
     if(!cluster_id) {
         console.log('No cluster_id provided');
         return;

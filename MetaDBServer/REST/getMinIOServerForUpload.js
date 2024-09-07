@@ -1,7 +1,7 @@
 const minIOServerDB = require('../DB/minIOServer');
 
 // Get the minIO server for upload
-async function minIOServerForUpload(fastify) {
+const minIOServerForUpload = async(fastify) => {
     fastify.get('/minIOServerForUpload', async (request, reply) => {
         const result = await minIOServerDB.getMinIOServerForUpload();
         if(!result.success){

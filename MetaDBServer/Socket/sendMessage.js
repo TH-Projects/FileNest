@@ -1,5 +1,5 @@
 // Used to send messages to the client
-function sendMessage(ws, message){
+const sendMessage = (ws, message) =>{
     ws.send(message);
 }
 
