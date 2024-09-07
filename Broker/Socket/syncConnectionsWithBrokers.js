@@ -4,7 +4,7 @@ const os = require('os');
 require('dotenv').config();
 
 // Sync the connections with the brokers
-function syncConnectionsWithBrokers(fastify, connectionStorage, clients, syncOperation = enums.operation.ADDCONNECTION) {
+const syncConnectionsWithBrokers = (fastify, connectionStorage, clients, syncOperation = enums.operation.ADDCONNECTION) => {
     if(!clients || clients.length === 0){
         return;
     }

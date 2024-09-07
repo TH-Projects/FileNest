@@ -5,7 +5,7 @@ const addMessage = require('./addMessage');
 const getConnections = require('./getConnections');
 
 // add messages between brokers
-function add(clientAddresses, messages) {
+const add = (clientAddresses, messages) => {
     const message = {syncOperation: enums.syncOperation.ADD, clients: clientAddresses, messages: messages};
     sendMessage(
         fastify,

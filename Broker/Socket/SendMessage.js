@@ -4,7 +4,7 @@ const enums = require('../Queue/enums');
 const removeMessage = require('../Queue/removeMessage');
 
 // Sends a message to all connected clients
-function sendMessage (fastify, message, wsList, publish = false) {
+const sendMessage = (fastify, message, wsList, publish = false) => {
     wsList.forEach(ws => {
         if (ws.readyState === WebSocket.OPEN) {
             try {
@@ -25,7 +25,7 @@ function sendMessage (fastify, message, wsList, publish = false) {
 }
 
 // remove messages between brokers
-function remove(fastify, clientAddress) {
+const remove = (fastify, clientAddress) => {
     removeMessage(clientAddress);
     sendMessage(
         fastify,

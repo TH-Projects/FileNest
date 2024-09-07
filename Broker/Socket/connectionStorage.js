@@ -5,14 +5,14 @@ let connectionStorage = [];
 let sharedConnections = [];
 
 // Remove a connection from the storage
-function removeConnection(ws) {
+const removeConnection = (ws) => {
     const wsEntry = connectionStorage.find((entry) => entry?.ws?.clientAddress === ws?.clientAddress);
     connectionStorage = connectionStorage.filter((entry) => entry?.ws?.clientAddress !== wsEntry?.ws?.clientAddress);
     return wsEntry;
 }
 
 // Add a connection to the storage
-function addConnection(ws, type) {
+const addConnection = (ws, type) => {
     if(ws._isServer){
         return;
     }
@@ -22,7 +22,7 @@ function addConnection(ws, type) {
 }
 
 // Add a shared connection to the storage
-function addSharedConnection(clientAddress, type) {
+const addSharedConnection = (clientAddress, type) => {
     if(!sharedConnections.find((entry) => entry.clientAddress === clientAddress)
         && !connectionStorage.find((entry) => entry.ws._url?.replace(/\//g, "") === clientAddress?.replace(/\//g, ""))){
         sharedConnections.push({type: type, clientAddress: clientAddress});
@@ -30,12 +30,12 @@ function addSharedConnection(clientAddress, type) {
 }
 
 // Remove a shared connection from the storage
-function removeSharedConnection(clientAddress) {
+const removeSharedConnection = (clientAddress) => {
     sharedConnections = sharedConnections.filter((entry) => entry.clientAddress !== clientAddress);
 }
 
 // Get all connections by type
-function getConnectionsByType(type, sharedConnections = false) {
+const getConnectionsByType = (type, sharedConnections = false) => {
     if(sharedConnections){
         return sharedConnections.filter((entry) => entry.type === type);
     }
@@ -43,14 +43,14 @@ function getConnectionsByType(type, sharedConnections = false) {
 }
 
 // Get all connection addresses by type
-function getAllConnectionAddressesByType(type) {
+const getAllConnectionAddressesByType = (type) => {
     const connectedClients = connectionStorage.filter((entry) => entry.type === type).map(entry => entry.ws.clientAddress);
     const sharedClients = sharedConnections.filter((entry) => entry.type === type).map(entry => entry.clientAddress);
     return [...connectedClients, ...sharedClients];
 }
 
 // Get all connections without a specific type
-function getConnectionsWithoutType(type, sharedConnections = false) {
+const getConnectionsWithoutType = (type, sharedConnections = false) => {
     if (sharedConnections) {
         return sharedConnections.filter((entry) => entry.type !== type);
     }
@@ -58,7 +58,7 @@ function getConnectionsWithoutType(type, sharedConnections = false) {
 }
 
 // Get all connections
-function getAllConnections(){
+const getAllConnections = () =>{
     const connectedClients = connectionStorage.map(entry => ({
         client: entry.ws.clientAddress,
         type: entry.type

@@ -8,7 +8,7 @@ const connectionOut = require('./connectionOut');
 const os = require('os');
 
 // Connections from other instances
-function connectionIn (fastify){
+const connectionIn = (fastify) =>{
     const wss = new WebSocket.Server({ server: fastify.server });
     // Connection from other brokers
     wss.on('connection', (ws, req) => {
