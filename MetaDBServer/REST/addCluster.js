@@ -3,6 +3,7 @@ require('dotenv').config();
 const enums = require('../Socket/enums');
 const {clientTypes} = require("./enums");
 
+// Add a cluster to the system
 async function addCluster(fastify) {
     fastify.post('/addCluster', async (request, reply) => {
         const data = request.body;
@@ -18,6 +19,7 @@ async function addCluster(fastify) {
     });
 }
 
+// Share the cluster information with the broker
 async function shareToBroker(start_node_id, end_node_id){
     try {
         const data = {

@@ -1,5 +1,6 @@
 const files = require('../DB/files');
 
+// Get all files
 async function getFiles(fastify) {
     fastify.get('/getFiles', async (request, reply) => {
         const result = await files.getFiles();

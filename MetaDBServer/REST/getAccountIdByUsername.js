@@ -1,10 +1,10 @@
 const users = require('../DB/user');
 
+// Get the account id by username
 async function getAccountIdByUsername(fastify) {
     fastify.get('/getAccountIdByUsername', async (request, reply) => {
-        const username = request.query.username;  // Extrahiere den Benutzernamen aus den Abfrageparametern
+        const username = request.query.username;
         console.log(username);
-        
         if (!username) {
             return reply.code(400).send({ success: "false", error: "Username parameter is required" });
         }

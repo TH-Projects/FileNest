@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
+// Delete a file
 async function deleteFile(fastify, options) {
     fastify.delete('/delete', async (request, reply) => {
         try {
@@ -52,6 +53,8 @@ async function deleteFile(fastify, options) {
     });
 }
 
+// Helper Functions
+// Send error response
 const sendError = (reply, statusCode, message) => {
     return reply.code(statusCode).send({
         success: false,
@@ -59,6 +62,7 @@ const sendError = (reply, statusCode, message) => {
     });
 };
 
+// Handle error
 const handleError = (reply, error, fastify) => {
     fastify.log.error('Delete file error:', error);
     if (!reply.sent) {
@@ -66,6 +70,7 @@ const handleError = (reply, error, fastify) => {
     }
 };
 
+// Authenticate user
 const authenticateUser = async (token) => {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);        
@@ -76,6 +81,7 @@ const authenticateUser = async (token) => {
     }
 };
 
+// Get file metadata
 const getFileMetadata = async (file_id) => {
     try {
         const fileResponse = await axios.get('http://nginx/getFile', {
@@ -92,6 +98,7 @@ const getFileMetadata = async (file_id) => {
     }
 };
 
+// Delete file from MinIO
 const deleteFileFromMinIO = async (bucketName, fileName, fileType, fastify) => {
     try {
         await minioClient.minioClient.removeObject(bucketName, `${fileName}.${fileType}`);
@@ -102,6 +109,7 @@ const deleteFileFromMinIO = async (bucketName, fileName, fileType, fastify) => {
     }
 };
 
+// Delete file metadata
 const deleteFileMetadata = async (file_id, fastify) => {
     
     try {

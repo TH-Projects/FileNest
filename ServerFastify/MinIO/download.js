@@ -3,6 +3,7 @@ const axios = require('axios');
 require('dotenv').config();
 const {clientTypes, operationTypes} = require('./enums');
 
+// Download a file
 async function download(fastify) {
   fastify.get('/download', async (request, reply) => {
     const { file_id } = request.query || {};
@@ -66,6 +67,7 @@ async function download(fastify) {
   });
 }
 
+// Read file from MinIO and send to the client
 async function readFile(minIOClient, bucketName, fileName, contentType, reply) {
   try {
     const dataStream = await minIOClient.getObject(bucketName, fileName);
@@ -81,6 +83,7 @@ async function readFile(minIOClient, bucketName, fileName, contentType, reply) {
   }
 }
 
+// Get file metadata from the database
 async function getFile(fileId) {
   try {
     const response = await axios.get(`${process.env.NGINX_API}/getFile`, {
@@ -96,6 +99,7 @@ async function getFile(fileId) {
   }
 }
 
+// Mark a MinIO server as non-reachable
 async function markNonReachableServer(minIOServer){
     try {
         const data = {
@@ -113,6 +117,7 @@ async function markNonReachableServer(minIOServer){
     }
 }
 
+// Get MinIO servers where the file is stored
 async function getMinIOServers(clusterLocationId) {
   try {
     const response = await axios.get(`${process.env.NGINX_API}/minIOServer`, {

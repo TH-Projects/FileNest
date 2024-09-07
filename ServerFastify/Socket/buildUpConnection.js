@@ -2,6 +2,7 @@ const axios = require('axios');
 const dotenv = require('dotenv');
 const os = require('os');
 
+// Build up the connection
 async function buildUpConnection() {
     console.log('Trying to establish connection');
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -13,6 +14,7 @@ async function buildUpConnection() {
     console.log('Connection established');
 }
 
+// Connection call
 async function connectionCall() {
     dotenv.config();
     console.log(`Connecting with: ws://${os.hostname()}:${process.env.PORT_SERVERFASTIFY}`)

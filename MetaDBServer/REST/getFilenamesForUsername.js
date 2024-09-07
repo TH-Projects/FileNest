@@ -1,5 +1,6 @@
 const files = require('../DB/files');
 
+// Get the filenames for a username
 async function getFilenamesForUsername(fastify) {
     fastify.get('/getFilenamesForUsername', async (request, reply) => {
         const username = request.query?.username;

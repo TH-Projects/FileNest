@@ -3,6 +3,7 @@ const { promisify } = require('util');
 const pipelineAsync = promisify(pipeline);
 const minioClient = require('./MinIOClient');
 
+// List objects in a bucket
 async function listObjects(fastify) {
     fastify.get('/listObjects', async (request, reply) => {
         const bucketName = 'thprojects';

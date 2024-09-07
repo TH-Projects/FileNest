@@ -3,6 +3,7 @@ const sendMessage = require('./SendMessage');
 const os = require('os');
 require('dotenv').config();
 
+// Sync the connections with the brokers
 function syncConnectionsWithBrokers(fastify, connectionStorage, clients, syncOperation = enums.operation.ADDCONNECTION) {
     if(!clients || clients.length === 0){
         return;
@@ -17,6 +18,8 @@ function syncConnectionsWithBrokers(fastify, connectionStorage, clients, syncOpe
         });
     }
     const brokers = connectionStorage.getConnectionsByType(enums.connectionTypes.BROKER);
+
+    // Send the message to all brokers
     for (let broker of brokers) {
         sendMessage(
             fastify,

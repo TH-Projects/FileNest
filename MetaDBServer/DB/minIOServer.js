@@ -1,5 +1,6 @@
 const connection = require('./connection');
 
+// Get the minIO server for upload based on memory limit and connection status
 async function getMinIOServerForUpload(){
     try {
         let minIOServer;
@@ -26,7 +27,6 @@ async function getMinIOServerForUpload(){
                     };
                 }
             }
-
         }
         return {
             success: false,
@@ -41,27 +41,7 @@ async function getMinIOServerForUpload(){
     }
 }
 
-async function addMinIOServer(address, cluster_id) {
-    try {
-        const db = await connection.getConnection();
-        const [result] = await db.query(
-            'INSERT INTO MinIOServer (address, cluster_id) ' +
-            'VALUES (?,?)', [address, cluster_id]
-        );
-        db.release();
-        return {
-            success: true,
-            message: result.insertId
-        };
-    } catch (error) {
-        console.error(error);
-        return {
-            success: false,
-            message: error
-        };
-    }
-}
-
+// Get the minIO server by a cluster
 async function getMinIOServerByCluster(cluster_id) {
     try {
         const db = await connection.getConnection();
@@ -84,6 +64,7 @@ async function getMinIOServerByCluster(cluster_id) {
     }
 }
 
+// Get all minIO servers
 async function getAllMinIOServer() {
     try {
         const db = await connection.getConnection();
@@ -106,6 +87,7 @@ async function getAllMinIOServer() {
     }
 }
 
+// Get the cluster for a minIO server
 async function getClusterForMinIOServer(minIOServer_id) {
     try {
         const db = await connection.getConnection();
@@ -128,6 +110,7 @@ async function getClusterForMinIOServer(minIOServer_id) {
     }
 }
 
+// Mark a server as non-reachable
 async function markNonReachableServer(minIOServer_id){
     try {
         const db = await connection.getConnection();
@@ -150,6 +133,7 @@ async function markNonReachableServer(minIOServer_id){
     }
 }
 
+// Update the minIO server
 async function updateMinIOServer(minIOServer_id, active){
     try {
         const db = await connection.getConnection();
@@ -174,7 +158,6 @@ async function updateMinIOServer(minIOServer_id, active){
 
 
 module.exports = {
-    addMinIOServer,
     getMinIOServerByCluster,
     getClusterForMinIOServer,
     getMinIOServerForUpload,

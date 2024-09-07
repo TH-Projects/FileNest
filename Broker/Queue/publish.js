@@ -3,7 +3,7 @@ const enums = require('../Socket/enums');
 const sendMessage = require('../Socket/SendMessage');
 const fastify = require('fastify')();
 
-
+// Publish messages to clients
 function publish(queue) {
     console.log('Publishing');
     const connectedClients = connectionStorage.getConnectionsWithoutType(enums.connectionTypes.BROKER);

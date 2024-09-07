@@ -1,6 +1,7 @@
 const connection = require('./connection');
 const minIOServerReference = require('./minIOServer');
 
+// Get all files
 async function getFiles() {
     try {
         const db = await connection.getConnection();
@@ -22,6 +23,7 @@ async function getFiles() {
     }
 }
 
+// Get all filenames for a given username
 async function getFilenamesForUsername(username){
     try {
         const db = await connection.getConnection();
@@ -47,6 +49,7 @@ async function getFilenamesForUsername(username){
     }
 }
 
+// Get a file by its ID
 async function getFile(file_id){
     try {
         const db = await connection.getConnection();
@@ -72,6 +75,7 @@ async function getFile(file_id){
     }
 }
 
+// Get the cluster location for a file
 async function getClusterForFile(file_id) {
     try {
         const db = await connection.getConnection();
@@ -93,6 +97,7 @@ async function getClusterForFile(file_id) {
     }
 }
 
+// Delete a file by its ID
 async function deleteFile(file_id) {
     try {
         const db = await connection.getConnection();
@@ -113,6 +118,7 @@ async function deleteFile(file_id) {
     }
 }
 
+// Add a file to the database
 async function addFile(etag, name, file_type, size, last_modify, owner_id, minIOServer, content_type) {
     try {
         // Get the appropriate MinIO server cluster
@@ -143,7 +149,6 @@ async function addFile(etag, name, file_type, size, last_modify, owner_id, minIO
         };
     }
 }
-
 
 module.exports = {
     getFiles,

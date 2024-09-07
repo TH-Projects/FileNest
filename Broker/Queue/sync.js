@@ -14,9 +14,6 @@ function add(clientAddresses, messages) {
     addMessage(message.messages, message.clients);
 }
 
-
-
-
 module.exports = {
     add
 }
