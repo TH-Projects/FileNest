@@ -33,5 +33,4 @@ function remove(fastify, clientAddress) {
         getConnections());
 }
 
-
 module.exports = sendMessage;

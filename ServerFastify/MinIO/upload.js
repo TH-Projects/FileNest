@@ -4,6 +4,7 @@ const { PassThrough } = require('stream');
 require('dotenv').config();
 const { clientTypes, operationTypes } = require('./enums');
 
+// Upload a file
 async function upload(fastify, options) {
     fastify.post('/upload', async (request, reply) => {
         try {
@@ -40,7 +41,6 @@ async function upload(fastify, options) {
             const metadata = createFileMetadata(fileName, fileSize, data.mimetype, user.username);
             const ownerId = await getAccountId(user.username);
             await insertFileMetadata(metadata, ownerId, minIOServerId, etag);
-            
 
             fastify.log.info('File uploaded successfully:', metadata);
 
@@ -57,12 +57,13 @@ async function upload(fastify, options) {
 }
 
 // Helper Functions
-
+// Check if the filename is valid
 const isValidFilename = (filename) => {    
     const validFilenameRegex = /^[a-zA-Z0-9_\-. ]+$/;
     return validFilenameRegex.test(filename);
 };
 
+// Send error response
 const sendError = (reply, statusCode, message) => {
     return reply.code(statusCode).send({
         success: false,
@@ -70,6 +71,7 @@ const sendError = (reply, statusCode, message) => {
     });
 };
 
+// Handle error
 const handleError = (reply, error, fastify) => {
     fastify.log.error('Upload error:', error);
     if (!reply.sent) {
@@ -77,6 +79,7 @@ const handleError = (reply, error, fastify) => {
     }
 };
 
+// Authenticate user
 const authenticateUser = async (user) => {
     try {
         const authResponse = await axios.post('http://nginx/authUser', {
@@ -91,6 +94,7 @@ const authenticateUser = async (user) => {
     }
 };
 
+// Get MinIO server for upload
 const getMinIOServerForUpload = async () => {
     try {
         const minIOResponse = await axios.get(`${process.env.NGINX_API}/minIOServerForUpload`);
@@ -107,6 +111,7 @@ const getMinIOServerForUpload = async () => {
     }
 };
 
+// Check if the filename already exists for the user
 const checkDuplicateFileName = async (username, fileName) => {
     try {
         const filenameResponse = await axios.get('http://nginx/getFilenamesForUsername', {
@@ -120,6 +125,7 @@ const checkDuplicateFileName = async (username, fileName) => {
     }
 };
 
+// Ensure bucket exists
 const ensureBucketExists = async (minIO, bucketName) => {
     try {
         const exists = await minIO.bucketExists(bucketName);
@@ -131,6 +137,7 @@ const ensureBucketExists = async (minIO, bucketName) => {
     }
 };
 
+// Upload file to MinIO
 const uploadFile = async (minIO, bucketName, fileName, fileBuffer, fileSize) => {
     try {
         const uploadStream = new PassThrough();
@@ -150,6 +157,7 @@ const uploadFile = async (minIO, bucketName, fileName, fileBuffer, fileSize) => 
     }
 };
 
+// Create file metadata
 const createFileMetadata = (fileName, fileSize, mimeType, username) => {
     const lastDotIndex = fileName.lastIndexOf('.');
     return {
@@ -161,6 +169,7 @@ const createFileMetadata = (fileName, fileSize, mimeType, username) => {
     };
 };
 
+// Get account ID by username
 const getAccountId = async (username) => {
     try {
         const response = await axios.get('http://nginx/getAccountIdByUsername', {
@@ -173,6 +182,7 @@ const getAccountId = async (username) => {
     }
 };
 
+// Insert file metadata into the database
 const insertFileMetadata = async (metadata, ownerId, minIOServerId, etag) => {
     try {
         const data = {

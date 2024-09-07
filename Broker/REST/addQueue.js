@@ -1,6 +1,7 @@
 const connectionStorage = require('../Socket/connectionStorage');
 const sync = require('../Queue/sync');
 
+// Add a message to the queue
 async function addQueue (fastify){
     fastify.post('/addQueue', (request, reply) => {
         // Add the message to the queue

@@ -3,6 +3,7 @@ require('dotenv').config();
 const enums = require('../Socket/enums');
 const {clientTypes} = require("./enums");
 
+// Create a user in the system
 async function createUser(fastify) {
     fastify.post('/createUser', async (request, reply) => {
         const data = request.body;
@@ -23,6 +24,7 @@ async function createUser(fastify) {
     });
 }
 
+// Share the user information with the broker
 async function shareToBroker(username, password, email){
     try {
         const data = {

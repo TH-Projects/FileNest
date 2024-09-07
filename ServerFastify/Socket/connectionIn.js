@@ -5,14 +5,16 @@ const receiveMessage = require('./receiveMessage');
 // Connections from other instances
 function connectionIn (fastify){
     const wss = new WebSocket.Server({ server: fastify.server });
-    // WebSocket-Verbindungshandler
+    // Handle incoming connections
     wss.on('connection', (ws, req) => {
         connectionStorage.setConnection(ws);
 
+        // Handle incoming messages
         ws.on('message', (message) => {
             receiveMessage(fastify, message);
         });
 
+        // Handle connection close
         ws.on('close', () => {
             connectionStorage.removeConnection();
         });

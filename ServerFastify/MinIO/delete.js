@@ -2,6 +2,7 @@ const minioClient = require('./MinIOClient');
 const axios = require('axios');
 const { clientTypes, operationTypes } = require('./enums')
 
+// Delete a file
 async function deleteFile(fastify, options) {
     fastify.delete('/delete', async (request, reply) => {
         try {
@@ -43,7 +44,7 @@ async function deleteFile(fastify, options) {
 }
 
 // Helper Functions
-
+// Send error response
 const sendError = (reply, statusCode, message) => {
     return reply.code(statusCode).send({
         success: false,
@@ -51,6 +52,7 @@ const sendError = (reply, statusCode, message) => {
     });
 };
 
+// Handle error
 const handleError = (reply, error, fastify) => {
     fastify.log.error('Delete file error:', error);
     if (!reply.sent) {
@@ -58,6 +60,7 @@ const handleError = (reply, error, fastify) => {
     }
 };
 
+// Authenticate user
 const authenticateUser = async (username, password) => {
     try {
         const authResponse = await axios.post('http://nginx/authUser', {
@@ -72,6 +75,7 @@ const authenticateUser = async (username, password) => {
     }
 };
 
+// Get file metadata
 const getFileMetadata = async (file_id) => {
     try {
         const fileResponse = await axios.get('http://nginx/getFile', {
@@ -88,6 +92,7 @@ const getFileMetadata = async (file_id) => {
     }
 };
 
+// Delete file from MinIO
 const deleteFileFromMinIO = async (bucketName, fileName, fileType, fastify) => {
     try {
         await minioClient.minioClient.removeObject(bucketName, `${fileName}.${fileType}`);
@@ -98,6 +103,7 @@ const deleteFileFromMinIO = async (bucketName, fileName, fileType, fastify) => {
     }
 };
 
+// Delete file metadata
 const deleteFileMetadata = async (file_id, fastify) => {
     
     try {

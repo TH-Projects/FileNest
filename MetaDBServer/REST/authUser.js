@@ -1,5 +1,6 @@
 const user = require('../DB/user');
 
+// Auth user
 async function authUser(fastify) {
     fastify.post('/authUser', async (request, reply) => {
         const data = request.body;

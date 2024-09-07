@@ -19,10 +19,13 @@ function connectionOut(fastify, url, type = enums.connectionTypes.BROKER) {
     });
     connectionStorage.addConnection(ws, type);
     console.log('ConnOut ' + url);
+
+    // Open the connection
     ws.on('open', () => {
         open(fastify, ws, type, true);
     });
 
+    // Receive messages
     ws.on('message', (message) => {
         let jsonMessage;
         if(Buffer.isBuffer(message)){
@@ -44,10 +47,12 @@ function connectionOut(fastify, url, type = enums.connectionTypes.BROKER) {
         receive(fastify, jsonMessage, ws);
     });
 
+    // Close the connection
     ws.on('close', () => {
         close(fastify, ws);
     });
 
+    // Error handling
     ws.on('error', (err) => {
         fastify.log.error(err);
     });

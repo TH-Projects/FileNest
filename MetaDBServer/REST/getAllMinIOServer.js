@@ -1,5 +1,6 @@
 const minIOServerDB = require('../DB/minIOServer');
 
+// Get all minIO servers
 async function allMinIOServer(fastify) {
     fastify.get('/allMinIOServer', async (request, reply) => {
         const result = await minIOServerDB.getAllMinIOServer();

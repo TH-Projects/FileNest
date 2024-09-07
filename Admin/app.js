@@ -1,7 +1,7 @@
 const fastify = require('fastify')({ logger: true });
 const scheduleTasks = require('./Scheduler/scheduleTasks');
 
-// Server starten
+// start server
 const start = async () => {
     try {
         await fastify.listen({port:parseInt(process.env.PORT_ADMIN, 10), host:'0.0.0.0'});

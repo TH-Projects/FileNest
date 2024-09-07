@@ -1,6 +1,7 @@
 const axios = require('axios');
 require('dotenv').config();
 
+//fetches all MinIO servers from the MetaDB
 const getMinIOServer = async () => {
     try {
         const response = await axios.get(`${process.env.NGINX_API}/allMinIOServer`);

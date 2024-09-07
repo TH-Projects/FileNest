@@ -3,6 +3,7 @@ require('dotenv').config();
 const enums = require('../Socket/enums');
 const {clientTypes} = require("./enums");
 
+// Add a MinIO server to the system
 async function addMinIOServer(fastify) {
     fastify.post('/addMinIOServer', async (request, reply) => {
         const data = request.body;
@@ -18,6 +19,7 @@ async function addMinIOServer(fastify) {
     });
 }
 
+// Share the MinIO server information with the broker
 async function shareToBroker(address, cluster_id){
     try {
         const data = {
