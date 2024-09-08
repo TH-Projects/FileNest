@@ -1,0 +1,16 @@
+{
+  "name": "broker",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.5",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.28.1",
+    "http-errors": "~1.6.3",
+    "process": "^0.11.10",
+    "ws": "^8.18.0"
+  }
+}

@@ -1,0 +1,212 @@
+version: '3'
+services:
+  createuser:
+    image: createuser
+    build:
+      context: FileStorage
+      dockerfile: Dockerfile
+    depends_on:
+      - minio1
+      - minio2
+      - minio3
+      - minio4
+    command: ["./createuser.sh", "http://minio1:9000"]
+    volumes:
+      - .env:/usr/local/bin/.env
+    env_file:
+      - .env
+
+  minio1:
+    image: minio/minio
+    container_name: minio1
+    volumes:
+      - minio1-data:/data
+    ports:
+      - "9001:${PORT_MINIO}"
+      - "9091:9091"
+    env_file:
+      - .env
+    environment:
+      - MINIO_PROMETHEUS_AUTH_TYPE=public
+    command: server --console-address ":9091" http://minio{1...4}/data
+
+  minio2:
+    image: minio/minio
+    container_name: minio2
+    volumes:
+      - minio2-data:/data
+    ports:
+      - "9002:${PORT_MINIO}"
+      - "9092:9092"
+    env_file:
+      - .env
+    environment:
+      - MINIO_PROMETHEUS_AUTH_TYPE=public
+    command: server --console-address ":9092" http://minio{1...4}/data
+
+  minio3:
+    image: minio/minio
+    container_name: minio3
+    volumes:
+      - minio3-data:/data
+    ports:
+      - "9003:${PORT_MINIO}"
+      - "9093:9093"
+    env_file:
+      - .env
+    environment:
+      - MINIO_PROMETHEUS_AUTH_TYPE=public
+    command: server --console-address ":9093" http://minio{1...4}/data
+
+  minio4:
+    image: minio/minio
+    container_name: minio4
+    volumes:
+      - minio4-data:/data
+    ports:
+      - "9004:${PORT_MINIO}"
+      - "9094:9094"
+    env_file:
+      - .env
+    environment:
+      - MINIO_PROMETHEUS_AUTH_TYPE=public
+    command: server --console-address ":9094" http://minio{1...4}/data
+
+  serverfastify:
+    image: serverfastify
+    build: ServerFastify
+    env_file:
+      - .env
+    expose:
+      - "${PORT_SERVERFASTIFY}"
+    depends_on:
+        - broker
+
+  reactapp:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: reactapp
+    container_name: filenest-client
+    ports:
+      - "3001:${PORT_REACTAPP}" # runs on port 3001
+
+  broker:
+    image: broker
+    build: 
+      context: ./Broker
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+
+  nginx:
+    image: nginx-server
+    build: 
+      context: ./Nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    env_file:
+      - .env
+    depends_on:
+      - serverfastify
+      - reactapp
+      - broker
+      - servermetadb1
+      - servermetadb2
+      - servermetadb3
+    ports:
+      - "${PORT_NGINX}:${PORT_NGINX}"
+
+  metadb1:
+    image: metadb
+    build: MetaDB
+    env_file:
+      - .env
+    volumes:
+      - .env:/usr/local/bin/.env
+      - metadb1-data:/var/lib/mysql
+    ports:
+      - "8001:${PORT_METADB}"
+  metadb2:
+    image: metadb
+    build: MetaDB
+    env_file:
+      - .env
+    volumes:
+      - .env:/usr/local/bin/.env
+      - metadb2-data:/var/lib/mysql
+    ports:
+      - "8002:${PORT_METADB}"
+
+  metadb3:
+    image: metadb
+    build: MetaDB
+    env_file:
+      - .env
+    volumes:
+      - .env:/usr/local/bin/.env
+      - metadb3-data:/var/lib/mysql
+    ports:
+      - "8003:${PORT_METADB}"
+
+  servermetadb1:
+    image: servermetadb
+    build: ./MetaDBServer
+    depends_on:
+      - metadb1
+      - broker
+    env_file:
+      - .env
+    environment:
+      - MYSQL_HOST=metadb1
+    expose:
+      - "${PORT_SERVERMETADB}"
+
+  servermetadb2:
+    image: servermetadb
+    build: ./MetaDBServer
+    depends_on:
+      - metadb2
+      - broker
+    env_file:
+      - .env
+    environment:
+      - MYSQL_HOST=metadb2
+    expose:
+      - "${PORT_SERVERMETADB}"
+
+
+  servermetadb3:
+    image: servermetadb
+    build: ./MetaDBServer
+    depends_on:
+      - metadb3
+      - broker
+    env_file:
+      - .env
+    environment:
+      - MYSQL_HOST=metadb3
+    expose:
+      - "${PORT_SERVERMETADB}"
+
+  admin:
+    image: admin
+    build: ./Admin
+    env_file:
+      - .env
+    depends_on:
+      - broker
+      - servermetadb1
+      - servermetadb2
+      - servermetadb3
+    ports:
+      - "3000:${PORT_ADMIN}"
+
+volumes:
+  minio1-data:
+  minio2-data:
+  minio3-data:
+  minio4-data:
+  metadb1-data:
+  metadb2-data:
+  metadb3-data:
