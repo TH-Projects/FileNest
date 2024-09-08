@@ -9,12 +9,12 @@ const createUserRoutes = async (fastify) => {
     fastify.post('/checkAndCreateUser', async (request, reply) => {
         const { username, email, password } = request.body;
 
-        // Validate the username and email
-        const checkResult = await checkUserExistance(username, email);
-        if (!checkResult.success) {
+        // Validate the username
+        const usernameValidationResult = validateUsername(username);
+        if (!usernameValidationResult.success) {
             return reply.status(400).send({
                 success: false,
-                message: checkResult.message
+                message: usernameValidationResult.message
             });
         }
 
@@ -24,6 +24,15 @@ const createUserRoutes = async (fastify) => {
             return reply.status(400).send({
                 success: false,
                 message: passwordValidationResult.message
+            });
+        }
+
+        // Check the email and username existence
+        const checkResult = await checkUserExistance(username, email);
+        if (!checkResult.success) {
+            return reply.status(400).send({
+                success: false,
+                message: checkResult.message
             });
         }
 
@@ -84,6 +93,19 @@ const createUserRoutes = async (fastify) => {
                 message: 'An error occurred while checking user existence'
             };
         }
+    };
+
+    // Validate the username with a regex
+    const validateUsername = (username) => {
+        // Username must contain only letters (A-Z) and numbers (0-9), and no spaces
+        const usernameRegex = /^[A-Za-z0-9]+$/;
+        if (!usernameRegex.test(username)) {
+            return {
+                success: false,
+                message: 'Username can only contain letters (A-Z) and numbers (0-9), with no spaces.'
+            };
+        }
+        return { success: true };
     };
 
     // Validate the password with a regex
