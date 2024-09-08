@@ -2,7 +2,7 @@ const publish = require('./publish');
 const queue = require('./queue');
 
 // Add messages to the queue
-function addMessage(messages, clients) {
+const addMessage = (messages, clients) => {
     for (let clientAddress of clients) {
         let entry = queue.queue.find((queueObject) => queueObject.clientAddress === clientAddress);
         if (entry) {

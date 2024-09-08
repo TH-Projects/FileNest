@@ -4,7 +4,7 @@ const user = require('../DB/user');
 
 const JWT_SECRET = process.env.JWT_SECRET;  // Key saved in .env file
 
-async function loginUserRoute(fastify) {
+const loginUserRoute = async (fastify) => {
     fastify.post('/loginUser', async (request, reply) => {
         const { username, password } = request.body;
 

@@ -1,7 +1,7 @@
 const queue = require('../Queue/queue.js');
 
 // Get the queue
-async function getQueue (fastify) {
+const getQueue = async (fastify) => {
     fastify.get('/getQueue', (request, reply) => {
         reply.send(JSON.stringify(queue.queue));
         return;

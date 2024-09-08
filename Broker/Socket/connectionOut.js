@@ -8,7 +8,7 @@ const os = require('os');
 const connectionStorage = require("./connectionStorage");
 
 // Connections to other instances
-function connectionOut(fastify, url, type = enums.connectionTypes.BROKER) {
+const connectionOut = (fastify, url, type = enums.connectionTypes.BROKER) => {
     if((new URL(url))?.hostname === os.hostname()){
         return;
     }

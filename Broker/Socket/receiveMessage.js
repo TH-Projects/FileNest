@@ -5,7 +5,7 @@ const addMessage = require('../Queue/addMessage');
 const removeMessages = require('../Queue/removeMessage');
 
 // This function is called up when a message is received.
-function receiveMessage (fastify, jsonMessage, ws) {
+const receiveMessage = (fastify, jsonMessage, ws) => {
     const message = JSON.stringify(jsonMessage);
     switch (jsonMessage.syncOperation) {
         case enums.syncOperation.ADD:

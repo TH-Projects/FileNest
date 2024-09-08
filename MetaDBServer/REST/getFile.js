@@ -1,7 +1,7 @@
 const files = require('../DB/files');
 
 // Get the file by file_id
-async function getFile(fastify) {
+const getFile = async (fastify) => {
     fastify.get('/getFile', async (request, reply) => {
         const file_id = request.query?.file_id;
         if(!file_id){

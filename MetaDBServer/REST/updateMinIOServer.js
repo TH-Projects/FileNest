@@ -4,7 +4,7 @@ const enums = require('../Socket/enums');
 const {clientTypes} = require("./enums");
 
 // Update the minIO server
-async function updateMinIOServer(fastify) {
+const updateMinIOServer = async (fastify) => {
     fastify.post('/updateMinIOServer', async (request, reply) => {
         const data = request.body;
         const minIOServer_id = data?.minIOServer_id;
@@ -20,7 +20,7 @@ async function updateMinIOServer(fastify) {
 }
 
 // Share the minIO server update to the broker
-async function shareToBroker(minIOServer_id, active){
+const shareToBroker = async (minIOServer_id, active) => {
     try {
         const data = {
             type: clientTypes.METADBSERVER,

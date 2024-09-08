@@ -2,7 +2,7 @@ const connection = require('./connection');
 const defaultRole = 2;
 
 // gets a user by username and password
-async function getUser(username, password) {
+const getUser = async (username, password) => {
     console.log(`getUser: ${username}, ${password}`);
     
     try {
@@ -33,7 +33,7 @@ async function getUser(username, password) {
 }
 
 // creates a user with the given username, password and email
-async function createUser(username, password, email) {
+const createUser = async (username, password, email) => {
     try {
         const db = await connection.getConnection();
         const userExists = await checkUsername(username);
@@ -63,7 +63,7 @@ async function createUser(username, password, email) {
 }
 
 // checks if a user with the given username exists
-async function checkUsername(username){
+const checkUsername = async (username) => {
     try {
         const db = await connection.getConnection();
         const userExists = await db.query(
@@ -78,7 +78,7 @@ async function checkUsername(username){
 }
 
 // checks if a user with the given email exists
-async function checkEmail(email) {    
+const checkEmail = async (email) => {    
     try {
         const db = await connection.getConnection();
         const emailExists = await db.query(
@@ -93,7 +93,7 @@ async function checkEmail(email) {
 }
 
 // gets the account_id by username
-async function getAccountIdByUsername(username) {
+const getAccountIdByUsername = async (username) => {
     try {
         const db = await connection.getConnection();
         const rows = await db.query(

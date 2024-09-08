@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const os = require('os');
 
 // Build up the connection to the broker
-async function buildUpConnection() {
+const buildUpConnection = async () => {
     console.log('Trying to establish connection');
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     let connection = false;
@@ -15,7 +15,7 @@ async function buildUpConnection() {
 }
 
 // Call the broker to establish connection
-async function connectionCall() {
+const connectionCall = async () => {
     dotenv.config();
     const data = {
         type: "METADBSERVER",

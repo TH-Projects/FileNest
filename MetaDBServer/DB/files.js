@@ -2,7 +2,7 @@ const connection = require('./connection');
 const minIOServerReference = require('./minIOServer');
 
 // Get all files
-async function getFiles() {
+const getFiles = async () => {
     try {
         const db = await connection.getConnection();
         const result = await db.query(
@@ -24,7 +24,7 @@ async function getFiles() {
 }
 
 // Get all filenames for a given username
-async function getFilenamesForUsername(username){
+const getFilenamesForUsername = async (username) => {
     try {
         const db = await connection.getConnection();
         let result = await db.query(
@@ -50,7 +50,7 @@ async function getFilenamesForUsername(username){
 }
 
 // Get a file by its ID
-async function getFile(file_id){
+const getFile = async (file_id) =>{
     try {
         const db = await connection.getConnection();
         let result = await db.query(
@@ -76,7 +76,7 @@ async function getFile(file_id){
 }
 
 // Get the cluster location for a file
-async function getClusterForFile(file_id) {
+const getClusterForFile = async (file_id) => {
     try {
         const db = await connection.getConnection();
         const result = await db.query(
@@ -98,7 +98,7 @@ async function getClusterForFile(file_id) {
 }
 
 // Delete a file by its ID
-async function deleteFile(file_id) {
+const deleteFile = async (file_id) => {
     try {
         const db = await connection.getConnection();
         const result = await db.query(
@@ -119,7 +119,7 @@ async function deleteFile(file_id) {
 }
 
 // Add a file to the database
-async function addFile(etag, name, file_type, size, last_modify, owner_id, minIOServer, content_type) {
+const addFile = async (etag, name, file_type, size, last_modify, owner_id, minIOServer, content_type) => {
     try {
         // Get the appropriate MinIO server cluster
         const minIOServerDB = await minIOServerReference.getClusterForMinIOServer(minIOServer);

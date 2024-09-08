@@ -1,7 +1,7 @@
 const connection = require('./connection');
 
 // Add a cluster to the database
-async function addCluster(start_node_id, end_node_id) {
+const addCluster = async (start_node_id, end_node_id) => {
     try {
         const db = await connection.getConnection();
         const [result] = await db.query(
@@ -23,7 +23,7 @@ async function addCluster(start_node_id, end_node_id) {
 }
 
 // Update the memory limit of a cluster
-async function updateMemoryLimit (cluster_id, memory_limit_reached) {
+const updateMemoryLimit = async (cluster_id, memory_limit_reached) => {
     try {
         const db = await connection.getConnection();
         const result = await db.query(

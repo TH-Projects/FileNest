@@ -3,7 +3,7 @@ const syncConnectionsWithBrokers = require('./syncConnectionsWithBrokers');
 const enums = require('./enums');
 
 // Close the connection of the client.
-function close (fastify, ws) {
+const close =  (fastify, ws) => {
     const wsEntry = connectionStorage.removeConnection(ws);
     if(wsEntry){
         console.log('Removing connection from storage' + wsEntry);

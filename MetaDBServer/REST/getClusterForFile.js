@@ -1,7 +1,7 @@
 const files = require('../DB/files');
 
 // Get the cluster for a file
-async function getClusterForFile(fastify) {
+const getClusterForFile = async (fastify) => {
     fastify.get('/getClusterForFile', async (request, reply) => {
         const file_id = request.query?.file_id;
         if(!file_id) {

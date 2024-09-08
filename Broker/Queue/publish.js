@@ -4,7 +4,7 @@ const sendMessage = require('../Socket/SendMessage');
 const fastify = require('fastify')();
 
 // Publish messages to clients
-function publish(queue) {
+const publish = (queue) => {
     console.log('Publishing');
     const connectedClients = connectionStorage.getConnectionsWithoutType(enums.connectionTypes.BROKER);
     const connectedClientAddresses = connectedClients.map(entry => entry.ws.clientAddress);
@@ -15,7 +15,7 @@ function publish(queue) {
 }
 
 // Get all messages for a client
-function getEntriesByClientAddresses(connectedClients, connectedClientAddresses, queue) {
+const getEntriesByClientAddresses =(connectedClients, connectedClientAddresses, queue) => {
     return queue
         .filter((queueObject) => connectedClientAddresses.includes(queueObject.clientAddress))
         .map((queueObject) => {

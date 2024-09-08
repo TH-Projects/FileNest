@@ -4,7 +4,7 @@ const enums = require('../Socket/enums');
 const {clientTypes} = require("./enums");
 
 // Add a MinIO server to the system
-async function addMinIOServer(fastify) {
+const addMinIOServer = async (fastify) => {
     fastify.post('/addMinIOServer', async (request, reply) => {
         const data = request.body;
         const address = data?.address;
@@ -20,7 +20,7 @@ async function addMinIOServer(fastify) {
 }
 
 // Share the MinIO server information with the broker
-async function shareToBroker(address, cluster_id){
+const shareToBroker = async (address, cluster_id) => {
     try {
         const data = {
             type: clientTypes.METADBSERVER,

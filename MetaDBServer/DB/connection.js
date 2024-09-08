@@ -22,7 +22,7 @@ async function register() {
 }
 
 // get a connection
-async function getConnection() {
+const getConnection = async () => {
     try {
         return await server.mariadb.getConnection();
     } catch (err) {

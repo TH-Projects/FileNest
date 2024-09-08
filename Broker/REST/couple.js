@@ -6,7 +6,7 @@ const crypto = require('crypto');
 require('dotenv').config();
 
 // Couple with another broker
-async function couple(fastify) {
+const couple = async (fastify) => {
   fastify.post('/couple', async (request, reply) => {
       const url = request.body.url;
       const type = request.body.type;
@@ -26,7 +26,7 @@ async function couple(fastify) {
 }
 
 // Get the current queue from the coupled brokers
-async function getCurrentQueue(){
+const getCurrentQueue = async() =>{
     let brokerConnections = connectionStorage.getAllConnectionAddressesByType(enums.connectionTypes.BROKER);
     brokerConnections = brokerConnections.map((connection) => {
         return connection.replace('ws://', 'http://');
@@ -57,7 +57,7 @@ async function getCurrentQueue(){
 }
 
 // Generate a hash from the data
-function generateHash(data) {
+const generateHash = (data) => {
     return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
 }
 

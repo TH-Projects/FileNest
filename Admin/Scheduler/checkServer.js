@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 //queries the MinIO server and reads out the percentage record of how full the memory is
-async function checkServer(server)  {
+const checkServer = async (server) =>  {
     try {
         const response = await axios.get(`http://${server}:9000/minio/metrics/v3/cluster/health`)
         const metrics = response.data;

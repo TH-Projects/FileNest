@@ -5,7 +5,7 @@ const enums = require('./enums');
 const queue = require('../Queue/queue');
 
 // Build up the connection to other brokers
-async function buildUpConnection() {
+const buildUpConnection = async() => {
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     let success = false;
     let tries = 0;
@@ -25,7 +25,7 @@ async function buildUpConnection() {
 }
 
 // Call the couple endpoint
-async function coupleCall(url){
+const coupleCall = async (url) =>{
     try {
         const response = await axios.post( url, {
             url: 'ws://' + os.hostname() + ':' + process.env.PORT_BROKER,
