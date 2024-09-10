@@ -1,4 +1,6 @@
-# FileNest
+<p align="right"> <img src="client/public/logo.png" alt="FileNestLogo" width="150"/> </p>
+
+# FileNest  
 
 A straightforward file-sharing server accessible through a web client. 
 This project was developed as part of an examination for the Distributed Systems course at DHBW Heidenheim.
@@ -73,7 +75,7 @@ PORT_ADMIN=3000  # Adapt if needed
 ```
 
 ### React .env
-Place an .env in the ./client folder
+Place an .env in the `./client` folder
 
 ```
 VITE_APP_HOST=<yourHostURL> # e.g localhost
@@ -84,6 +86,18 @@ All containers can be launched by with the command
 ```
 docker-compose up -d
 ```
+
+## Project Documentation
+
+A description of the structure and decisions in the project is provided inside the `documentation`-Folder
+
+Further information about used technologies can be found here:
+- [Docker-Documentation](https://docs.docker.com/manuals/)
+- [Nginx-Documentation](https://nginx.org/en/docs/)
+- [minIO-Documentation](https://min.io/docs/minio/container/index.html)
+- [React-Documentation](https://react.dev/learn)
+- [Fastify-Documentation](https://fastify.dev/docs/latest/Guides/)
+- [MariaDB-Documentation](https://mariadb.com/kb/en/documentation/)
 
 
 
