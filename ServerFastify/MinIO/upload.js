@@ -124,7 +124,7 @@ const getMinIOServerForUpload = async () => {
 
 // Check if the filename already exists for the user
 const getFilenamesForUser = async (username) => {
-    const filenameResponse = await axios.get('http://nginx/getFilenamesForUsername', {
+    const filenameResponse = await axios.get(`${process.env.NGINX_API}/getFilenamesForUsername`, {
         params: { username },
         headers: { 'Content-Type': 'application/json' }
     });
@@ -197,7 +197,7 @@ const createFileMetadata = (fileName, fileSize, mimeType, username) => {
 // Get account ID by username
 const getAccountId = async (username) => {
     try {
-        const response = await axios.get('http://nginx/getAccountIdByUsername', {
+        const response = await axios.get(`${process.env.NGINX_API}/getAccountIdByUsername`, {
             params: { username },
             headers: { 'Content-Type': 'application/json' }
         });
@@ -226,7 +226,7 @@ const insertFileMetadata = async (metadata, ownerId, minIOServerId, etag) => {
                 }
             }
         }
-        const response = await axios.post('http://nginx/addQueue', data, {
+        const response = await axios.post(`${process.env.NGINX_API}/addQueue`, data, {
             headers: { 'Content-Type': 'application/json' }
         });        
 

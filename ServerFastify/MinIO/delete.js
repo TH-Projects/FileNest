@@ -84,7 +84,7 @@ const authenticateUser = async (token) => {
 // Get file metadata
 const getFileMetadata = async (file_id) => {
     try {
-        const fileResponse = await axios.get('http://nginx/getFile', {
+        const fileResponse = await axios.get(`${process.env.NGINX_API}/getFile`, {
             params: { file_id },
             headers: { 'Content-Type': 'application/json' }
         });
@@ -123,7 +123,7 @@ const deleteFileMetadata = async (file_id, fastify) => {
             }
         }
 
-        const deleteResponse = await axios.post('http://nginx/addQueue',data, {
+        const deleteResponse = await axios.post(`${process.env.NGINX_API}/addQueue`,data, {
             headers: { 'Content-Type': 'application/json' }
         });
         console.log(deleteResponse);

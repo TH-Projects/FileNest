@@ -4,7 +4,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contextes/auth-context';
 import CryptoJS from 'crypto-js';
 import axios from 'axios';
-import '../style/AccountPage.css'; // Importiere CSS-Datei für Stile
+import '../style/AccountPage.css';
+
+const HOST = import.meta.env.VITE_APP_HOST
+
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -21,7 +24,7 @@ const LoginPage = () => {
 
     try {
       // Send login request to the database server
-      const { data, status } = await axios.post('http://localhost/loginUser', {
+      const { data, status } = await axios.post(`http://${HOST}/loginUser`, {
         username,
         password: hashedPassword
       });

@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../style/AccountPage.css'; // Importiere CSS-Datei für Stile
 
+const HOST = import.meta.env.VITE_APP_HOST
+
 const RegisterPage = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -24,7 +26,7 @@ const RegisterPage = () => {
 
     try {
       // Send registration request to the database server
-      const { data, status } = await axios.post('http://localhost/checkAndCreateUser', {
+      const { data, status } = await axios.post(`http://${HOST}/checkAndCreateUser`, {
         username,
         email,
         password

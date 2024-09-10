@@ -8,6 +8,9 @@ import { useAuth } from "../contextes/auth-context";
 import useFileUpload from "../hooks/usefileupload";
 import "../style/cards.css";
 
+const HOST = import.meta.env.VITE_APP_HOST
+
+
 const FileTable = () => {
   // User authentication context
   const { user } = useAuth();
@@ -57,7 +60,7 @@ const FileTable = () => {
   };
 
   // Custom Hook for File Upload
-  const uploadUrl = "http://localhost/upload";
+  const uploadUrl = `http://${HOST}/upload`;
   const { handleFileChange, handleUpload, resultMsg } = useFileUpload(uploadUrl, handleCloseModal);
 
   // Set the result message from the file upload
@@ -82,7 +85,7 @@ const FileTable = () => {
   // Fetch file metadata from the database server
   const fetchFiles = async () => {
     try {
-      const response = await axios.get('http://localhost/getFiles');
+      const response = await axios.get(`http://${HOST}/getFiles`);
       if (response.status === 200) {
         setQueryData(response.data.message);
       } else {

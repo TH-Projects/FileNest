@@ -6,6 +6,8 @@ import { saveAs } from 'file-saver';
 import { formatTimestamp, formatBytes, createResultMessage } from '../utils/utils';
 import "../style/cards.css";
 
+const HOST = import.meta.env.VITE_APP_HOST
+
 const FileView = ({ file_meta_data, onDelete, onDownload }) => {  
   const { token } = useAuth();  
   const { file_id, name, file_type, size, username, last_modify } = file_meta_data;
@@ -14,7 +16,7 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
   const handleDownload = async () => {
     try {
       // Try to download the requested file
-      const response = await axios.get('http://localhost/download', {
+      const response = await axios.get(`http://${HOST}/download`, {
         params: { file_id },
         responseType: 'blob',
       });
@@ -49,7 +51,7 @@ const FileView = ({ file_meta_data, onDelete, onDownload }) => {
     
     try {
       // Try to delete the requested file
-      const response = await axios.delete('http://localhost/delete', {
+      const response = await axios.delete(`http://${HOST}/delete`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
