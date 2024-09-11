@@ -9,7 +9,7 @@ upstream metadbserver{
 }
 
 server {
-    listen 81;
+    listen 80;
     server_name ${NGINX_SERVER_NAME};
 
     # Set the maximum allowed size of the client request body to 10 MB
