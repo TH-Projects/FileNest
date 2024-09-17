@@ -87,6 +87,13 @@ All containers can be launched by with the command
 docker-compose up -d
 ```
 
+### Troubleshooting the system startup
+
+Depending on your used hardware it can be the case that the metadbServer tries to connect to the database before it is set up.
+In this case please restart your metadbServer-containers manually or adjust the sleep in the `app.js` of the metadbServer to a value that 
+the system starts without the containers exiting.
+
+
 ## Project Documentation
 
 A description of the structure and decisions in the project is provided inside the `documentation`-Folder
