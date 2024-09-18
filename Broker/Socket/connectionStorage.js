@@ -18,6 +18,11 @@ const addConnection = (ws, type) => {
     }
     if(!connectionStorage.find((entry) => entry.ws.clientAddress === ws.clientAddress)){
         connectionStorage.push({type: type, ws: ws});
+        console.log("Adding connection", ws.clientAddress, 'storage: ', connectionStorage.map(entry => entry.ws.clientAddress));
+        removeSharedConnection(ws.clientAddress);
+    }
+    else{
+        console.log("Connection already exists", ws.clientAddress);
     }
 }
 

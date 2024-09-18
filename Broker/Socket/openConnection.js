@@ -1,5 +1,8 @@
 const syncConnectionsWithBrokers = require('./syncConnectionsWithBrokers');
 const connectionStorage = require('./connectionStorage');
+const publish = require('../Queue/publish');
+const queue = require('../Queue/queue');
+const enums = require('./enums');
 
 // Open a connection
 const open = (fastify, ws, type, connOut = false) => {
@@ -7,6 +10,9 @@ const open = (fastify, ws, type, connOut = false) => {
     if(connOut){
         const connections = connectionStorage.getAllConnections();
         syncConnectionsWithBrokers(fastify, connectionStorage, connections);
+    }
+    if(type !== enums.connectionTypes.BROKER){
+        publish(queue.queue);
     }
 }
 
