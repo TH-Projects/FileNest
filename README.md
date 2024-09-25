@@ -7,7 +7,7 @@ This project was developed as part of an examination for the Distributed Systems
 
 ## Get The Application running
 
-First clone the repo with the project directory `FielNest`.
+First clone the repo with the project directory `FileNest` (name is mandatory).
 ```
 https://github.com/TH-Projects/FileNest.git
 ```
