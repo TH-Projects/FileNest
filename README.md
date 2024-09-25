@@ -84,7 +84,7 @@ VITE_APP_HOST=<yourHostURL> # e.g localhost
 ### Launching the system
 All containers can be launched by with the command
 ```
-docker-compose up -d
+docker-compose up -d --scale broker=<numberOfBrokersToStart> --scale serverfastify=<numberOfFastifyServersToStart> --build
 ```
 
 ### Troubleshooting the system startup
