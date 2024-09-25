@@ -7,6 +7,11 @@ This project was developed as part of an examination for the Distributed Systems
 
 ## Get The Application running
 
+First clone the repo with the project directory `FielNest`.
+```
+https://github.com/TH-Projects/FileNest.git
+```
+
 Before launching the system it is needed to define a .env file containing needed variables for running the application and configuring the infrastructure.
 The .env-file has so define the following environmental variables:
 
@@ -82,7 +87,7 @@ VITE_APP_HOST=<yourHostURL> # e.g localhost
 ```
 
 ### Launching the system
-All containers can be launched by with the command
+All containers can be launched by the command
 ```
 docker-compose up -d --scale broker=<numberOfBrokersToStart> --scale serverfastify=<numberOfFastifyServersToStart> --build
 ```
@@ -96,7 +101,7 @@ the system starts without the containers exiting.
 
 ## Project Documentation
 
-A description of the structure and decisions in the project is provided inside the `documentation`-Folder
+A description of the structure and decisions in the project in german language is provided inside the `documentation`-Folder
 
 Further information about used technologies can be found here:
 - [Docker-Documentation](https://docs.docker.com/manuals/)
