@@ -91,6 +91,7 @@ All containers can be launched by the command
 ```
 docker-compose up -d --scale broker=<numberOfBrokersToStart> --scale serverfastify=<numberOfFastifyServersToStart> --build
 ```
+The system is fully booted when the container createuser-1 has exited. This behaviour is expected.
 
 ### Troubleshooting the system startup
 
