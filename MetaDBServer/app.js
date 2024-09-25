@@ -31,9 +31,9 @@ fastify.register(require('./REST/updateMemoryLimit'));
 // Server starten
 const start = async () => {
     try {
-        await fastify.listen({port:3001, host:'0.0.0.0'});
-        await new Promise(resolve => setTimeout(resolve, 5000)); // wait for the database to be ready, adjust if your hardware is to slow
+        await new Promise(resolve => setTimeout(resolve, 15000)); // wait for the database to be ready, adjust if your hardware is to slow
         await dbConnection.register();
+        await fastify.listen({port:3001, host:'0.0.0.0'});
         connectionIn(fastify);
         await buildUpConnection();
     } catch (err) {

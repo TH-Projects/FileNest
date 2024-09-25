@@ -20,8 +20,11 @@ const upload = async (fastify, options) => {
                 return sendError(reply, 400, 'File data is missing or malformed');
             }
 
+            console.log('FIELNAME:', fileName);
+            
+
             if (!isValidFilename(fileName)) {                
-                return sendError(reply, 400, 'Filename contains invalid characters. Only letters (A-Z, a-z), numbers, hyphens, underscores, and spaces are allowed');
+                return sendError(reply, 400, 'Filename contains invalid characters or the extension is missing. Only letters (A-Z, a-z), numbers, hyphens, underscores, and spaces are allowed');
             }
 
             // Authenticate user using JWT
@@ -74,7 +77,7 @@ const upload = async (fastify, options) => {
 }
 // Check if the filename is valid
 const isValidFilename = (filename) => {    
-    const validFilenameRegex = /^[a-zA-Z0-9_\-. ]+$/;
+    const validFilenameRegex = /^[a-zA-Z0-9_\-. ]+\.[a-zA-Z0-9]+$/;
     return validFilenameRegex.test(filename);
 };
 

@@ -115,7 +115,7 @@ const createUserRoutes = async (fastify) => {
         if (!passwordRegex.test(password)) {
             return {
                 success: false,
-                message: 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.'
+                message: 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character ( . is not a special character ).'
             };
         }
         return { success: true };
