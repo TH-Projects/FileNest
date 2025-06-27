@@ -7,6 +7,9 @@ import FileUpload from "../components/upload-file";
 import { useAuth } from "../contextes/auth-context";
 import useFileUpload from "../hooks/usefileupload";
 import "../style/cards.css";
+import { FaFolderPlus } from "react-icons/fa";
+import { FiPlus } from "react-icons/fi";
+
 
 const HOST = import.meta.env.VITE_APP_HOST
 
@@ -226,12 +229,19 @@ const FileTable = () => {
         <Col md={3}></Col>
         <Col md={1} className="d-flex justify-content-end align-items-top">
           <Button
+              variant="success"
+              className="btn-md square-button mx-1"
+              disabled={!user}
+          >
+            <FaFolderPlus/>
+          </Button>
+          <Button
             variant="success"
-            className="btn-md square-button"
+            className="btn-md square-button mx-1"
             onClick={handleShowModal}
             disabled={!user}
           >
-            +
+            <FiPlus />
           </Button>
           <FileUpload
             show={showUploadModal}
