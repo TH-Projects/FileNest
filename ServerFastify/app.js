@@ -14,11 +14,11 @@ fastify.register(FastifyCors, {
 });
 
 fastify.register(FastifyMultipart, {
-    addToBody: true,
+    attachFieldsToBody: true,
     limits: {
-        fileSize: 10 * 1024 * 1024, // 10 MB (Erhöhe diesen Wert nach Bedarf)
-      },
-});
+        fileSize: 10 * 1024 * 1024  // 10 MB
+    }
+})
 
 fastify.register(require('./MinIO/upload'),{
     fs: fs,
