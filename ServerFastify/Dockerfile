@@ -1,6 +1,5 @@
 # Wähle ein Node.js-Basis-Image
-FROM node:18
-
+FROM node:lts-alpine3.21
 # Arbeitsverzeichnis im Container erstellen und setzen
 WORKDIR /usr/src/app
 

@@ -4,23 +4,32 @@ const { PassThrough } = require('stream');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { clientTypes, operationTypes } = require('./enums');
+const { default: fastify } = require('fastify');
 
 const JWT_SECRET = process.env.JWT_SECRET;  // Key saved in .env file
 
 // Upload a file
 const upload = async (fastify, options) => {
-    fastify.post('/upload', async (request, reply) => {        
+    fastify.post('/upload', async (request, reply) => {   
         try {            
-            const data = request.body.file?.[0];
-            const fileName = data.filename;
-            const fileBuffer = data.data;
-            const fileSize = fileBuffer.length;            
+            const filePart = request.body.file;
+            if (!filePart) {
+                // A 400 error is returned if no file part is found
+                return sendError(reply, 400, 'No file object found in request');
+            }
+            // Convert the file part to a buffer
+            const fileBuffer = await filePart.toBuffer();
 
-            if (!data || !fileName || !fileBuffer || !fileSize) {
+            // Metadata is extracted from the file part
+            const fileName = filePart.filename;
+            const fileSize = fileBuffer.length;
+            const mimeType = filePart.mimetype;
+
+            if (!fileName || !fileBuffer || !fileSize || !mimeType) {
                 return sendError(reply, 400, 'File data is missing or malformed');
             }
 
-            console.log('FIELNAME:', fileName);
+            fastify.log.info(`Uploading file: ${fileName}`);
             
 
             if (!isValidFilename(fileName)) {                
@@ -33,7 +42,7 @@ const upload = async (fastify, options) => {
                 return sendError(reply, 401, 'Token is missing');
             }            
 
-            const authResponse = await authenticateUser(token);
+            const authResponse = await authenticateUser(fastify, token);
             if (!authResponse.success) {                
                 return sendError(reply, 401, 'User authentication failed');
             }
@@ -58,9 +67,9 @@ const upload = async (fastify, options) => {
 
             const etag = await uploadFile(minIO, authenticatedUsername.toLowerCase(), fileName, fileBuffer, fileSize);
 
-            const metadata = createFileMetadata(fileName, fileSize, data.mimetype, authenticatedUsername);
+            const metadata = createFileMetadata(fileName, fileSize, mimeType, authenticatedUsername);
             const ownerId = await getAccountId(authenticatedUsername);
-            await insertFileMetadata(metadata, ownerId, minIOServerId, etag);
+            await insertFileMetadata(fastify, metadata, ownerId, minIOServerId, etag);
 
             fastify.log.info('File uploaded successfully:', metadata);
 
@@ -98,12 +107,12 @@ const handleError = (reply, error, fastify) => {
 };
 
 // Authenticate user
-const authenticateUser = async (token) => {
+const authenticateUser = async (fastify, token) => {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);        
         return { success: true, message: 'user authenticated in db' , username: decoded.username}; // Return user data
     } catch (error) {
-        console.error('JWT authentication error:', error);
+        fastify.log.error('JWT authentication error:', error);
         return {success: false, message: 'authentication in db failed'}; // Token is invalid or expired
     }
 };
@@ -211,7 +220,7 @@ const getAccountId = async (username) => {
 };
 
 // Insert file metadata into the database
-const insertFileMetadata = async (metadata, ownerId, minIOServerId, etag) => {
+const insertFileMetadata = async (fastify, metadata, ownerId, minIOServerId, etag) => {
     try {
         const data = {
             type: clientTypes.METADBSERVER,
@@ -234,7 +243,7 @@ const insertFileMetadata = async (metadata, ownerId, minIOServerId, etag) => {
         });        
 
         if (response.status === 200) {
-            console.log('File metadata inserted successfully');
+            fastify.log.info('File metadata inserted successfully');
         } else {
             throw new Error('Error inserting metadata into the database');
         }

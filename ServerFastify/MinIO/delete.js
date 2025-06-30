@@ -76,7 +76,7 @@ const authenticateUser = async (token) => {
         const decoded = jwt.verify(token, JWT_SECRET);        
         return { success: true, message: 'user authenticated in db' , username: decoded.username}; // Return user data
     } catch (error) {
-        console.error('JWT authentication error:', error);
+        fastify.log.error('JWT authentication error:', error);
         return {success: false, message: 'authentication in db failed'}; // Token is invalid or expired
     }
 };
@@ -102,7 +102,7 @@ const getFileMetadata = async (file_id) => {
 const deleteFileFromMinIO = async (bucketName, fileName, fileType, fastify) => {
     try {
         await minioClient.minioClient.removeObject(bucketName, `${fileName}.${fileType}`);
-        fastify.log.info('File deleted from MinIO successfully.');
+        fastify.log.info(`File ${fileName} from bucket ${bucketName} deleted from MinIO successfully.`);
     } catch (error) {
         fastify.log.error('Error deleting file from MinIO:', error);        
         throw new Error('Failed to delete file from MinIO');
@@ -126,7 +126,6 @@ const deleteFileMetadata = async (file_id, fastify) => {
         const deleteResponse = await axios.post(`${process.env.NGINX_API}/addQueue`,data, {
             headers: { 'Content-Type': 'application/json' }
         });
-        console.log(deleteResponse);
         
         if (deleteResponse.status !== 200 || !deleteResponse.data.status === 'success') {
             throw new Error(deleteResponse.data.message || 'Error deleting file metadata');

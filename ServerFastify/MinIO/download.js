@@ -7,7 +7,8 @@ const {clientTypes, operationTypes} = require('./enums');
 const download = async (fastify) => {
   fastify.get('/download', async (request, reply) => {
     const { file_id } = request.query || {};
-
+    fastify.log.info(`Download request received for file_id: ${file_id}`);
+    fastify.log.info('Request query: ', request.query);
     if (!file_id) {
       return reply.code(400).send({
         success: false,
@@ -17,7 +18,7 @@ const download = async (fastify) => {
 
     try {
       // Get file metadata from the database
-      const file = await getFile(file_id);      
+      const file = await getFile(fastify, file_id);      
       if (!file) {        
         return reply.code(500).send({
           success: false,
@@ -26,7 +27,7 @@ const download = async (fastify) => {
       }
 
       // Get MinIO servers where the file is stored
-      const minIOServers = await getMinIOServers(file.cluster_location_id);
+      const minIOServers = await getMinIOServers(fastify, file.cluster_location_id);
       if (!minIOServers) {
         return reply.code(500).send({
           success: false,
@@ -46,10 +47,10 @@ const download = async (fastify) => {
           const fileName = `${file.name}.${file.file_type}`;
 
           // Read file from the bucket and send to the client
-          return await readFile(minIOClientInstance, bucketName, fileName, file.content_type, reply);
+          return await readFile(fastify, minIOClientInstance, bucketName, fileName, file.content_type, reply);
         } catch (error) {
-          console.error(`Error reading file from MinIO server ${minIOServer.address}:`, error);
-          await markNonReachableServer(minIOServer);
+          fastify.log.error(`Error reading file from MinIO server ${minIOServer.address}:`, error);
+          await markNonReachableServer(fastify, minIOServer);
         }
       }
 
@@ -58,7 +59,7 @@ const download = async (fastify) => {
         message: 'Failed to read file from all servers. Please refresh your browser and try again, because it could be deleted by the owner' 
       });
     } catch (error) {
-      console.error('Error handling download request:', error);
+      fastify.log.error('Error handling download request:', error);
       return reply.status(500).send({
         success: false,
         message: 'An unexpected error occurred'
@@ -68,14 +69,14 @@ const download = async (fastify) => {
 }
 
 // Read file from MinIO and send to the client
-const readFile = async (minIOClient, bucketName, fileName, contentType, reply) => {
+const readFile = async (fastify, minIOClient, bucketName, fileName, contentType, reply) => {
   try {
     const dataStream = await minIOClient.getObject(bucketName, fileName);
     reply.header('Content-Disposition', `attachment; filename="${fileName}"`);
     reply.header('Content-Type', contentType);
     return reply.status(200).send(dataStream);
   } catch (err) {
-    console.error('Error sending file:', err);
+    fastify.log.error('Error sending file:', err);
     return reply.status(500).send({
       success: false,
       message: 'Failed to send file from MinIO server'
@@ -84,7 +85,7 @@ const readFile = async (minIOClient, bucketName, fileName, contentType, reply) =
 }
 
 // Get file metadata from the database
-const getFile = async (fileId) => {
+const getFile = async (fastify, fileId) => {
   try {
     const response = await axios.get(`${process.env.NGINX_API}/getFile`, {
       params: { file_id: fileId }
@@ -94,13 +95,13 @@ const getFile = async (fileId) => {
     }
     return null;
   } catch (error) {
-    console.error('Error fetching file metadata:', error.response.data);
+    fastify.log.error('Error fetching file metadata:', error.response.data);
     return null;
   }
 }
 
 // Mark a MinIO server as non-reachable
-const markNonReachableServer = async (minIOServer) =>{
+const markNonReachableServer = async (fastify, minIOServer) =>{
     try {
         const data = {
             type: clientTypes.METADBSERVER,
@@ -113,12 +114,12 @@ const markNonReachableServer = async (minIOServer) =>{
         }
         await axios.post(process.env.NGINX_API + `/addQueue`, data);
     } catch (error){
-        console.log(error);
+        fastify.log.error(error);
     }
 }
 
 // Get MinIO servers where the file is stored
-const getMinIOServers = async (clusterLocationId) => {
+const getMinIOServers = async (fastify, clusterLocationId) => {
   try {
     const response = await axios.get(`${process.env.NGINX_API}/minIOServer`, {
       params: { cluster_id: clusterLocationId }
@@ -128,7 +129,7 @@ const getMinIOServers = async (clusterLocationId) => {
     }
     return null;
   } catch (error) {
-    console.error('Error fetching MinIO servers:', error);
+    fastify.log.error('Error fetching MinIO servers:', error);
     return null;
   }
 }
