@@ -3,22 +3,22 @@ import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import { useState, useEffect, useCallback } from "react";
 import MultiSelect from "../components/multi-select";
 import FileView from "../components/view-file";
-import FileUpload from "../components/upload-file";
+import GenericModal from "../components/generic-modal";
 import { useAuth } from "../contextes/auth-context";
 import useFileUpload from "../hooks/usefileupload";
 import "../style/cards.css";
 import { FaFolderPlus } from "react-icons/fa";
 import { FiPlus } from "react-icons/fi";
 
-
-const HOST = import.meta.env.VITE_APP_HOST
-
+const HOST = import.meta.env.VITE_APP_HOST;
 
 const FileTable = () => {
-  // User authentication context
   const { user } = useAuth();
 
-  // State variables
+  // Folder modal state
+  const [folderName, setFolderName] = useState("");
+  
+  // Existing state variables
   const [queryData, setQueryData] = useState([]);
   const [fileMetaData, setFileMetaData] = useState([]);
   const [filenameOptions, setFilenameOptions] = useState([]);
@@ -28,27 +28,41 @@ const FileTable = () => {
   const [selectedFileExtensionOptions, setSelectedFileExtensionOptions] = useState([]);
   const [selectedFileOwnerOptions, setSelectedFileOwnerOptions] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showFolderModal, setShowFolderModal] = useState(false);
   const [resultMessage, setResultMessage] = useState(null);
 
-  // UI interaction handlers
-  const handleCloseModal = () => setShowUploadModal(false);
-  const handleShowModal = () => setShowUploadModal(true);
+  // Folder modal handlers
+  const handleOpenFolderModal = () => setShowFolderModal(true);
+  const handleCloseFolderModal = () => setShowFolderModal(false);
+  const createFolder = async () => {
+    if (folderName.trim().length > 0) {
+      await axios.post(`http://${HOST}/folders`, { name: folderName });
+      setFolderName("");
+      handleCloseFolderModal();
+      fetchFiles();
+    }
+  };
+
+  // Upload modal handlers
+  const handleCloseUploadModal = () => setShowUploadModal(false);
+  const handleShowUploadModal = () => setShowUploadModal(true);
+
+  // Select handlers
   const handleNameSelect = vData => setSelectedFilenameOptions(vData || []);
   const handleExtensionSelect = vData => setSelectedFileExtensionOptions(vData || []);
   const handleOwnerSelect = vData => setSelectedFileOwnerOptions(vData || []);
 
-  // Reports the response of the file download to the user
-  const handleFileDownload = (response) => {
-    setResultMessage(response);
-  };
-
-  // Reports the response of the file delete to the user
+  // Download/Delete handlers
+  const handleFileDownload = (response) => setResultMessage(response);
   const handleFileDelete = (response) => {
     setResultMessage(response);
-    fetchFiles(); // Refresh the file list shown in the table
+    fetchFiles();
   };
 
-  // Reports the response of the file upload to the user
+  // File upload hook
+  const uploadUrl = `http://${HOST}/upload`;
+  const { handleFileChange, handleUpload, resultMsg } = useFileUpload(uploadUrl, handleCloseUploadModal);
+
   const handleFileUpload = async () => {
     if (user) {
       const { success, message } = await handleUpload();
@@ -62,11 +76,7 @@ const FileTable = () => {
     }
   };
 
-  // Custom Hook for File Upload
-  const uploadUrl = `http://${HOST}/upload`;
-  const { handleFileChange, handleUpload, resultMsg } = useFileUpload(uploadUrl, handleCloseModal);
-
-  // Set the result message from the file upload
+  // Effect: set result message from upload
   useEffect(() => {
     if (resultMsg) setResultMessage(resultMsg);
   }, [resultMsg]);
@@ -85,7 +95,7 @@ const FileTable = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Fetch file metadata from the database server
+  // Fetch metadata
   const fetchFiles = async () => {
     try {
       const response = await axios.get(`http://${HOST}/getFiles`);
@@ -95,13 +105,7 @@ const FileTable = () => {
         console.error('Failed to fetch files');
       }
     } catch (error) {
-      if (error.response) {
-        console.error(`Error: ${error.response.data.message || 'An error occurred while fetching files'}`);
-      } else if (error.request) {
-        console.error('Error: No response received from the server');
-      } else {
-        console.error('Error: An unexpected error occurred');
-      }
+      console.error(error.response?.data.message || error.message);
     }
   };
   
@@ -161,23 +165,16 @@ const FileTable = () => {
 
   // Update the file metadata and select options when the select options change
   useEffect(() => {
-    if (!queryData || queryData.length === 0) return;
-
+    if (!queryData) return;
     let filteredData = queryData;
-    if (selectedFilenameOptions.length > 0) {
-      filteredData = filteredData.filter((file) =>
-        selectedFilenameOptions.map((option) => option.value).includes(file.name)
-      );
+    if (selectedFilenameOptions.length) {
+      filteredData = filteredData.filter(file => selectedFilenameOptions.map(o => o.value).includes(file.name));
     }
-    if (selectedFileExtensionOptions.length > 0) {
-      filteredData = filteredData.filter((file) =>
-        selectedFileExtensionOptions.map((option) => option.value).includes(file.file_type)
-      );
+    if (selectedFileExtensionOptions.length) {
+      filteredData = filteredData.filter(file => selectedFileExtensionOptions.map(o => o.value).includes(file.file_type));
     }
-    if (selectedFileOwnerOptions.length > 0) {
-      filteredData = filteredData.filter((file) =>
-        selectedFileOwnerOptions.map((option) => option.value).includes(file.username)
-      );
+    if (selectedFileOwnerOptions.length) {
+      filteredData = filteredData.filter(file => selectedFileOwnerOptions.map(o => o.value).includes(file.username));
     }
     setStatesForSelectOptionsFromBaseData(filteredData);
     setFileMetaData(filteredData);
@@ -231,24 +228,25 @@ const FileTable = () => {
           <Button
               variant="success"
               className="btn-md square-button mx-1"
+              onClick={handleOpenFolderModal}
               disabled={!user}
           >
             <FaFolderPlus/>
           </Button>
+          <GenericModal show={showFolderModal} title="Create New Folder" onClose={handleCloseFolderModal} onSubmit={createFolder} confirmText="Create">
+            <input type="text" className="form-control" placeholder="Folder name" value={folderName} onChange={(e) => setFolderName(e.target.value)} />
+          </GenericModal>
           <Button
             variant="success"
             className="btn-md square-button mx-1"
-            onClick={handleShowModal}
+            onClick={handleShowUploadModal}
             disabled={!user}
           >
             <FiPlus />
           </Button>
-          <FileUpload
-            show={showUploadModal}
-            handleClose={handleCloseModal}
-            handleFileChange={handleFileChange}
-            handleUpload={handleFileUpload}
-          />
+          <GenericModal show={showUploadModal} title="Upload a new file" onClose={handleCloseUploadModal} onSubmit={handleFileUpload} confirmText="Upload">
+            <input type="file" onChange={handleFileChange} className="file-input"/>
+          </GenericModal>
         </Col>
       </Row>
       <Row className="justify-content-center">
