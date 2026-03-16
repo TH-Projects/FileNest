@@ -15,6 +15,7 @@ jest.mock('../logger', () => ({
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const minioClientModule = require('../MinIO/MinIOClient');
+const FastifyMultipart = require('@fastify/multipart');
 
 // Set env vars before requiring the module under test
 process.env.JWT_SECRET = 'test-secret';
@@ -29,22 +30,25 @@ const upload = require('../MinIO/upload');
 const makeMinioMock = () => ({
     bucketExists: jest.fn().mockResolvedValue(true),
     makeBucket: jest.fn().mockResolvedValue(undefined),
-    putObject: jest.fn((bucket, file, stream, size, cb) => cb(null, { etag: 'etag-abc123' }))
+    putObject: jest.fn((_bucket, _file, _stream, _size, cb) => cb(null, { etag: 'etag-abc123' }))
 });
 
-// Builds the request body that the upload route expects (as parsed by @fastify/multipart).
-// The body is injected as JSON, so `data` must survive JSON serialisation with a truthy
-// `.length`. A plain string is the safest choice:
-//   - Buffer → serialises to {type:'Buffer',data:[...]} with no .length → fails size guard
-//   - Array  → has .length but is not a valid Node.js stream chunk → stream.end() throws
-//   - String → has .length AND is accepted by PassThrough.end() ✓
-const makeFileBody = (filename = 'document.pdf') => ({
-    file: [{
-        filename,
-        data: 'filebytes',
-        mimetype: 'application/pdf'
-    }]
-});
+const BOUNDARY = 'testboundary12345';
+
+// Builds a real multipart/form-data payload with a single "file" field.
+const makeFileBody = (filename = 'document.pdf', content = 'filebytes') =>
+    Buffer.from(
+        `--${BOUNDARY}\r\n` +
+        `Content-Disposition: form-data; name="file"; filename="${filename}"\r\n` +
+        `Content-Type: application/pdf\r\n` +
+        `\r\n` +
+        `${content}\r\n` +
+        `--${BOUNDARY}--\r\n`
+    );
+
+// Builds an empty multipart body (no file field) for the "missing file" test.
+const makeEmptyBody = () =>
+    Buffer.from(`--${BOUNDARY}--\r\n`);
 
 // Shorthand to inject a POST /upload request
 const injectUpload = (fastify, body, token = 'valid-token') =>
@@ -52,7 +56,7 @@ const injectUpload = (fastify, body, token = 'valid-token') =>
         method: 'POST',
         url: '/upload',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': `multipart/form-data; boundary=${BOUNDARY}`,
             Authorization: `Bearer ${token}`
         },
         payload: body
@@ -67,6 +71,10 @@ describe('POST /upload', () => {
 
         const Fastify = require('fastify');
         fastify = Fastify({ logger: false });
+        fastify.register(FastifyMultipart, {
+            attachFieldsToBody: true,
+            limits: { fileSize: 10 * 1024 * 1024 }
+        });
         await upload(fastify, {});
         await fastify.ready();
     });
@@ -78,7 +86,7 @@ describe('POST /upload', () => {
     // --- Input validation ---
 
     test('returns 400 when the request body has no file field', async () => {
-        const response = await injectUpload(fastify, {});
+        const response = await injectUpload(fastify, makeEmptyBody());
         expect(response.statusCode).toBe(400);
         expect(JSON.parse(response.body).success).toBe(false);
     });
@@ -93,9 +101,13 @@ describe('POST /upload', () => {
         expect(response.statusCode).toBe(400);
     });
 
-    test('returns 400 for a filename with a path separator (slash)', async () => {
+    test('path separators in the filename are stripped by the multipart parser (busboy)', async () => {
+        // busboy sanitises Content-Disposition filenames and strips the directory
+        // component before the application sees it, so 'folder/file.txt' arrives
+        // as 'file.txt' — a valid name that passes filename validation and reaches
+        // the auth check (401), never triggering the 400 path.
         const response = await injectUpload(fastify, makeFileBody('folder/file.txt'));
-        expect(response.statusCode).toBe(400);
+        expect(response.statusCode).toBe(401);
     });
 
     // --- Authentication ---
@@ -104,7 +116,7 @@ describe('POST /upload', () => {
         const response = await fastify.inject({
             method: 'POST',
             url: '/upload',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': `multipart/form-data; boundary=${BOUNDARY}` },
             payload: makeFileBody()
         });
         expect(response.statusCode).toBe(401);

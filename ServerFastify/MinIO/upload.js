@@ -14,9 +14,10 @@ const upload = async (fastify, options) => {
     fastify.post('/upload', async (request, reply) => {
         const correlationId = crypto.randomUUID();
         try {
-            const data = request.body.file?.[0];
+            const raw = request.body?.file;
+            const data = Array.isArray(raw) ? raw[0] : raw;
             const fileName = data?.filename;
-            const fileBuffer = data?.data;
+            const fileBuffer = data ? await data.toBuffer() : undefined;
             const fileSize = fileBuffer?.length;
 
             if (!data || !fileName || !fileBuffer || !fileSize) {

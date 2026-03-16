@@ -1,3 +1,3 @@
-FROM nginx:1.18.0-alpine
+FROM nginx:1.28-alpine
 WORKDIR /etc/nginx/templates
 COPY default.conf.template /etc/nginx/templates/default.conf.template
