@@ -1,4 +1,4 @@
-const fastify = require('fastify')({ logger: true });
+const fastify = require('fastify')({ logger: { level: 'info', base: { service: 'Admin' } } });
 const scheduleTasks = require('./Scheduler/scheduleTasks');
 
 // start server

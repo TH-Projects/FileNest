@@ -1,18 +1,15 @@
 const connection = require('./connection');
+const logger = require('../logger');
 const defaultRole = 2;
 
 // gets a user by username and password
 const getUser = async (username, password) => {
-    console.log(`getUser: ${username}, ${password}`);
-    
     try {
         const db = await connection.getConnection();
         const result = await db.query(
             'SELECT username,password FROM Account WHERE username = ?', [username]
         );
         db.release();
-        console.log(JSON.stringify(result));
-        
         if(result.length === 0 || result[0].password !== password) {
             return {
                 success: false,
@@ -24,7 +21,7 @@ const getUser = async (username, password) => {
             message: result
         };
     } catch (error) {
-        console.error(error);
+        logger.error('DB:user:getUser', 'Database query failed', error);
         return {
             success: false,
             message: error
@@ -48,13 +45,13 @@ const createUser = async (username, password, email) => {
             'VALUES (?, ?, ?, ?)', [username, password, email, defaultRole]
         );
         db.release();
-        console.log(JSON.stringify(result));
+        logger.info('DB:user:createUser', 'User created', { username, insertId: result.insertId });
         return {
             success: true,
             message: result
         };
     } catch (error) {
-        console.error(error);
+        logger.error('DB:user:createUser', 'Failed to create user', error);
         return {
             success: false,
             message: error
@@ -70,15 +67,15 @@ const checkUsername = async (username) => {
             'SELECT COUNT(*) as count FROM Account WHERE username = ?', [username]
         );
         db.release();
-        return userExists[0]; // Rückgabe des gesamten Ergebnisses, das Array ist
+        return userExists[0];
     } catch(error) {
-        console.error(error);
+        logger.error('DB:user:checkUsername', 'Database query failed', error);
     }
     return [];
 }
 
 // checks if a user with the given email exists
-const checkEmail = async (email) => {    
+const checkEmail = async (email) => {
     try {
         const db = await connection.getConnection();
         const emailExists = await db.query(
@@ -87,7 +84,7 @@ const checkEmail = async (email) => {
         db.release();
         return emailExists[0];
     } catch(error) {
-        console.error(error);
+        logger.error('DB:user:checkEmail', 'Database query failed', error);
     }
     return { count: 0 };
 }
@@ -100,16 +97,14 @@ const getAccountIdByUsername = async (username) => {
             'SELECT account_id FROM Account WHERE username = ?', [username]
         );
         db.release();
-        console.log(JSON.stringify(rows));
-
         if (rows.length > 0) {
-            return { success: true, message: rows[0].account_id };  // Rückgabe des account_id
+            return { success: true, message: rows[0].account_id };
         } else {
             return { success: false, message: "No account found for the given username" };
         }
     } catch (error) {
-        console.error(error);
-        return { success: false, message: error.message };  // Rückgabe des Fehlertexts
+        logger.error('DB:user:getAccountIdByUsername', 'Database query failed', error);
+        return { success: false, message: error.message };
     }
 }
 

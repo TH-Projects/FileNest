@@ -1,4 +1,4 @@
-const fastify = require('fastify')({ logger: true });
+const fastify = require('fastify')({ logger: { level: 'info', base: { service: 'Broker' } } });
 const connectionIn = require('./Socket/connectionIn');
 const connectionOut = require('./Socket/connectionOut');
 const buildUpConnection = require('./Socket/buildUpConnection');

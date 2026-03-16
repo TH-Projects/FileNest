@@ -6,6 +6,7 @@ const send = require('./SendMessage');
 const enums = require('./enums');
 const os = require('os');
 const connectionStorage = require("./connectionStorage");
+const logger = require('../logger');
 
 // Connections to other instances
 const connectionOut = (fastify, url, type = enums.connectionTypes.BROKER) => {
@@ -18,7 +19,7 @@ const connectionOut = (fastify, url, type = enums.connectionTypes.BROKER) => {
         writable: true
     });
     connectionStorage.addConnection(ws, type);
-    console.log('ConnOut ' + url);
+    logger.info('connectionOut', `Outgoing connection established to ${url}`, { type });
 
     // Open the connection
     ws.on('open', () => {
@@ -54,7 +55,7 @@ const connectionOut = (fastify, url, type = enums.connectionTypes.BROKER) => {
 
     // Error handling
     ws.on('error', (err) => {
-        fastify.log.error(err);
+        logger.error('connectionOut', `WebSocket error on connection to ${url}`, err);
     });
 }
 module.exports = connectionOut;
