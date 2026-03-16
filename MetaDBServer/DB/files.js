@@ -1,5 +1,6 @@
 const connection = require('./connection');
 const minIOServerReference = require('./minIOServer');
+const logger = require('../logger');
 
 // Get all files
 const getFiles = async () => {
@@ -15,7 +16,7 @@ const getFiles = async () => {
             message: result
         };
     } catch (error) {
-        console.error(error);
+        logger.error('DB:files', 'Database query failed', error);
         return {
             success: false,
             message: error
@@ -41,7 +42,7 @@ const getFilenamesForUsername = async (username) => {
             message: result
         };
     } catch (error){
-        console.error(error);
+        logger.error('DB:files', 'Database query failed', error);
         return {
             success: false,
             message: error
@@ -67,7 +68,7 @@ const getFile = async (file_id) =>{
             message: result
         };
     } catch (error){
-        console.error(error);
+        logger.error('DB:files', 'Database query failed', error);
         return {
             success: false,
             message: error
@@ -89,7 +90,7 @@ const getClusterForFile = async (file_id) => {
             message: result
         };
     } catch (error) {
-        console.error(error);
+        logger.error('DB:files', 'Database query failed', error);
         return {
             success: false,
             message: error
@@ -110,7 +111,7 @@ const deleteFile = async (file_id) => {
             message: `Deleted ${result.affectedRows} record(s)`
         };
     } catch (error) {
-        console.error(error);
+        logger.error('DB:files', 'Database query failed', error);
         return {
             success: false,
             message: error
@@ -136,13 +137,13 @@ const addFile = async (etag, name, file_type, size, last_modify, owner_id, minIO
             [etag, name, file_type, size, last_modify, owner_id, minIOServerDB.message.cluster_id ,content_type]
         );
         db.release();
-        console.log('Added file', result.insertId);
+        logger.info('DB:files:addFile', 'File record inserted', { insertId: result.insertId });
         return {
             success: true,
             message: result.insertId
         };
     } catch (error) {
-        console.error(error);
+        logger.error('DB:files', 'Database query failed', error);
         return {
             success: false,
             message: error

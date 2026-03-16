@@ -1,7 +1,8 @@
- const WebSocket = require('ws');
+const WebSocket = require('ws');
 const getConnections = require('../Queue/getConnections');
 const enums = require('../Queue/enums');
 const removeMessage = require('../Queue/removeMessage');
+const logger = require('../logger');
 
 // Sends a message to all connected clients
 const sendMessage = (fastify, message, wsList, publish = false) => {
@@ -9,17 +10,17 @@ const sendMessage = (fastify, message, wsList, publish = false) => {
         if (ws.readyState === WebSocket.OPEN) {
             try {
                 ws.send(JSON.stringify(message));
-                console.log('Message sent to ' + ws.clientAddress + ': ' + JSON.stringify(message));
+                logger.info('sendMessage', `Message sent to ${ws.clientAddress}`);
                 if(publish){
                     remove(fastify, ws.clientAddress);
                 }
             }
             catch (e) {
-                console.log('Error sending message to ' + ws.clientAddress + ': ' + e);
+                logger.error('sendMessage', `Failed to send message to ${ws.clientAddress}`, e);
             }
         }
         else {
-            console.log('Client not connected');
+            logger.warn('sendMessage', `Client not connected: ${ws.clientAddress}`);
         }
     });
 }

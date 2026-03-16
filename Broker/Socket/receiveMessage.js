@@ -3,6 +3,7 @@ const socketEnums = require('./enums');
 const connectionStorage = require('./connectionStorage');
 const addMessage = require('../Queue/addMessage');
 const removeMessages = require('../Queue/removeMessage');
+const logger = require('../logger');
 
 // This function is called up when a message is received.
 const receiveMessage = (fastify, jsonMessage, ws) => {
@@ -34,7 +35,7 @@ const receiveMessage = (fastify, jsonMessage, ws) => {
             }
             break;
         default:
-            console.log('Unknown operation: ' + jsonMessage.syncOperation + ' ' + message + ' ' + ws.clientAddress);
+            logger.warn('receiveMessage', `Unknown sync operation: ${jsonMessage.syncOperation}`, { clientAddress: ws.clientAddress });
             break;
     }
 }

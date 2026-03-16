@@ -1,5 +1,6 @@
 const connectionStorage = require('../Socket/connectionStorage');
 const sync = require('../Queue/sync');
+const logger = require('../logger');
 
 // Add a message to the queue
 const addQueue = async (fastify) =>{
@@ -21,7 +22,8 @@ const addQueue = async (fastify) =>{
                 }
             });
         }
-        console.log('clients: ' + JSON.stringify(clients));
+        const correlationIds = messages.map(m => m.correlationId).filter(Boolean);
+        logger.info('addQueue', `Queuing ${messages.length} message(s) for ${data.type}`, { targetType: data.type, clients, correlationIds });
         sync.add(clients, messages);
         reply.send({status: 'success'});
     });

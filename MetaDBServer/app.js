@@ -1,4 +1,4 @@
-const fastify = require('fastify')({ logger: true});
+const fastify = require('fastify')({ logger: { level: 'info', base: { service: 'MetaDBServer' } } });
 const buildUpConnection = require('./Socket/buildUpConnection');
 const dbConnection = require('./DB/connection');
 const connectionIn = require('./Socket/connectionIn');

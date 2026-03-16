@@ -2,10 +2,11 @@ const connectionStorage = require('../Socket/connectionStorage');
 const enums = require('../Socket/enums');
 const sendMessage = require('../Socket/SendMessage');
 const fastify = require('fastify')();
+const logger = require('../logger');
 
 // Publish messages to clients
 const publish = (queue) => {
-    console.log('Publishing');
+    logger.info('publish', 'Publishing queued messages to connected clients');
     const connectedClients = connectionStorage.getConnectionsWithoutType(enums.connectionTypes.BROKER);
     const connectedClientAddresses = connectedClients.map(entry => entry.ws.clientAddress);
     const entries = getEntriesByClientAddresses(connectedClients, connectedClientAddresses, queue);

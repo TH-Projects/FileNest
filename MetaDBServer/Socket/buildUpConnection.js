@@ -1,37 +1,37 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
 const os = require('os');
+const logger = require('../logger');
 
 // Build up the connection to the broker
 const buildUpConnection = async () => {
-    console.log('Trying to establish connection');
+    logger.info('buildUpConnection', 'Trying to establish connection to Broker');
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     let connection = false;
     while (!connection) {
         await sleep(1000);
         connection = await connectionCall();
     }
-    console.log('Connection established');
+    logger.info('buildUpConnection', 'Connection to Broker established');
 }
 
 // Call the broker to establish connection
 const connectionCall = async () => {
     dotenv.config();
+    const wsUrl = `ws://${os.hostname()}:${process.env.PORT_SERVERMETADB}`;
     const data = {
         type: "METADBSERVER",
-        url: `ws://${os.hostname()}:${process.env.PORT_SERVERMETADB}`
+        url: wsUrl
     };
 
     try {
         const response = await axios.post(process.env.NGINX_API + "/couple", data);
-        console.log('Response: ', response.data);
         if (response.data?.couple === 'success') {
-            console.log('Connection established (Call)');
+            logger.info('buildUpConnection', 'Broker coupling successful', { wsUrl });
             return true;
         }
-
     } catch (error) {
-        console.log('Error when connecting to the broker. Retry after delay');
+        logger.warn('buildUpConnection', 'Failed to connect to Broker, retrying', { err: error.message });
     }
     return false;
 }

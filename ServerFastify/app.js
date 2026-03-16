@@ -1,4 +1,4 @@
-const fastify = require('fastify')({ logger: true });
+const fastify = require('fastify')({ logger: { level: 'info', base: { service: 'ServerFastify' } } });
 const fs = require('fs');
 const stream = require('stream');
 const buildUpConnection = require("./Socket/buildUpConnection");
